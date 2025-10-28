@@ -1,5 +1,60 @@
-__pycache__/
-*.pyc
-.venv/
+# === Node.js / Next.js 共通 ===
+node_modules/
+.next/
+out/
+dist/
+build/
+coverage/
+
+# === 環境変数 ===
 .env
+.env.*      # .env.local, .env.development, etc.
+!.env.example  # サンプルだけは残す
+
+# === OS / Editor ===
 .DS_Store
+Thumbs.db
+*.log
+*.tmp
+*.swp
+*.swo
+
+# === VSCode / Editor settings ===
+.vscode/
+.history/
+.idea/
+*.code-workspace
+
+# === Supabase Local ===
+.supabase/
+supabase/.temp/
+supabase/migrations/.temp/
+
+# === Claude Code ===
+# Claude Codeは CLAUDE.md のみGit管理するのが原則。
+# 以下は除外推奨：
+.claude/
+claude_cache/
+claude_history/
+claude_temp/
+claude_logs/
+# Claude拡張が生成する一時ファイル・キャッシュがあればここに追記
+
+# === Testing ===
+.playwright/
+test-results/
+reports/
+coverage/
+
+# === Images / Assets ===
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.webp
+*.svg
+
+# === Misc ===
+*.bak
+*.orig
+*.lock

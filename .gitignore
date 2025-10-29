@@ -8,8 +8,8 @@ coverage/
 
 # === 環境変数 ===
 .env
-.env.*      # .env.local, .env.development, etc.
-!.env.example  # サンプルだけは残す
+.env.*
+!.env.example
 
 # === OS / Editor ===
 .DS_Store
@@ -57,4 +57,9 @@ coverage/
 # === Misc ===
 *.bak
 *.orig
-*.lock
+
+# === Lock files (keep them for consistency) ===
+# Uncomment if you want to exclude lock files
+# package-lock.json
+# pnpm-lock.yaml
+# yarn.lock

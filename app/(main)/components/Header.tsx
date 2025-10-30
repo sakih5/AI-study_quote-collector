@@ -44,12 +44,13 @@ export default function Header({ user }: HeaderProps) {
               <span className="font-medium">{displayName}</span>
             </div>
 
-            {/* 設定リンク */}
+            {/* タグ管理リンク */}
             <Link
-              href="/settings"
-              className="px-4 py-2 text-sm text-gray-300 hover:text-white hover:bg-gray-700 rounded-lg transition-colors"
+              href="/settings/tags"
+              className="px-4 py-2 text-sm text-gray-300 hover:text-white hover:bg-gray-700 rounded-lg transition-colors flex items-center gap-1"
             >
-              設定
+              <span>🏷️</span>
+              <span>タグ管理</span>
             </Link>
 
             {/* ログアウトボタン */}

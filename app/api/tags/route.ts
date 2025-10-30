@@ -168,8 +168,8 @@ export async function POST(request: NextRequest) {
     // タグ名が#で始まっていない場合は追加
     const tagName = name.startsWith('#') ? name : `#${name}`;
 
-    // 同名のタグが存在しないかチェック
-    const { data: existing } = await supabase
+    // 同名のアクティブなタグが存在しないかチェック
+    const { data: activeTag } = await supabase
       .from('tags')
       .select('id')
       .eq('user_id', user.id)
@@ -177,7 +177,7 @@ export async function POST(request: NextRequest) {
       .is('deleted_at', null)
       .single();
 
-    if (existing) {
+    if (activeTag) {
       return NextResponse.json(
         {
           error: {
@@ -189,15 +189,43 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // タグを作成
-    const { data: tag, error } = await supabase
+    // 同名の削除済みタグがあるかチェック
+    const { data: deletedTag } = await supabase
       .from('tags')
-      .insert({
-        user_id: user.id,
-        name: tagName,
-      })
       .select('id, name, created_at')
+      .eq('user_id', user.id)
+      .eq('name', tagName)
+      .not('deleted_at', 'is', null)
       .single();
+
+    let tag;
+    let error;
+
+    if (deletedTag) {
+      // 削除済みタグを復活させる
+      const result = await supabase
+        .from('tags')
+        .update({ deleted_at: null })
+        .eq('id', deletedTag.id)
+        .select('id, name, created_at')
+        .single();
+
+      tag = result.data;
+      error = result.error;
+    } else {
+      // 新しいタグを作成
+      const result = await supabase
+        .from('tags')
+        .insert({
+          user_id: user.id,
+          name: tagName,
+        })
+        .select('id, name, created_at')
+        .single();
+
+      tag = result.data;
+      error = result.error;
+    }
 
     if (error) {
       console.error('タグ作成エラー:', error);

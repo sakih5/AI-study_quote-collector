@@ -181,6 +181,25 @@ export async function DELETE(
       );
     }
 
+    // まず、quote_tagsテーブルから関連レコードを削除
+    const { error: quoteTagsError } = await supabase
+      .from('quote_tags')
+      .delete()
+      .eq('tag_id', tagId);
+
+    if (quoteTagsError) {
+      console.error('quote_tags削除エラー:', quoteTagsError);
+      return NextResponse.json(
+        {
+          error: {
+            code: 'DATABASE_ERROR',
+            message: 'タグの関連データの削除に失敗しました',
+          },
+        },
+        { status: 500 }
+      );
+    }
+
     // ソフトデリート（deleted_atに現在時刻を設定）
     const { error } = await supabase
       .from('tags')

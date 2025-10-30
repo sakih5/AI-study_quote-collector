@@ -64,6 +64,28 @@ export default function HomePage() {
   const hasActiveFilters =
     searchQuery || selectedActivityIds.length > 0 || selectedTagIds.length > 0;
 
+  // CSVエクスポート処理
+  const handleExportCsv = () => {
+    // クエリパラメータを構築
+    const params = new URLSearchParams();
+
+    if (searchQuery) {
+      params.append('search', searchQuery);
+    }
+
+    if (selectedActivityIds.length > 0) {
+      params.append('activity_ids', selectedActivityIds.join(','));
+    }
+
+    if (selectedTagIds.length > 0) {
+      params.append('tag_ids', selectedTagIds.join(','));
+    }
+
+    // CSVエクスポートAPIにリクエスト
+    const url = `/api/export/csv${params.toString() ? '?' + params.toString() : ''}`;
+    window.location.href = url;
+  };
+
   // フレーズ削除処理
   const handleDelete = async (quoteId: number) => {
     if (isDeleting) return;
@@ -181,10 +203,16 @@ export default function HomePage() {
               </button>
             )}
           </div>
-          {/* TODO: CSVエクスポートボタン（Phase 2） */}
-          {/* <button className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white text-sm rounded-lg transition-colors">
-            CSVでエクスポート
-          </button> */}
+          {/* CSVエクスポートボタン */}
+          <button
+            onClick={handleExportCsv}
+            disabled={total === 0}
+            className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white text-sm font-medium rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+            title="表示中のフレーズをCSV形式でダウンロード"
+          >
+            <span>📥</span>
+            <span>CSVエクスポート</span>
+          </button>
         </div>
       </div>
 

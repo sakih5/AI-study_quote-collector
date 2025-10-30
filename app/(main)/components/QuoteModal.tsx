@@ -5,6 +5,9 @@ import { useActivities } from '../hooks/useActivities';
 import { useTags } from '../hooks/useTags';
 import { useBooks } from '../hooks/useBooks';
 import { useSnsUsers } from '../hooks/useSnsUsers';
+import OCRUploader from './OCRUploader';
+import OCRCanvas from './OCRCanvas';
+import type { OCRResult, SelectionResult } from '@/lib/ocr/types';
 
 interface QuoteModalProps {
   isOpen: boolean;
@@ -77,6 +80,45 @@ export default function QuoteModal({ isOpen, onClose }: QuoteModalProps) {
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // OCR機能の状態管理
+  const [isOCRModalOpen, setIsOCRModalOpen] = useState(false);
+  const [ocrStep, setOcrStep] = useState<'upload' | 'select'>('upload');
+  const [ocrResult, setOcrResult] = useState<OCRResult | null>(null);
+  const [ocrImageUrl, setOcrImageUrl] = useState<string>('');
+
+  // OCR機能のハンドラー
+  const handleOCRComplete = (result: OCRResult, imageUrl: string) => {
+    setOcrResult(result);
+    setOcrImageUrl(imageUrl);
+    setOcrStep('select');
+  };
+
+  const handleOCRSelectionsComplete = (selections: SelectionResult[]) => {
+    // OCR結果をフレーズ入力欄に反映
+    const newQuotes: QuoteInput[] = selections.map(selection => ({
+      text: selection.text,
+      activity_ids: [],
+      tag_ids: [],
+    }));
+
+    if (newQuotes.length > 0) {
+      setQuotes(newQuotes);
+    }
+
+    // OCRモーダルを閉じる
+    setIsOCRModalOpen(false);
+    setOcrStep('upload');
+    setOcrResult(null);
+    setOcrImageUrl('');
+  };
+
+  const handleOCRCancel = () => {
+    setIsOCRModalOpen(false);
+    setOcrStep('upload');
+    setOcrResult(null);
+    setOcrImageUrl('');
+  };
 
   // フォームのバリデーション
   const validateForm = (): string | null => {
@@ -272,6 +314,25 @@ export default function QuoteModal({ isOpen, onClose }: QuoteModalProps) {
 
           {/* コンテンツ */}
           <div className="p-6 space-y-4">
+            {/* セクション0: OCR（画像からテキスト抽出） */}
+            <div className="border border-blue-600 rounded-lg p-4 bg-blue-900/10">
+              <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center gap-2">
+                  <span className="text-2xl">📷</span>
+                  <h3 className="text-lg font-semibold text-white">画像からテキストを抽出</h3>
+                </div>
+              </div>
+              <p className="text-sm text-gray-400 mb-3">
+                書籍やメモの画像をアップロードして、テキストを自動で抽出できます。
+              </p>
+              <button
+                onClick={() => setIsOCRModalOpen(true)}
+                className="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-500 transition-colors font-medium"
+              >
+                画像をアップロード
+              </button>
+            </div>
+
             {/* セクション1: フレーズ & 分類分け */}
             <div className="border border-gray-700 rounded-lg overflow-hidden">
               <button
@@ -845,6 +906,42 @@ export default function QuoteModal({ isOpen, onClose }: QuoteModalProps) {
           </div>
         </div>
       </div>
+
+      {/* OCRモーダル */}
+      {isOCRModalOpen && (
+        <>
+          {/* オーバーレイ */}
+          <div
+            className="fixed inset-0 bg-black/70 z-60"
+            onClick={handleOCRCancel}
+          />
+
+          {/* OCRモーダルコンテンツ */}
+          <div className="fixed inset-0 z-70 flex items-center justify-center p-4 pointer-events-none">
+            <div
+              className="bg-[#2a2a2a] rounded-lg shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-y-auto pointer-events-auto"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="p-6">
+                {ocrStep === 'upload' && (
+                  <OCRUploader
+                    onOCRComplete={handleOCRComplete}
+                    onCancel={handleOCRCancel}
+                  />
+                )}
+                {ocrStep === 'select' && ocrResult && (
+                  <OCRCanvas
+                    imageUrl={ocrImageUrl}
+                    ocrResult={ocrResult}
+                    onSelectionsComplete={handleOCRSelectionsComplete}
+                    onBack={() => setOcrStep('upload')}
+                  />
+                )}
+              </div>
+            </div>
+          </div>
+        </>
+      )}
     </>
   );
 }

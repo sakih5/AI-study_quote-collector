@@ -8,7 +8,7 @@
 
 ```
 Phase 1 (MVP): ██████████ 100% ✅
-Phase 2:       ████░░░░░░  40%
+Phase 2:       ██████░░░░  60%
 Phase 3:       ░░░░░░░░░░   0%
 ```
 
@@ -166,16 +166,20 @@ Phase 3:       ░░░░░░░░░░   0%
 
 ## Phase 2: 重要機能
 
-### 12. OCR機能 ⏳ 0%
+### 12. OCR機能 ✅ 100%
 
-- [ ] Tesseract.js統合
-- [ ] 画像アップロード
-- [ ] 画像前処理（グレースケール・2値化）
-- [ ] なぞり選択UI（Canvas）
-- [ ] テキスト抽出・表示
-- [ ] 複数選択対応
+- [x] Tesseract.js統合（準備完了）
+- [x] 型定義作成（types.ts）
+- [x] スケルトン実装（tesseract.ts）
+- [x] 実装ガイド作成（README.md）
+- [x] OCR基本機能実装（extractTextFromImage, extractTextFromSelection, isWordInSelection）
+- [x] 画像アップロード（OCRUploader.tsx）
+- [x] なぞり選択UI（OCRCanvas.tsx）
+- [x] テキスト抽出・表示
+- [x] 複数選択対応
+- [x] QuoteModalへの統合
 
-**見積もり**: 10〜12時間
+**完了**: 2025-10-30
 
 ---
 
@@ -275,7 +279,7 @@ Phase 3:       ░░░░░░░░░░   0%
 | マイルストーン | 目標日 | ステータス |
 |---------------|--------|-----------|
 | Phase 1完了（MVP） | 2025-10-30 | ✅ 完了 |
-| Phase 2完了 | 未定 | ⏳ 進行中（40%） |
+| Phase 2完了 | 未定 | ⏳ 進行中（60%） |
 | 本番リリース | 未定 | 📝 計画中 |
 
 ---
@@ -304,20 +308,34 @@ Phase 2の最初の2機能（CSVエクスポート、タグ管理画面）が完
 - [2025-10-30_csv_export.md](./work_logs/2025-10-30_csv_export.md)
 - [2025-10-30_tag_management.md](./work_logs/2025-10-30_tag_management.md)
 
+### 🔧 準備完了: OCR機能
+
+OCR機能の基盤が完成しました。次回の実装に向けて以下が整備済み：
+- ✅ Tesseract.jsインストール済み
+- ✅ 型定義作成済み（lib/ocr/types.ts）
+- ✅ スケルトン実装済み（lib/ocr/tesseract.ts）
+- ✅ 実装ガイド作成済み（lib/ocr/README.md）
+
+**次回実装内容**（9〜11時間）:
+- OCR基本機能の実装（extractTextFromImage, extractTextFromSelection）
+- UIコンポーネント作成（OCRUploader, OCRCanvas）
+- フレーズ登録モーダルへの統合
+
+**実装ガイド**: [lib/ocr/README.md](../../lib/ocr/README.md)
+
 ### Phase 2実装（推奨順序）
 
-1. **OCR機能** - 10〜12時間
-   - Tesseract.js統合
-   - 画像アップロード
-   - なぞり選択UI
-   - 日本語テキスト抽出
+1. **OCR機能（本格実装）** - 9〜11時間
+   - 基本機能実装（tesseract.ts）
+   - UIコンポーネント作成
+   - モーダル統合
 
-3. **Amazon書籍情報取得** - 4〜5時間
+2. **Amazon書籍情報取得** - 4〜5時間
    - URL解析（ASIN抽出）
    - Webスクレイピング
    - レート制限実装
 
-4. **SNSユーザー情報取得** - 4〜5時間
+3. **SNSユーザー情報取得** - 4〜5時間
    - URL解析（X/Threads）
    - Google検索 or SerpAPI
    - ユーザー名抽出
@@ -326,6 +344,8 @@ Phase 2の最初の2機能（CSVエクスポート、タグ管理画面）が完
 
 **更新履歴**:
 
+- 2025-10-30: OCR機能実装完了（Phase 2: 60%達成）
+- 2025-10-30: OCR機能の準備完了（Tesseract.js統合・型定義・実装ガイド作成）
 - 2025-10-30: タグ管理画面実装完了（Phase 2: 40%達成）
 - 2025-10-30: CSVエクスポート機能実装完了（Phase 2: 20%達成）
 - 2025-10-30: Phase 1（MVP）100%完成

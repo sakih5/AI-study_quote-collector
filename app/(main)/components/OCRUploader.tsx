@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef } from 'react';
 import type { OCRResult, OCRProgress } from '@/lib/ocr/types';
 import { extractTextFromImage } from '@/lib/ocr/tesseract';
 
@@ -15,6 +15,7 @@ export default function OCRUploader({ onOCRComplete, onCancel }: OCRUploaderProp
   const [isProcessing, setIsProcessing] = useState(false);
   const [progress, setProgress] = useState<OCRProgress | null>(null);
   const [error, setError] = useState<string>('');
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // ドラッグ&ドロップ対応
   const handleDrop = useCallback((e: React.DragEvent<HTMLDivElement>) => {
@@ -45,6 +46,11 @@ export default function OCRUploader({ onOCRComplete, onCancel }: OCRUploaderProp
     // プレビュー用のURLを作成
     const url = URL.createObjectURL(file);
     setImageUrl(url);
+  };
+
+  // ファイル選択ダイアログを開く
+  const handleClickUpload = () => {
+    fileInputRef.current?.click();
   };
 
   // OCR実行
@@ -88,24 +94,25 @@ export default function OCRUploader({ onOCRComplete, onCancel }: OCRUploaderProp
 
       {/* ファイル選択エリア */}
       {!imageFile && (
-        <div
-          onDrop={handleDrop}
-          onDragOver={handleDragOver}
-          className="border-2 border-dashed border-gray-600 rounded-lg p-8 text-center hover:border-blue-500 transition-colors cursor-pointer"
-        >
+        <>
           <input
+            ref={fileInputRef}
             type="file"
             accept="image/*"
             onChange={handleFileChange}
             className="hidden"
-            id="ocr-file-input"
           />
-          <label htmlFor="ocr-file-input" className="cursor-pointer">
+          <div
+            onDrop={handleDrop}
+            onDragOver={handleDragOver}
+            onClick={handleClickUpload}
+            className="border-2 border-dashed border-gray-600 rounded-lg p-8 text-center hover:border-blue-500 transition-colors cursor-pointer"
+          >
             <div className="text-4xl mb-4">📷</div>
             <p className="text-gray-300 mb-2">画像をドラッグ&ドロップ</p>
             <p className="text-gray-500 text-sm">または クリックして選択</p>
-          </label>
-        </div>
+          </div>
+        </>
       )}
 
       {/* 画像プレビュー */}

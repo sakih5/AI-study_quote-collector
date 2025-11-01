@@ -358,6 +358,37 @@ try {
 
 ---
 
+## 実装時のトラブルと解決
+
+### 問題: 画像アップロードボタンをクリックしてもファイルエクスプローラが開かない
+
+**原因:**
+- label要素がdiv要素にネストされていて、クリックイベントが正しく伝播しなかった
+
+**解決方法:**
+1. useRefでinput要素への参照を追加
+2. label要素をdiv要素に変更
+3. onClickイベントで`fileInputRef.current?.click()`を直接呼び出す
+
+**修正後のコード:**
+```typescript
+const fileInputRef = useRef<HTMLInputElement>(null);
+
+const handleClickUpload = () => {
+  fileInputRef.current?.click();
+};
+
+// JSX
+<input ref={fileInputRef} type="file" accept="image/*" onChange={handleFileChange} className="hidden" />
+<div onClick={handleClickUpload} className="...">
+  {/* アップロードエリア */}
+</div>
+```
+
+**結果:** ✅ 画像アップロード・ドラッグ&ドロップともに正常動作
+
+---
+
 ## 次回作業時の開始手順
 
 ### 1. 開発サーバー起動

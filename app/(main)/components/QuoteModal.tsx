@@ -912,12 +912,16 @@ export default function QuoteModal({ isOpen, onClose }: QuoteModalProps) {
         <>
           {/* オーバーレイ */}
           <div
-            className="fixed inset-0 bg-black/70 z-60"
+            className="fixed inset-0 bg-black/70"
+            style={{ zIndex: 60 }}
             onClick={handleOCRCancel}
           />
 
           {/* OCRモーダルコンテンツ */}
-          <div className="fixed inset-0 z-70 flex items-center justify-center p-4 pointer-events-none">
+          <div
+            className="fixed inset-0 flex items-center justify-center p-4 pointer-events-none"
+            style={{ zIndex: 70 }}
+          >
             <div
               className="bg-[#2a2a2a] rounded-lg shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-y-auto pointer-events-auto"
               onClick={(e) => e.stopPropagation()}

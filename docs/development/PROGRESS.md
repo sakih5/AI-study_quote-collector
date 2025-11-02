@@ -1,15 +1,23 @@
 # プロジェクト進捗状況
 
-最終更新: 2025年10月30日
+最終更新: 2025年11月02日
 
 ---
 
 ## 全体進捗
 
+### Next.js アプリケーション
 ```
 Phase 1 (MVP): ██████████ 100% ✅
 Phase 2:       ██████░░░░  60%
 Phase 3:       ░░░░░░░░░░   0%
+```
+
+### FastAPI バックエンド移行
+```
+Phase 1: ██████████ 100% ✅ 環境構築
+Phase 2: ██████████ 100% ✅ 認証基盤
+Phase 3: ░░░░░░░░░░   0%    API実装
 ```
 
 ---
@@ -286,6 +294,8 @@ Phase 3:       ░░░░░░░░░░   0%
 
 ## 作業時間記録
 
+### Next.jsアプリケーション
+
 | 日付 | 作業内容 | 時間 |
 |------|---------|------|
 | 2024-10-28 | プロジェクト初期化 + Supabase基盤構築 | 2時間 |
@@ -293,13 +303,44 @@ Phase 3:       ░░░░░░░░░░   0%
 | 2025-10-30 | フレーズ一覧・フィルター・編集・削除・ページネーション実装（Phase 1完成） | 6時間 |
 | 2025-10-30 | CSVエクスポート機能実装（Phase 2開始） | 2時間 |
 | 2025-10-30 | タグ管理画面実装（一覧・検索・ソート・リネーム・統合・削除） | 4時間 |
-| **合計** | | **19.5時間** |
+| **小計** | | **19.5時間** |
+
+### FastAPIバックエンド移行
+
+| 日付 | 作業内容 | 時間 |
+|------|---------|------|
+| 2025-11-01 | Phase 1-2: 環境構築・認証基盤（95%） | 3時間 |
+| 2025-11-02 | Phase 2完了: Swagger UI認証問題解決 | 1時間 |
+| **小計** | | **4時間** |
+
+| **総合計** | | **23.5時間** |
 
 ---
 
 ## 次回作業時の優先タスク
 
-### ✅ 完了: CSVエクスポート & タグ管理画面実装
+### 🎯 FastAPI Phase 3: /api/activities エンドポイント実装
+
+FastAPI Phase 2（認証基盤）が完了しました。次はPhase 3として最初のビジネスロジックAPIを実装します。
+
+**実装内容**（見積もり: 2〜3時間）:
+1. Pydanticモデル作成（`backend/models/activity.py`）
+2. APIルート作成（`backend/routes/activities.py`）
+3. Supabaseから活動領域データ取得
+4. `main.py`へルーター登録
+5. 動作確認（curl → Swagger UI → Next.jsから呼び出し）
+
+**参考ドキュメント**:
+- [FastAPIセットアップガイド.md](../FastAPIセットアップガイド.md)
+- [API設計書_v3_FastAPI補足.md](../API設計書_v3_FastAPI補足.md)
+
+**作業ログ**:
+- [2025-11-01_fastapi_phase1-2.md](./work_logs/2025-11-01_fastapi_phase1-2.md)
+- [2025-11-02_swagger_ui_auth_fix.md](./work_logs/2025-11-02_swagger_ui_auth_fix.md)
+
+---
+
+### ✅ 完了: CSVエクスポート & タグ管理画面実装（Next.js）
 
 Phase 2の最初の2機能（CSVエクスポート、タグ管理画面）が完了しました。
 
@@ -344,13 +385,125 @@ OCR機能の基盤が完成しました。次回の実装に向けて以下が�
 
 **更新履歴**:
 
-- 2025-10-30: OCR機能実装完了（Phase 2: 60%達成）
+- 2025-11-02: **FastAPI Phase 2完了** - Swagger UI認証問題解決
+- 2025-11-01: **FastAPI Phase 1完了** - 環境構築・認証基盤実装
+- 2025-10-30: OCR機能実装完了（Next.js Phase 2: 60%達成）
 - 2025-10-30: OCR機能の準備完了（Tesseract.js統合・型定義・実装ガイド作成）
-- 2025-10-30: タグ管理画面実装完了（Phase 2: 40%達成）
-- 2025-10-30: CSVエクスポート機能実装完了（Phase 2: 20%達成）
+- 2025-10-30: タグ管理画面実装完了（Next.js Phase 2: 40%達成）
+- 2025-10-30: CSVエクスポート機能実装完了（Next.js Phase 2: 20%達成）
 - 2025-10-30: Phase 1（MVP）100%完成
 - 2025-10-29: フレーズ登録モーダル（部分）完成（Phase 1: 85%達成）
 - 2025-10-29: 全API実装完了（フレーズ・SNSユーザー含む）（Phase 1: 80%達成）
 - 2025-10-29: 認証機能・基本レイアウト・基本API実装完了
 - 2025-10-29: Supabaseプロジェクト作成・スキーマ適用完了
 - 2024-10-28: 初版作成
+
+---
+
+## FastAPI バックエンド移行
+
+### Phase 1: 環境構築 ✅ 100%
+
+- [x] uvインストール・プロジェクトセットアップ
+- [x] 依存パッケージインストール（FastAPI, Uvicorn, Pydantic, Supabase）
+- [x] pyproject.toml作成
+- [x] config.py作成（Supabase設定）
+- [x] main.py作成（FastAPIアプリ）
+- [x] CORS設定
+- [x] サーバー起動確認
+- [x] Swagger UI確認
+
+**完了**: 2025-11-01
+**作業ログ**: [2025-11-01_fastapi_phase1-2.md](./work_logs/2025-11-01_fastapi_phase1-2.md)
+
+---
+
+### Phase 2: 認証基盤 ✅ 100%
+
+- [x] auth.py作成（認証モジュール）
+- [x] Supabaseクライアント統合
+- [x] JWT認証実装（get_current_user）
+- [x] /api/meエンドポイント作成
+- [x] curl認証テスト成功
+- [x] OpenAPIスキーマカスタマイズ
+- [x] Swagger UI認証問題解決
+- [x] Swagger UI認証テスト成功
+
+**完了**: 2025-11-02
+**作業ログ**:
+- [2025-11-01_fastapi_phase1-2.md](./work_logs/2025-11-01_fastapi_phase1-2.md)
+- [2025-11-02_swagger_ui_auth_fix.md](./work_logs/2025-11-02_swagger_ui_auth_fix.md)
+
+---
+
+### Phase 3: API実装 ⏳ 0%
+
+#### 3-1. /api/activities ⏳ 0%
+
+- [ ] Pydanticモデル作成（models/activity.py）
+- [ ] APIルート作成（routes/activities.py）
+- [ ] Supabaseからデータ取得
+- [ ] main.pyへルーター登録
+- [ ] 動作確認（curl, Swagger UI, Next.js）
+
+**見積もり**: 2〜3時間
+
+#### 3-2. /api/tags ⏳ 0%
+
+- [ ] Pydanticモデル作成（models/tag.py）
+- [ ] APIルート作成（routes/tags.py）
+- [ ] CRUD操作実装
+- [ ] タグ統合機能実装
+
+**見積もり**: 3〜4時間
+
+#### 3-3. /api/books ⏳ 0%
+
+- [ ] Pydanticモデル作成（models/book.py）
+- [ ] APIルート作成（routes/books.py）
+- [ ] CRUD操作実装
+- [ ] Amazon情報取得統合
+
+**見積もり**: 3〜4時間
+
+#### 3-4. /api/sns-users ⏳ 0%
+
+- [ ] Pydanticモデル作成（models/sns_user.py）
+- [ ] APIルート作成（routes/sns_users.py）
+- [ ] CRUD操作実装
+- [ ] SNSユーザー情報取得統合
+
+**見積もり**: 3〜4時間
+
+#### 3-5. /api/quotes ⏳ 0%
+
+- [ ] Pydanticモデル作成（models/quote.py）
+- [ ] APIルート作成（routes/quotes.py）
+- [ ] 一括登録実装
+- [ ] グループ化クエリ実装
+- [ ] フィルター機能実装
+
+**見積もり**: 5〜6時間
+
+---
+
+### Phase 4: Next.js統合 ⏳ 0%
+
+- [ ] Next.jsのAPI呼び出しをFastAPIに切り替え
+- [ ] 認証トークン送信ロジック追加
+- [ ] エラーハンドリング統合
+- [ ] E2Eテスト
+
+**見積もり**: 4〜5時間
+
+---
+
+### Phase 5: デプロイ ⏳ 0%
+
+- [ ] Cloud Run設定
+- [ ] Dockerfile作成
+- [ ] 環境変数設定
+- [ ] デプロイスクリプト作成
+- [ ] 本番環境テスト
+
+**見積もり**: 3〜4時間

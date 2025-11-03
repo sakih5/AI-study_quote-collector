@@ -112,13 +112,13 @@ export function useQuotesGrouped(options: UseQuotesGroupedOptions = {}) {
       params.append('limit', (options.limit || 50).toString());
       params.append('offset', offset.toString());
 
-      const response = await fetch(`/api/quotes/grouped?${params.toString()}`);
-
-      if (!response.ok) {
-        throw new Error('Failed to fetch quotes');
-      }
-
-      const data = await response.json();
+      // FastAPI用のfetchを使用
+      const { apiGet } = await import('@/lib/api/client');
+      const data = await apiGet<{
+        items: QuoteGroup[];
+        total: number;
+        has_more: boolean;
+      }>(`/api/quotes/grouped?${params.toString()}`);
 
       if (append) {
         setItems((prevItems) => [...prevItems, ...(data.items || [])]);

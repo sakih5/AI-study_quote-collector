@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { apiGet, apiPost } from '@/lib/api/client';
 
 export interface Book {
   id: number;
@@ -10,6 +11,16 @@ export interface Book {
   cover_image_url: string | null;
   isbn: string | null;
   asin: string | null;
+}
+
+interface BooksResponse {
+  books: Book[];
+  total: number;
+  has_more: boolean;
+}
+
+interface BookResponse {
+  book: Book;
 }
 
 export function useBooks() {
@@ -24,11 +35,7 @@ export function useBooks() {
   const fetchBooks = async () => {
     try {
       setLoading(true);
-      const response = await fetch('/api/books?limit=100');
-      if (!response.ok) {
-        throw new Error('Failed to fetch books');
-      }
-      const data = await response.json();
+      const data = await apiGet<BooksResponse>('/api/books?limit=100');
       setBooks(data.books || []);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Unknown error');
@@ -46,19 +53,7 @@ export function useBooks() {
     asin?: string;
   }): Promise<Book | null> => {
     try {
-      const response = await fetch('/api/books', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(bookData),
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to create book');
-      }
-
-      const data = await response.json();
+      const data = await apiPost<BookResponse>('/api/books', bookData);
       const newBook = data.book;
       setBooks([...books, newBook]);
       return newBook;

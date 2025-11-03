@@ -87,6 +87,12 @@ export default function QuoteModal({ isOpen, onClose }: QuoteModalProps) {
   const [ocrResult, setOcrResult] = useState<OCRResult | null>(null);
   const [ocrImageUrl, setOcrImageUrl] = useState<string>('');
 
+  // URL取得機能の状態管理
+  const [bookUrl, setBookUrl] = useState('');
+  const [isFetchingBookInfo, setIsFetchingBookInfo] = useState(false);
+  const [snsUrl, setSnsUrl] = useState('');
+  const [isFetchingSnsInfo, setIsFetchingSnsInfo] = useState(false);
+
   // OCR機能のハンドラー
   const handleOCRComplete = (result: OCRResult, imageUrl: string) => {
     setOcrResult(result);
@@ -118,6 +124,94 @@ export default function QuoteModal({ isOpen, onClose }: QuoteModalProps) {
     setOcrStep('upload');
     setOcrResult(null);
     setOcrImageUrl('');
+  };
+
+  // Amazon URLから書籍情報を取得
+  const handleFetchBookInfo = async () => {
+    if (!bookUrl.trim()) {
+      setError('Amazon URLを入力してください');
+      return;
+    }
+
+    setIsFetchingBookInfo(true);
+    setError(null);
+
+    try {
+      const response = await fetch('/api/books/from-url', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ url: bookUrl.trim() }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error?.message || '書籍情報の取得に失敗しました');
+      }
+
+      const data = await response.json();
+      const bookInfo = data.book_info;
+
+      // 取得した情報をフォームに自動入力
+      setBookData({
+        ...bookData,
+        newBook: {
+          title: bookInfo.title || '',
+          author: bookInfo.author || '',
+          publisher: bookInfo.publisher || '',
+        },
+      });
+
+      // URLフィールドをクリア
+      setBookUrl('');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : '書籍情報の取得に失敗しました');
+    } finally {
+      setIsFetchingBookInfo(false);
+    }
+  };
+
+  // SNS URLからユーザー情報を取得
+  const handleFetchSnsInfo = async () => {
+    if (!snsUrl.trim()) {
+      setError('SNS URLを入力してください');
+      return;
+    }
+
+    setIsFetchingSnsInfo(true);
+    setError(null);
+
+    try {
+      const response = await fetch('/api/sns-users/from-url', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ url: snsUrl.trim() }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error?.message || 'ユーザー情報の取得に失敗しました');
+      }
+
+      const data = await response.json();
+      const userInfo = data.user_info;
+
+      // 取得した情報をフォームに自動入力
+      setSnsData({
+        ...snsData,
+        platform: userInfo.platform,
+        newSnsUser: {
+          handle: userInfo.handle || '',
+          display_name: userInfo.display_name || '',
+        },
+      });
+
+      // URLフィールドをクリア
+      setSnsUrl('');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'ユーザー情報の取得に失敗しました');
+    } finally {
+      setIsFetchingSnsInfo(false);
+    }
   };
 
   // フォームのバリデーション
@@ -627,6 +721,33 @@ export default function QuoteModal({ isOpen, onClose }: QuoteModalProps) {
                           </div>
                         ) : (
                           <div className="space-y-3">
+                            {/* Amazon URLから取得 */}
+                            <div className="p-4 bg-[#252525] rounded-lg border border-gray-700">
+                              <label className="block text-sm font-medium text-gray-300 mb-2">
+                                Amazon URLから自動取得
+                              </label>
+                              <div className="flex gap-2">
+                                <input
+                                  type="text"
+                                  value={bookUrl}
+                                  onChange={(e) => setBookUrl(e.target.value)}
+                                  placeholder="例: https://www.amazon.co.jp/dp/..."
+                                  className="flex-1 px-4 py-2 bg-[#1a1a1a] border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                  disabled={isFetchingBookInfo}
+                                />
+                                <button
+                                  onClick={handleFetchBookInfo}
+                                  disabled={isFetchingBookInfo}
+                                  className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors disabled:bg-gray-600 disabled:cursor-not-allowed"
+                                >
+                                  {isFetchingBookInfo ? '取得中...' : 'URLから取得'}
+                                </button>
+                              </div>
+                              <p className="text-xs text-gray-500 mt-2">
+                                ※ Amazon URLを入力すると、書籍情報を自動取得できます
+                              </p>
+                            </div>
+
                             <div>
                               <label className="block text-sm font-medium text-gray-300 mb-2">
                                 タイトル<span className="text-red-500">*</span>
@@ -793,6 +914,33 @@ export default function QuoteModal({ isOpen, onClose }: QuoteModalProps) {
                           </div>
                         ) : (
                           <div className="space-y-3">
+                            {/* SNS URLから取得 */}
+                            <div className="p-4 bg-[#252525] rounded-lg border border-gray-700">
+                              <label className="block text-sm font-medium text-gray-300 mb-2">
+                                SNS URLから自動取得
+                              </label>
+                              <div className="flex gap-2">
+                                <input
+                                  type="text"
+                                  value={snsUrl}
+                                  onChange={(e) => setSnsUrl(e.target.value)}
+                                  placeholder="例: https://x.com/username/status/... または https://www.threads.com/@username/post/..."
+                                  className="flex-1 px-4 py-2 bg-[#1a1a1a] border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                  disabled={isFetchingSnsInfo}
+                                />
+                                <button
+                                  onClick={handleFetchSnsInfo}
+                                  disabled={isFetchingSnsInfo}
+                                  className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors disabled:bg-gray-600 disabled:cursor-not-allowed"
+                                >
+                                  {isFetchingSnsInfo ? '取得中...' : 'URLから取得'}
+                                </button>
+                              </div>
+                              <p className="text-xs text-gray-500 mt-2">
+                                ※ X/Threads URLを入力すると、ユーザー情報を自動取得できます
+                              </p>
+                            </div>
+
                             <div>
                               <label className="block text-sm font-medium text-gray-300 mb-2">
                                 ユーザーID<span className="text-red-500">*</span>

@@ -5,13 +5,18 @@ from config import settings
 
 security = HTTPBearer()
 
-def get_supabase_client() -> Client:
-    """Supabaseクライアントを取得"""
-    return create_client(settings.supabase_url, settings.supabase_key)
+def get_supabase_client(
+    credentials: HTTPAuthorizationCredentials = Depends(security)
+) -> Client:
+    """認証トークンを含むSupabaseクライアントを取得"""
+    token = credentials.credentials
+    supabase = create_client(settings.supabase_url, settings.supabase_key)
+    # 認証トークンをPostgRESTセッションに設定
+    supabase.postgrest.auth(token)
+    return supabase
 
 async def get_current_user(
-    credentials: HTTPAuthorizationCredentials = Depends(security),
-    supabase: Client = Depends(get_supabase_client)
+    credentials: HTTPAuthorizationCredentials = Depends(security)
 ):
     """JWTトークンからユーザーを取得"""
     token = credentials.credentials
@@ -20,23 +25,17 @@ async def get_current_user(
     print(f"[DEBUG] Received token: {token[:20]}..." if len(token) > 20 else f"[DEBUG] Received token: {token}")
 
     try:
-        # トークンをセッションに設定してからユーザーを取得
-        # supabase-py v2.xでは、まずセッションを設定する必要がある
-        supabase.postgrest.auth(token)
-        print("[DEBUG] Token set in postgrest session")
-
         # ユーザー情報を取得
+        supabase = create_client(settings.supabase_url, settings.supabase_key)
         response = supabase.auth.get_user(token)
-        print(f"[DEBUG] User response: {response}")
+        print(f"[DEBUG] User authenticated: {response.user.id if response.user else 'None'}")
 
         if not response.user:
-            print("[DEBUG] No user found in response")
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="認証が必要です"
             )
 
-        print(f"[DEBUG] User authenticated: {response.user.id}")
         return response.user
 
     except HTTPException:

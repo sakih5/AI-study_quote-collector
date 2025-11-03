@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { createClient } from '@/lib/supabase/client';
+import { apiGet } from '@/lib/api/client';
 
 interface Activity {
   id: number;
@@ -7,6 +7,10 @@ interface Activity {
   description: string;
   icon: string;
   display_order: number;
+}
+
+interface ActivitiesResponse {
+  activities: Activity[];
 }
 
 export function useActivities() {
@@ -17,18 +21,7 @@ export function useActivities() {
   useEffect(() => {
     async function fetchActivities() {
       try {
-        const supabase = createClient();
-        const response = await fetch('/api/activities', {
-          headers: {
-            Authorization: `Bearer ${(await supabase.auth.getSession()).data.session?.access_token}`,
-          },
-        });
-
-        if (!response.ok) {
-          throw new Error('活動領域の取得に失敗しました');
-        }
-
-        const data = await response.json();
+        const data = await apiGet<ActivitiesResponse>('/api/activities');
         setActivities(data.activities || []);
       } catch (err: any) {
         setError(err.message);

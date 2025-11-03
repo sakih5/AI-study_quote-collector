@@ -1,12 +1,23 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { apiGet, apiPost } from '@/lib/api/client';
 
 export interface SnsUser {
   id: number;
   platform: 'X' | 'THREADS';
   handle: string;
   display_name: string | null;
+}
+
+interface SnsUsersResponse {
+  sns_users: SnsUser[];
+  total: number;
+  has_more: boolean;
+}
+
+interface SnsUserResponse {
+  sns_user: SnsUser;
 }
 
 export function useSnsUsers() {
@@ -21,11 +32,7 @@ export function useSnsUsers() {
   const fetchSnsUsers = async () => {
     try {
       setLoading(true);
-      const response = await fetch('/api/sns-users?limit=100');
-      if (!response.ok) {
-        throw new Error('Failed to fetch SNS users');
-      }
-      const data = await response.json();
+      const data = await apiGet<SnsUsersResponse>('/api/sns-users?limit=100');
       setSnsUsers(data.sns_users || []);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Unknown error');
@@ -40,19 +47,7 @@ export function useSnsUsers() {
     display_name?: string;
   }): Promise<SnsUser | null> => {
     try {
-      const response = await fetch('/api/sns-users', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(userData),
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to create SNS user');
-      }
-
-      const data = await response.json();
+      const data = await apiPost<SnsUserResponse>('/api/sns-users', userData);
       const newUser = data.sns_user;
       setSnsUsers([...snsUsers, newUser]);
       return newUser;

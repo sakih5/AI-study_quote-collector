@@ -1,11 +1,19 @@
 import { useEffect, useState } from 'react';
-import { createClient } from '@/lib/supabase/client';
+import { apiGet, apiPost } from '@/lib/api/client';
 
 interface Tag {
   id: number;
   name: string;
   usage_count?: number;
   created_at: string;
+}
+
+interface TagsResponse {
+  tags: Tag[];
+}
+
+interface TagResponse {
+  tag: Tag;
 }
 
 export function useTags() {
@@ -19,18 +27,7 @@ export function useTags() {
 
   async function fetchTags() {
     try {
-      const supabase = createClient();
-      const response = await fetch('/api/tags', {
-        headers: {
-          Authorization: `Bearer ${(await supabase.auth.getSession()).data.session?.access_token}`,
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error('タグの取得に失敗しました');
-      }
-
-      const data = await response.json();
+      const data = await apiGet<TagsResponse>('/api/tags');
       setTags(data.tags || []);
     } catch (err: any) {
       setError(err.message);
@@ -41,21 +38,7 @@ export function useTags() {
 
   async function createTag(name: string): Promise<Tag | null> {
     try {
-      const supabase = createClient();
-      const response = await fetch('/api/tags', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${(await supabase.auth.getSession()).data.session?.access_token}`,
-        },
-        body: JSON.stringify({ name }),
-      });
-
-      if (!response.ok) {
-        throw new Error('タグの作成に失敗しました');
-      }
-
-      const data = await response.json();
+      const data = await apiPost<TagResponse>('/api/tags', { name });
       const newTag = data.tag;
 
       // ローカルステートを更新

@@ -2,7 +2,7 @@ from fastapi import FastAPI, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.openapi.utils import get_openapi
 from auth import get_current_user
-from routes import activities
+from routes import activities, tags, books, sns_users, quotes
 
 app = FastAPI(
     title="抜き書きアプリ API",
@@ -51,6 +51,10 @@ app.add_middleware(
 
 # ルーター登録
 app.include_router(activities.router)
+app.include_router(tags.router)
+app.include_router(books.router)
+app.include_router(sns_users.router)
+app.include_router(quotes.router)
 
 @app.get("/")
 def root():

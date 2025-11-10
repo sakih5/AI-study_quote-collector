@@ -23,8 +23,8 @@ export function useActivities() {
       try {
         const data = await apiGet<ActivitiesResponse>('/api/activities');
         setActivities(data.activities || []);
-      } catch (err: any) {
-        setError(err.message);
+      } catch (err: unknown) {
+        setError(err instanceof Error ? err.message : 'アクティビティの取得に失敗しました');
       } finally {
         setLoading(false);
       }

@@ -89,8 +89,8 @@ export async function GET(request: NextRequest) {
 
         // 活動領域別にカウント
         const activityDistribution: Record<number, number> = {};
-        distribution?.forEach((item: any) => {
-          item.quotes.quote_activities.forEach((qa: any) => {
+        distribution?.forEach((item) => {
+          (item.quotes as unknown as { quote_activities: { activity_id: number }[] }).quote_activities.forEach((qa: { activity_id: number }) => {
             const activityId = qa.activity_id;
             activityDistribution[activityId] =
               (activityDistribution[activityId] || 0) + 1;

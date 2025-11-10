@@ -1,6 +1,41 @@
 import { createClient } from '@/lib/supabase/server';
 import { NextRequest, NextResponse } from 'next/server';
 
+// 型定義
+interface Activity {
+  id: number;
+  name: string;
+  icon: string;
+}
+
+interface Tag {
+  id: number;
+  name: string;
+}
+
+interface QuoteActivity {
+  activities: Activity;
+}
+
+interface QuoteTag {
+  tags: Tag;
+}
+
+interface QuoteFromDB {
+  id: number;
+  text: string;
+  source_type: 'BOOK' | 'SNS' | 'OTHER';
+  book_id: number | null;
+  sns_user_id: number | null;
+  page_number: number | null;
+  created_at: string;
+  quote_activities: QuoteActivity[];
+  quote_tags: QuoteTag[];
+  books: unknown;
+  sns_users: unknown;
+  source_meta: unknown;
+}
+
 /**
  * GET /api/quotes/grouped
  * フレーズ一覧を取得（グループ化あり）
@@ -96,12 +131,12 @@ export async function GET(request: NextRequest) {
     }
 
     // 活動領域フィルター（クライアント側で実施）
-    let filteredQuotes = quotes;
+    let filteredQuotes = quotes as unknown as QuoteFromDB[];
     if (activity_ids) {
       const activityIdArray = activity_ids.split(',').map((id) => parseInt(id));
-      filteredQuotes = filteredQuotes.filter((quote: any) => {
+      filteredQuotes = filteredQuotes.filter((quote: QuoteFromDB) => {
         const quoteActivityIds = quote.quote_activities.map(
-          (qa: any) => qa.activities.id
+          (qa: QuoteActivity) => qa.activities.id
         );
         return activityIdArray.some((id) => quoteActivityIds.includes(id));
       });
@@ -110,18 +145,18 @@ export async function GET(request: NextRequest) {
     // タグフィルター（クライアント側で実施）
     if (tag_ids) {
       const tagIdArray = tag_ids.split(',').map((id) => parseInt(id));
-      filteredQuotes = filteredQuotes.filter((quote: any) => {
-        const quoteTagIds = quote.quote_tags.map((qt: any) => qt.tags.id);
+      filteredQuotes = filteredQuotes.filter((quote: QuoteFromDB) => {
+        const quoteTagIds = quote.quote_tags.map((qt: QuoteTag) => qt.tags.id);
         return tagIdArray.some((id) => quoteTagIds.includes(id));
       });
     }
 
     // グループ化処理
-    const groupedItems: any[] = [];
+    const groupedItems: unknown[] = [];
 
     // 書籍単位でグループ化
-    const bookGroups = new Map<number, any[]>();
-    filteredQuotes.forEach((quote: any) => {
+    const bookGroups = new Map<number, QuoteFromDB[]>();
+    filteredQuotes.forEach((quote: QuoteFromDB) => {
       if (quote.source_type === 'BOOK' && quote.book_id) {
         if (!bookGroups.has(quote.book_id)) {
           bookGroups.set(quote.book_id, []);
@@ -130,25 +165,25 @@ export async function GET(request: NextRequest) {
       }
     });
 
-    bookGroups.forEach((quotes, bookId) => {
+    bookGroups.forEach((quotes, _bookId) => {
       const firstQuote = quotes[0];
       groupedItems.push({
         type: 'book',
         book: firstQuote.books,
-        quotes: quotes.map((q: any) => ({
+        quotes: quotes.map((q: QuoteFromDB) => ({
           id: q.id,
           text: q.text,
           page_number: q.page_number,
-          activities: q.quote_activities.map((qa: any) => qa.activities),
-          tags: q.quote_tags.map((qt: any) => qt.tags),
+          activities: q.quote_activities.map((qa: QuoteActivity) => qa.activities),
+          tags: q.quote_tags.map((qt: QuoteTag) => qt.tags),
           created_at: q.created_at,
         })),
       });
     });
 
     // SNSユーザー単位でグループ化
-    const snsGroups = new Map<number, any[]>();
-    filteredQuotes.forEach((quote: any) => {
+    const snsGroups = new Map<number, QuoteFromDB[]>();
+    filteredQuotes.forEach((quote: QuoteFromDB) => {
       if (quote.source_type === 'SNS' && quote.sns_user_id) {
         if (!snsGroups.has(quote.sns_user_id)) {
           snsGroups.set(quote.sns_user_id, []);
@@ -157,23 +192,23 @@ export async function GET(request: NextRequest) {
       }
     });
 
-    snsGroups.forEach((quotes, snsUserId) => {
+    snsGroups.forEach((quotes, _snsUserId) => {
       const firstQuote = quotes[0];
       groupedItems.push({
         type: 'sns',
         sns_user: firstQuote.sns_users,
-        quotes: quotes.map((q: any) => ({
+        quotes: quotes.map((q: QuoteFromDB) => ({
           id: q.id,
           text: q.text,
-          activities: q.quote_activities.map((qa: any) => qa.activities),
-          tags: q.quote_tags.map((qt: any) => qt.tags),
+          activities: q.quote_activities.map((qa: QuoteActivity) => qa.activities),
+          tags: q.quote_tags.map((qt: QuoteTag) => qt.tags),
           created_at: q.created_at,
         })),
       });
     });
 
     // その他のフレーズ（グループ化なし）
-    filteredQuotes.forEach((quote: any) => {
+    filteredQuotes.forEach((quote: QuoteFromDB) => {
       if (quote.source_type === 'OTHER') {
         groupedItems.push({
           type: 'other',
@@ -181,8 +216,8 @@ export async function GET(request: NextRequest) {
             id: quote.id,
             text: quote.text,
             source_meta: quote.source_meta,
-            activities: quote.quote_activities.map((qa: any) => qa.activities),
-            tags: quote.quote_tags.map((qt: any) => qt.tags),
+            activities: quote.quote_activities.map((qa: QuoteActivity) => qa.activities),
+            tags: quote.quote_tags.map((qt: QuoteTag) => qt.tags),
             created_at: quote.created_at,
           },
         });

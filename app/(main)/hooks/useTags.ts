@@ -29,8 +29,8 @@ export function useTags() {
     try {
       const data = await apiGet<TagsResponse>('/api/tags');
       setTags(data.tags || []);
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'タグの取得に失敗しました');
     } finally {
       setLoading(false);
     }
@@ -45,8 +45,8 @@ export function useTags() {
       setTags((prev) => [...prev, newTag]);
 
       return newTag;
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'タグの作成に失敗しました');
       return null;
     }
   }

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useCallback, useRef } from 'react';
+import Image from 'next/image';
 import type { OCRResult, OCRProgress } from '@/lib/ocr/types';
 import { extractTextFromImage } from '@/lib/ocr/tesseract';
 
@@ -119,10 +120,13 @@ export default function OCRUploader({ onOCRComplete, onCancel }: OCRUploaderProp
       {imageFile && !isProcessing && (
         <div className="space-y-4">
           <div className="relative">
-            <img
+            <Image
               src={imageUrl}
               alt="プレビュー"
-              className="max-w-full max-h-96 mx-auto rounded-lg"
+              width={800}
+              height={600}
+              className="max-w-full max-h-96 mx-auto rounded-lg object-contain"
+              unoptimized
             />
           </div>
 

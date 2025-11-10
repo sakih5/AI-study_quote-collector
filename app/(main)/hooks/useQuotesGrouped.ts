@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 
 export interface Activity {
   id: number;
@@ -78,20 +78,7 @@ export function useQuotesGrouped(options: UseQuotesGroupedOptions = {}) {
   const [hasMore, setHasMore] = useState(false);
   const [currentOffset, setCurrentOffset] = useState(0);
 
-  useEffect(() => {
-    // フィルター条件が変わったらリセット
-    setItems([]);
-    setCurrentOffset(0);
-    fetchQuotes(0, false);
-  }, [
-    options.search,
-    options.sourceType,
-    options.activityIds,
-    options.tagIds,
-    options.limit,
-  ]);
-
-  const fetchQuotes = async (offset: number = 0, append: boolean = false) => {
+  const fetchQuotes = useCallback(async (offset: number = 0, append: boolean = false) => {
     try {
       if (append) {
         setLoadingMore(true);
@@ -135,7 +122,14 @@ export function useQuotesGrouped(options: UseQuotesGroupedOptions = {}) {
       setLoading(false);
       setLoadingMore(false);
     }
-  };
+  }, [options.search, options.sourceType, options.activityIds, options.tagIds, options.limit]);
+
+  useEffect(() => {
+    // フィルター条件が変わったらリセット
+    setItems([]);
+    setCurrentOffset(0);
+    fetchQuotes(0, false);
+  }, [fetchQuotes]);
 
   const loadMore = () => {
     if (!hasMore || loadingMore) return;

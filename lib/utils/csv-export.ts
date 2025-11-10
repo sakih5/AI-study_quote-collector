@@ -33,7 +33,7 @@ export type QuoteForExport = {
   text: string;
   source_type: 'BOOK' | 'SNS' | 'OTHER';
   page_number: number | null;
-  source_meta: Record<string, any> | null;
+  source_meta: Record<string, unknown> | null;
   created_at: string;
   books: Book | null;
   sns_users: SnsUser | null;

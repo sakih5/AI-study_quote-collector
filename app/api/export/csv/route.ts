@@ -114,7 +114,7 @@ export async function GET(request: NextRequest) {
 
       filteredQuotes = filteredQuotes.filter((quote) => {
         const quoteActivityIds =
-          quote.quote_activities?.map((qa: any) => qa.activities.id) || [];
+          quote.quote_activities?.map((qa) => (qa.activities as unknown as { id: number }).id) || [];
 
         // すべての指定された活動領域がフレーズに含まれているかチェック（AND条件）
         return activityIdsArray.every((activityId) =>
@@ -128,7 +128,7 @@ export async function GET(request: NextRequest) {
       const tagIdsArray = tag_ids.split(',').map((id) => parseInt(id.trim()));
 
       filteredQuotes = filteredQuotes.filter((quote) => {
-        const quoteTagIds = quote.quote_tags?.map((qt: any) => qt.tags.id) || [];
+        const quoteTagIds = quote.quote_tags?.map((qt) => (qt.tags as unknown as { id: number }).id) || [];
 
         // すべての指定されたタグがフレーズに含まれているかチェック（AND条件）
         return tagIdsArray.every((tagId) => quoteTagIds.includes(tagId));

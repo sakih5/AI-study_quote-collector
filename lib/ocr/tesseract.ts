@@ -203,8 +203,8 @@ export function preprocessImage(imageData: ImageData): ImageData {
  */
 export async function extractTextFromBase64(
   base64Image: string,
-  language: string = 'jpn',
-  onProgress?: (progress: OCRProgress) => void
+  _language: string = 'jpn',
+  _onProgress?: (progress: OCRProgress) => void
 ): Promise<OCRResult> {
   // TODO: 次回実装
   // Base64をBlobに変換してextractTextFromImageを呼び出す

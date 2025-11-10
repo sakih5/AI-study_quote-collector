@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 
 export type TagWithMetadata = {
   id: number;
@@ -21,7 +21,7 @@ export function useTagsManagement(params: UseTagsManagementParams = {}) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchTags = async () => {
+  const fetchTags = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
@@ -45,11 +45,11 @@ export function useTagsManagement(params: UseTagsManagementParams = {}) {
     } finally {
       setLoading(false);
     }
-  };
+  }, [search, sort, order]);
 
   useEffect(() => {
     fetchTags();
-  }, [search, sort, order]);
+  }, [fetchTags]);
 
   return {
     tags,

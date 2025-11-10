@@ -323,7 +323,22 @@ export default function QuoteModal({ isOpen, onClose }: QuoteModalProps) {
           tag_ids: q.tag_ids,
         }));
 
-      const payload: any = {
+      interface QuotePayload {
+        quotes: Array<{
+          text: string;
+          activity_ids: number[];
+          tag_ids: number[];
+        }>;
+        source_type: 'BOOK' | 'SNS' | 'OTHER';
+        book_id?: number;
+        sns_user_id?: number;
+        source_meta?: {
+          source: string | null;
+          note: string | null;
+        };
+      }
+
+      const payload: QuotePayload = {
         quotes: quotesPayload,
         source_type: sourceType,
       };

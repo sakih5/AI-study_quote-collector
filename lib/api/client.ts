@@ -62,7 +62,7 @@ export async function apiGet<T>(endpoint: string): Promise<T> {
 /**
  * POST リクエスト
  */
-export async function apiPost<T>(endpoint: string, body: any): Promise<T> {
+export async function apiPost<T>(endpoint: string, body: unknown): Promise<T> {
   const response = await apiFetch(endpoint, {
     method: 'POST',
     body: JSON.stringify(body),
@@ -73,7 +73,7 @@ export async function apiPost<T>(endpoint: string, body: any): Promise<T> {
 /**
  * PUT リクエスト
  */
-export async function apiPut<T>(endpoint: string, body: any): Promise<T> {
+export async function apiPut<T>(endpoint: string, body: unknown): Promise<T> {
   const response = await apiFetch(endpoint, {
     method: 'PUT',
     body: JSON.stringify(body),

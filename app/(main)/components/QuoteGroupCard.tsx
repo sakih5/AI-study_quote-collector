@@ -1,3 +1,4 @@
+import Image from 'next/image';
 import { QuoteGroup, Quote } from '../hooks/useQuotesGrouped';
 import QuoteItem from './QuoteItem';
 
@@ -16,9 +17,11 @@ export default function QuoteGroupCard({ group, onEdit, onDelete }: QuoteGroupCa
           {/* 書籍カバー */}
           {book.cover_image_url ? (
             <div className="flex-shrink-0">
-              <img
+              <Image
                 src={book.cover_image_url}
                 alt={book.title}
+                width={96}
+                height={128}
                 className="w-24 h-32 object-cover rounded"
               />
             </div>

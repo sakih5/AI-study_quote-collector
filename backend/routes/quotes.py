@@ -514,9 +514,10 @@ async def get_quotes_grouped(
                 )
 
         # ページネーション適用
-        total = len(grouped_items)
+        # フレーズの総数をカウント（グループ数ではなく）
+        total = len(quotes)
         paginated_items = grouped_items[offset:offset + limit]
-        has_more = offset + limit < total
+        has_more = offset + limit < len(grouped_items)
 
         return QuotesGroupedResponse(
             items=paginated_items,

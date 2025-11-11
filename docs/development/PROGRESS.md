@@ -1,6 +1,6 @@
 # プロジェクト進捗状況
 
-最終更新: 2025年11月10日（Vercel本番デプロイ完了、TypeScript/ESLintエラー修正完了、ログインループ・API接続エラー修正完了）
+最終更新: 2025年11月11日（UIライトテーマ化完了、ボタン色統一完了、件数カウント修正完了）
 
 ---
 
@@ -369,15 +369,16 @@ Phase 5: ██████████ 100% ✅ Cloud Runデプロイ
 | 2025-11-03 | TypeScript/ESLintエラー修正（41件） | 2.5時間 |
 | 2025-11-03 | Vercelデプロイ | 1時間 |
 | 2025-11-10 | ログインループ・API接続エラー修正 | 3時間 |
-| **小計** | | **6.5時間** |
+| 2025-11-11 | UIライトテーマ化・ボタン色統一・件数カウント修正 | 1.5時間 |
+| **小計** | | **8時間** |
 
-| **総合計** | | **46.5時間** |
+| **総合計** | | **48時間** |
 
 ---
 
 ## 次回作業時の優先タスク
 
-### 🎉 現在の状態（2025-11-10時点）
+### 🎉 現在の状態（2025-11-11時点）
 
 **✅ 完了している主要タスク**:
 - Next.js Phase 1 (MVP): 100%完了
@@ -386,6 +387,7 @@ Phase 5: ██████████ 100% ✅ Cloud Runデプロイ
 - TypeScript/ESLintエラー: 0件（完全修正済み）
 - 本番デプロイ: Vercel + Cloud Run + Supabase すべて稼働中
 - ログインループ・API接続エラー: 修正完了
+- **修正計画書 Phase 1 タスク1-2: 完了（UIライトテーマ化・ボタン色統一・件数カウント修正）**
 
 **🎯 本番環境URL**:
 - フロントエンド: https://ai-study-quote-collector.vercel.app
@@ -398,13 +400,14 @@ Phase 5: ██████████ 100% ✅ Cloud Runデプロイ
 
 #### 1. 修正計画書の実装（推奨: フェーズ1から順に実装）
 
-**フェーズ1: 優先度高（2〜3時間）**
-1. **件数カウント修正** - グループ数→フレーズ総数に変更
-2. **見た目の修正**
-   - ダーク→ライトテーマ
-   - フレーズを大きく太字に、カード化
-   - 本タイトル・著者名をグレーに
-3. **Amazon表紙画像取得**
+**フェーズ1: 優先度高（残り約1時間）**
+1. ~~**件数カウント修正** - グループ数→フレーズ総数に変更~~ ✅ 完了
+2. ~~**見た目の修正（UIライトテーマ化・ボタン色統一）**~~ ✅ 完了
+   - ~~ダーク→ライトテーマ~~ ✅
+   - ~~ボタンの色を青系で統一（意味に応じて濃さ変更）~~ ✅
+   - フレーズを大きく太字に、カード化（未実施）
+   - 本タイトル・著者名をグレーに（未実施）
+3. **Amazon表紙画像取得** ⏳ 残り
 
 **フェーズ2: 中優先度（1〜1.5時間）**
 4. **キーワード検索修正**
@@ -457,6 +460,7 @@ Phase 5: ██████████ 100% ✅ Cloud Runデプロイ
 
 **更新履歴**:
 
+- 2025-11-11: **修正計画書 Phase 1 部分完了🎉** - UIライトテーマ化完了、ボタン色統一完了、件数カウント修正完了
 - 2025-11-10: **本番環境安定化完了🎉** - ログインループ・API接続エラー修正完了、アプリ正常稼働中
 - 2025-11-03: **本番デプロイ完了🎉** - Vercelデプロイ、TypeScript/ESLintエラー0件達成
 - 2025-11-03: **FastAPI Phase 5完了🎉** - Cloud Runデプロイ完了、バックエンド本番稼働開始
@@ -714,3 +718,58 @@ AttributeError: 'SyncQueryRequestBuilder' object has no attribute 'select'
 **完了**: 2025-11-10
 **作業時間**: 約3時間（試行錯誤含む）
 **作業ログ**: [2025-11-10_login-loop-and-api-fix.md](./work_logs/2025-11-10_login-loop-and-api-fix.md)
+
+---
+
+## 修正計画書の実装
+
+### UIライトテーマ化＆ボタン色統一＆件数カウント修正 ✅ 100%
+
+**完了したタスク（修正計画書フェーズ1より）:**
+- [x] タスク1: 件数カウント修正（グループ数→フレーズ総数）
+- [x] タスク2（追加作業）: ボタンの色を青系で統一
+- [x] モーダル背景色の完全ライトテーマ化（暗い背景色の削除）
+
+**修正内容:**
+
+1. **モーダル背景色の完全ライトテーマ化**
+   - すべての暗い背景色（`#1a1a1a`, `#2a2a2a`, `#252525`）を削除
+   - モーダル、タグ管理画面、ログイン画面を完全にライトテーマに
+   - モーダルオーバーレイ: `bg-black/50` → `bg-gray-900/20`
+   - モーダル本体: `bg-[#2a2a2a]` → `bg-white`
+
+2. **ボタンの色を青系で統一**
+   - Primary（主要アクション）: `bg-blue-600` - 登録、保存、変更、検索
+   - Positive（成功系アクション）: `bg-blue-500` - エクスポート、統合
+   - Secondary（キャンセル）: `bg-blue-400` - キャンセル
+   - Danger（削除）: `bg-rose-400` - 削除、ログアウト（コーラルピンク）
+
+3. **件数カウント修正**
+   - グループ数ではなくフレーズの総数を表示
+   - `backend/routes/quotes.py`: `total = len(quotes)`
+   - `app/api/quotes/grouped/route.ts`: `total: filteredQuotes.length`
+   - 表示テキスト: 「該当件数/全件数」→「該当フレーズ数/フレーズ総数」
+
+4. **FastAPIバックエンドの再デプロイ**
+   - Cloud Runへの再デプロイ成功
+   - サービスURL: https://quote-collector-api-n6pgp2mv4a-an.a.run.app
+
+**修正したファイル（12ファイル）:**
+- フロントエンド: 11ファイル
+  - `app/(main)/layout.tsx`
+  - `app/(main)/page.tsx`
+  - `app/(main)/components/Header.tsx`
+  - `app/(main)/components/QuoteModal.tsx`
+  - `app/(main)/components/QuoteEditModal.tsx`
+  - `app/(main)/components/QuoteItem.tsx`
+  - `app/(main)/settings/tags/page.tsx`
+  - `app/(auth)/login/page.tsx`
+  - `app/api/quotes/grouped/route.ts`
+  - `styles/globals.css`（前回作業で修正済み）
+  - `app/(main)/components/QuoteGroupCard.tsx`（前回作業で修正済み）
+- バックエンド: 1ファイル
+  - `backend/routes/quotes.py`
+
+**完了**: 2025-11-11
+**作業時間**: 約1.5時間
+**作業ログ**: [2025-11-11_button_color_unification_and_count_fix.md](./work_logs/2025-11-11_button_color_unification_and_count_fix.md)

@@ -191,7 +191,7 @@ export default function HomePage() {
         <div className="flex items-center justify-between pt-2 border-t border-gray-300">
           <div className="flex items-center gap-4">
             <p className="text-gray-600 text-sm">
-              {hasActiveFilters ? '該当件数' : '全件数'}：
+              {hasActiveFilters ? '該当フレーズ数' : 'フレーズ総数'}：
               <span className="font-bold text-gray-900 ml-1">{total}件</span>
             </p>
             {hasActiveFilters && (

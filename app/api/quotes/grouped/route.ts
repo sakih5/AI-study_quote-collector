@@ -229,7 +229,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({
       items: paginatedItems,
-      total: groupedItems.length,
+      total: filteredQuotes.length, // フレーズの総数（グループ数ではなく）
       has_more: offset + limit < groupedItems.length,
     });
   } catch (error) {

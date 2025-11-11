@@ -58,6 +58,7 @@ export default function QuoteModal({ isOpen, onClose }: QuoteModalProps) {
   const { snsUsers, loading: snsUsersLoading } = useSnsUsers();
 
   const [newTagName, setNewTagName] = useState('');
+  const [isPublic, setIsPublic] = useState(false); // 公開/非公開フラグ
 
   // 出典情報の管理
   const [bookData, setBookData] = useState<BookData>({
@@ -332,6 +333,7 @@ export default function QuoteModal({ isOpen, onClose }: QuoteModalProps) {
           tag_ids: number[];
         }>;
         source_type: 'BOOK' | 'SNS' | 'OTHER';
+        is_public: boolean;
         book_id?: number;
         sns_user_id?: number;
         source_meta?: {
@@ -343,6 +345,7 @@ export default function QuoteModal({ isOpen, onClose }: QuoteModalProps) {
       const payload: QuotePayload = {
         quotes: quotesPayload,
         source_type: sourceType,
+        is_public: isPublic,
       };
 
       if (sourceType === 'BOOK') {
@@ -1052,6 +1055,26 @@ export default function QuoteModal({ isOpen, onClose }: QuoteModalProps) {
 
           {/* フッター */}
           <div className="sticky bottom-0 bg-white border-t border-gray-200 px-6 py-4">
+            {/* 公開/非公開トグル */}
+            <div className="mb-4">
+              <label className="flex items-center gap-3 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={isPublic}
+                  onChange={(e) => setIsPublic(e.target.checked)}
+                  className="w-5 h-5 text-blue-600 border-gray-300 rounded focus:ring-2 focus:ring-blue-500"
+                />
+                <div className="flex flex-col">
+                  <span className="text-sm font-medium text-gray-900">
+                    このフレーズを公開する
+                  </span>
+                  <span className="text-xs text-gray-500">
+                    ログインしていないユーザーも閲覧できます
+                  </span>
+                </div>
+              </label>
+            </div>
+
             {/* エラーメッセージ */}
             {error && (
               <div className="mb-4 p-3 bg-red-900/50 border border-red-700 rounded-lg text-red-200 text-sm">

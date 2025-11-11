@@ -24,7 +24,7 @@ export async function POST(request: NextRequest) {
 
     // リクエストボディを取得
     const body = await request.json();
-    const { quotes, source_type, book_id, sns_user_id, source_meta, page_number } = body;
+    const { quotes, source_type, book_id, sns_user_id, source_meta, page_number, is_public } = body;
 
     // バリデーション
     if (!quotes || !Array.isArray(quotes) || quotes.length === 0) {
@@ -114,6 +114,7 @@ export async function POST(request: NextRequest) {
           sns_user_id: source_type === 'SNS' ? sns_user_id : null,
           page_number: page_number || null,
           source_meta: source_type === 'OTHER' ? source_meta : null,
+          is_public: is_public || false,
         })
         .select('id, text, source_type, page_number, created_at')
         .single();

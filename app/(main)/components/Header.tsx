@@ -31,7 +31,7 @@ export default function Header({ user }: HeaderProps) {
         <div className="flex items-center justify-between h-16">
           {/* 左側: アプリ名 */}
           <div className="flex items-center gap-8">
-            <Link href="/" className="flex items-center gap-2">
+            <Link href="/my-quotes" className="flex items-center gap-2">
               <span className="text-2xl font-bold text-gray-900">抜き書きアプリ</span>
             </Link>
           </div>

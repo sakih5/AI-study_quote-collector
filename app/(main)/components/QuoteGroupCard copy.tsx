@@ -65,35 +65,35 @@ export default function QuoteGroupCard({ group, onEdit, onDelete }: QuoteGroupCa
     const platformIcon = sns_user.platform === 'X' ? '𝕏' : '@';
 
     return (
-      <div className="bg-white p-6">
-        <div className="flex gap-6 items-start">
-          {/* 左側：SNSユーザー情報（1/3） */}
-          <div className="w-1/3 flex-shrink-0 sticky top-6 self-start bg-gray-50 p-4 rounded-lg">
-            <div className="flex flex-col items-center text-center">
-              {/* SNSアイコン */}
-              <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mb-3">
-                <span className="text-3xl">{platformIcon}</span>
-              </div>
-
-              {/* ユーザー情報 */}
-              <h3 className="text-sm text-gray-900 font-medium mb-0.5">
-                {sns_user.display_name || `@${sns_user.handle}`}
-              </h3>
-              <p className="text-xs text-gray-500">@{sns_user.handle}</p>
-              <p className="text-xs text-gray-400 mt-2">
-                {sns_user.platform}・{quotes.length}件のフレーズ
-              </p>
-            </div>
+      <div className="bg-white rounded-lg p-6 shadow-lg border border-gray-200">
+        <div className="flex gap-4 mb-4">
+          {/* SNSアイコン */}
+          <div className="flex-shrink-0 w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center">
+            <span className="text-4xl">{platformIcon}</span>
           </div>
 
-          {/* 右側：フレーズ一覧（2/3） */}
+          {/* ユーザー情報 */}
           <div className="flex-1">
-            <div className="space-y-3">
-              {quotes.map((quote) => (
-                <QuoteItem key={quote.id} quote={quote} onEdit={onEdit} onDelete={onDelete} />
-              ))}
-            </div>
+            <h3 className="text-xl font-bold text-gray-900 mb-1">
+              {sns_user.display_name || `@${sns_user.handle}`}
+            </h3>
+            <p className="text-gray-500 text-sm">@{sns_user.handle}</p>
+            <p className="text-gray-400 text-xs mt-2">
+              {sns_user.platform} · {quotes.length}件のフレーズ
+            </p>
           </div>
+        </div>
+
+        {/* フレーズ一覧 */}
+        <div className="space-y-3">
+          {quotes.map((quote) => (
+            <QuoteItem
+              key={quote.id}
+              quote={quote}
+              onEdit={onEdit}
+              onDelete={onDelete}
+            />
+          ))}
         </div>
       </div>
     );
@@ -102,27 +102,18 @@ export default function QuoteGroupCard({ group, onEdit, onDelete }: QuoteGroupCa
   // OTHER タイプ
   const { quote } = group;
   return (
-    <div className="bg-white p-6">
-      <div className="flex gap-6 items-start">
-        {/* 左側：その他メタ情報（1/3） */}
-        <div className="w-1/3 flex-shrink-0 sticky top-6 self-start bg-gray-50 p-4 rounded-lg">
-          <div className="text-center">
-            <h3 className="text-sm font-medium text-gray-900 mb-1">その他</h3>
-            {quote.source_meta?.source && (
-              <p className="text-xs text-gray-500">出典: {quote.source_meta.source}</p>
-            )}
-            {quote.source_meta?.note && (
-              <p className="text-xs text-gray-400 mt-1">{quote.source_meta.note}</p>
-            )}
-            <p className="text-xs text-gray-400 mt-2">1件のフレーズ</p>
-          </div>
-        </div>
-
-        {/* 右側：フレーズ本体（2/3） */}
-        <div className="flex-1">
-          <QuoteItem quote={quote} onEdit={onEdit} onDelete={onDelete} />
-        </div>
+    <div className="bg-white rounded-lg p-6 shadow-md border border-gray-200">
+      <div className="mb-4">
+        <h3 className="text-lg font-bold text-gray-900 mb-1">その他</h3>
+        {quote.source_meta?.source && (
+          <p className="text-gray-500 text-sm">出典: {quote.source_meta.source}</p>
+        )}
+        {quote.source_meta?.note && (
+          <p className="text-gray-400 text-xs mt-1">{quote.source_meta.note}</p>
+        )}
       </div>
+
+      <QuoteItem quote={quote} onEdit={onEdit} onDelete={onDelete} />
     </div>
   );
 }

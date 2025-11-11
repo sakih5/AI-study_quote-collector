@@ -203,7 +203,7 @@ export default function PublicHomePage() {
                             key={quote.id}
                             className="p-4 bg-gray-50 rounded-lg border border-gray-200"
                           >
-                            <p className="text-gray-900 whitespace-pre-wrap">{quote.text}</p>
+                            <p className="text-gray-900 text-lg font-bold mb-3">{quote.text}</p>
                             {quote.page_number && (
                               <p className="text-xs text-gray-500 mt-2">p.{quote.page_number}</p>
                             )}
@@ -262,9 +262,7 @@ export default function PublicHomePage() {
       {/* フッター */}
       <footer className="bg-white border-t border-gray-200 mt-12 py-6">
         <div className="container mx-auto px-4 text-center">
-          <p className="text-gray-600 text-sm">
-            ログインして自分のフレーズを登録・管理しましょう
-          </p>
+          <p className="text-gray-600 text-sm">ログインして自分のフレーズを登録・管理しましょう</p>
           <Link
             href="/login"
             className="inline-block mt-4 px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors"

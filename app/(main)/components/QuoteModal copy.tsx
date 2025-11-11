@@ -48,8 +48,11 @@ interface OtherData {
 }
 
 export default function QuoteModal({ isOpen, onClose }: QuoteModalProps) {
-  const [isPhraseOpen, setIsPhraseOpen] = useState(true);
-  const [isSourceOpen, setIsSourceOpen] = useState(false);
+  const [activeSection, setActiveSection] = useState<'phrase' | 'source'>('phrase');
+  // const [isPhraseOpen, setIsPhraseOpen] = useState(true);
+  // const [isSourceOpen, setIsSourceOpen] = useState(false);
+  // const [isPhraseOpen, setIsPhraseOpen] = useState<boolean>(true);
+  // const [isSourceOpen, setIsSourceOpen] = useState<boolean>(false);
   const [quotes, setQuotes] = useState<QuoteInput[]>([{ text: '', activity_ids: [], tag_ids: [] }]);
   const [sourceType, setSourceType] = useState<'BOOK' | 'SNS' | 'OTHER'>('BOOK');
 
@@ -448,13 +451,13 @@ export default function QuoteModal({ isOpen, onClose }: QuoteModalProps) {
             {/* セクション1: フレーズ & 分類分け */}
             <div className="border border-gray-200 rounded-lg overflow-hidden">
               <button
-                onClick={() => setIsPhraseOpen((prev) => !prev)}
+                onClick={() => setActiveSection('phrase')}
                 className="w-full px-4 py-3 bg-white text-gray-900 text-left font-medium flex items-center justify-between hover:bg-gray-50 transition-colors"
               >
                 <span>1. フレーズ & 分類分け</span>
-                <span className="text-xl">{isPhraseOpen ? '▲' : '▼'}</span>
+                <span className="text-xl">{activeSection === 'phrase' ? '▲' : '▼'}</span>
               </button>
-              {isPhraseOpen && (
+              {activeSection === 'phrase' && (
                 <div className="p-4 space-y-6">
                   {quotes.map((quote, index) => (
                     <div
@@ -628,13 +631,13 @@ export default function QuoteModal({ isOpen, onClose }: QuoteModalProps) {
             {/* セクション2: 出典 */}
             <div className="border border-gray-200 rounded-lg overflow-hidden">
               <button
-                onClick={() => setIsSourceOpen((prev) => !prev)}
+                onClick={() => setActiveSection('source')}
                 className="w-full px-4 py-3 bg-white text-gray-900 text-left font-medium flex items-center justify-between hover:bg-gray-50 transition-colors"
               >
                 <span>2. 出典（本 / SNS / その他）</span>
-                <span className="text-xl">{isSourceOpen ? '▲' : '▼'}</span>
+                <span className="text-xl">{activeSection === 'source' ? '▲' : '▼'}</span>
               </button>
-              {isSourceOpen && (
+              {activeSection === 'source' && (
                 <div className="p-4 space-y-4">
                   {/* 出典タイプ選択 */}
                   <div>

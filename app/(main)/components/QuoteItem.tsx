@@ -9,17 +9,17 @@ interface QuoteItemProps {
 
 export default function QuoteItem({ quote, pageNumber, onEdit, onDelete }: QuoteItemProps) {
   return (
-    <div className="py-3 border-b border-gray-700 last:border-b-0">
+    <div className="bg-white rounded-lg shadow-md p-4 border border-gray-200">
       <div className="flex items-start justify-between gap-4">
         <div className="flex-1">
-          <p className="text-white text-base mb-2">{quote.text}</p>
+          <p className="text-gray-900 text-lg font-bold mb-3">{quote.text}</p>
 
           {/* 活動領域とタグ */}
           <div className="flex flex-wrap gap-2">
             {quote.activities.map((activity) => (
               <span
                 key={activity.id}
-                className="px-2 py-1 bg-[#1a1a1a] text-gray-300 text-xs rounded"
+                className="px-2 py-1 bg-gray-100 text-gray-700 text-xs rounded"
               >
                 {activity.icon} {activity.name}
               </span>
@@ -27,7 +27,7 @@ export default function QuoteItem({ quote, pageNumber, onEdit, onDelete }: Quote
             {quote.tags.map((tag) => (
               <span
                 key={tag.id}
-                className="px-2 py-1 bg-blue-900/30 text-blue-300 text-xs rounded"
+                className="px-2 py-1 bg-blue-50 text-blue-700 text-xs rounded"
               >
                 {tag.name}
               </span>
@@ -46,7 +46,7 @@ export default function QuoteItem({ quote, pageNumber, onEdit, onDelete }: Quote
             {onEdit && (
               <button
                 onClick={() => onEdit(quote)}
-                className="p-1.5 text-gray-400 hover:text-blue-400 hover:bg-[#1a1a1a] rounded transition-colors"
+                className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-gray-100 rounded transition-colors"
                 title="編集"
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -57,7 +57,7 @@ export default function QuoteItem({ quote, pageNumber, onEdit, onDelete }: Quote
             {onDelete && (
               <button
                 onClick={() => onDelete(quote.id)}
-                className="p-1.5 text-gray-400 hover:text-red-400 hover:bg-[#1a1a1a] rounded transition-colors"
+                className="p-1.5 text-gray-400 hover:text-rose-500 hover:bg-gray-100 rounded transition-colors"
                 title="削除"
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

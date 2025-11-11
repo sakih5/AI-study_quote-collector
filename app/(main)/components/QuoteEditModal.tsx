@@ -84,20 +84,20 @@ export default function QuoteEditModal({
   return (
     <>
       {/* オーバーレイ */}
-      <div className="fixed inset-0 bg-black/50 z-40" onClick={onClose} />
+      <div className="fixed inset-0 bg-gray-900/20 z-40" onClick={onClose} />
 
       {/* モーダル */}
       <div className="fixed inset-0 z-50 flex items-center justify-center p-4 pointer-events-none">
         <div
-          className="bg-[#2a2a2a] rounded-lg shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto pointer-events-auto"
+          className="bg-white rounded-lg shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto pointer-events-auto"
           onClick={(e) => e.stopPropagation()}
         >
           {/* ヘッダー */}
-          <div className="sticky top-0 bg-[#2a2a2a] border-b border-gray-700 px-6 py-4 flex items-center justify-between z-10">
-            <h2 className="text-2xl font-bold text-white">フレーズを編集</h2>
+          <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between z-10">
+            <h2 className="text-2xl font-bold text-gray-900">フレーズを編集</h2>
             <button
               onClick={onClose}
-              className="text-gray-400 hover:text-white transition-colors text-2xl"
+              className="text-gray-600 hover:text-gray-900 transition-colors text-2xl"
             >
               ×
             </button>
@@ -107,30 +107,30 @@ export default function QuoteEditModal({
           <div className="p-6 space-y-4">
             {/* フレーズテキスト */}
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
                 フレーズ<span className="text-red-500">*</span>
               </label>
               <textarea
                 value={text}
                 onChange={(e) => setText(e.target.value)}
                 rows={3}
-                className="w-full px-4 py-2 bg-[#1a1a1a] border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-4 py-2 bg-white border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
 
             {/* 活動領域選択 */}
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
                 活動領域（複数選択可）<span className="text-red-500">*</span>
               </label>
               {activitiesLoading ? (
-                <p className="text-gray-400 text-sm">読み込み中...</p>
+                <p className="text-gray-600 text-sm">読み込み中...</p>
               ) : (
                 <div className="grid grid-cols-2 gap-2">
                   {activities.map((activity) => (
                     <label
                       key={activity.id}
-                      className="flex items-center gap-2 px-3 py-2 bg-[#1a1a1a] border border-gray-600 rounded-lg hover:bg-[#252525] cursor-pointer transition-colors"
+                      className="flex items-center gap-2 px-3 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors"
                     >
                       <input
                         type="checkbox"
@@ -144,7 +144,7 @@ export default function QuoteEditModal({
                         }}
                         className="w-4 h-4"
                       />
-                      <span className="text-white text-sm">
+                      <span className="text-gray-900 text-sm">
                         {activity.icon} {activity.name}
                       </span>
                     </label>
@@ -155,7 +155,7 @@ export default function QuoteEditModal({
 
             {/* タグ選択 */}
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">タグ</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">タグ</label>
               {/* 選択済みタグ */}
               <div className="flex flex-wrap gap-2 mb-3">
                 {tagIds.map((tagId) => {
@@ -186,7 +186,7 @@ export default function QuoteEditModal({
                       setTagIds([...tagIds, tagId]);
                     }
                   }}
-                  className="w-full px-4 py-2 bg-[#1a1a1a] border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500 mb-3"
+                  className="w-full px-4 py-2 bg-white border border-gray-300 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 mb-3"
                 >
                   <option value="">既存のタグを選択...</option>
                   {tags
@@ -206,7 +206,7 @@ export default function QuoteEditModal({
                   value={newTagName}
                   onChange={(e) => setNewTagName(e.target.value)}
                   placeholder="例: 生産性"
-                  className="flex-1 px-4 py-2 bg-[#1a1a1a] border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="flex-1 px-4 py-2 bg-white border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
                 <button
                   onClick={async () => {
@@ -218,7 +218,7 @@ export default function QuoteEditModal({
                       }
                     }
                   }}
-                  className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors"
+                  className="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-gray-900 rounded-lg transition-colors"
                 >
                   + 追加
                 </button>
@@ -227,7 +227,7 @@ export default function QuoteEditModal({
           </div>
 
           {/* フッター */}
-          <div className="sticky bottom-0 bg-[#2a2a2a] border-t border-gray-700 px-6 py-4">
+          <div className="sticky bottom-0 bg-white border-t border-gray-200 px-6 py-4">
             {/* エラーメッセージ */}
             {error && (
               <div className="mb-4 p-3 bg-red-900/50 border border-red-700 rounded-lg text-red-200 text-sm">
@@ -240,7 +240,7 @@ export default function QuoteEditModal({
               <button
                 onClick={onClose}
                 disabled={isSubmitting}
-                className="px-6 py-2 bg-gray-700 hover:bg-gray-600 text-white font-medium rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="px-6 py-2 bg-blue-400 hover:bg-blue-500 text-gray-900 font-medium rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 キャンセル
               </button>

@@ -130,7 +130,7 @@ export default function HomePage() {
             onChange={(e) => setSearchKeyword(e.target.value)}
             onKeyPress={handleKeyPress}
             placeholder="キーワードで絞り込み..."
-            className="flex-1 px-4 py-3 bg-[#2a2a2a] border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="flex-1 px-4 py-3 bg-white border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
           <button
             onClick={handleSearch}
@@ -145,7 +145,7 @@ export default function HomePage() {
       <div className="mb-6 space-y-4">
         {/* 活動領域フィルター */}
         <div>
-          <h3 className="text-sm font-medium text-gray-400 mb-2">活動領域</h3>
+          <h3 className="text-sm font-medium text-gray-600 mb-2">活動領域</h3>
           <div className="flex gap-2 overflow-x-auto pb-2">
             {activities.map((activity) => (
               <button
@@ -154,7 +154,7 @@ export default function HomePage() {
                 className={`flex-shrink-0 px-4 py-2 rounded-lg font-medium transition-colors ${
                   selectedActivityIds.includes(activity.id)
                     ? 'bg-blue-600 text-white'
-                    : 'bg-[#2a2a2a] text-gray-300 hover:bg-[#353535]'
+                    : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'
                 }`}
               >
                 {activity.icon} {activity.name}
@@ -165,7 +165,7 @@ export default function HomePage() {
 
         {/* タグフィルター */}
         <div>
-          <h3 className="text-sm font-medium text-gray-400 mb-2">タグ</h3>
+          <h3 className="text-sm font-medium text-gray-600 mb-2">タグ</h3>
           <div className="flex gap-2 overflow-x-auto pb-2">
             {tags.length === 0 ? (
               <p className="text-gray-500 text-sm">タグがまだありません</p>
@@ -177,7 +177,7 @@ export default function HomePage() {
                   className={`flex-shrink-0 px-4 py-2 rounded-lg font-medium transition-colors ${
                     selectedTagIds.includes(tag.id)
                       ? 'bg-blue-600 text-white'
-                      : 'bg-[#2a2a2a] text-gray-300 hover:bg-[#353535]'
+                      : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'
                   }`}
                 >
                   {tag.name}
@@ -188,16 +188,16 @@ export default function HomePage() {
         </div>
 
         {/* 件数表示とクリアボタン */}
-        <div className="flex items-center justify-between pt-2 border-t border-gray-700">
+        <div className="flex items-center justify-between pt-2 border-t border-gray-300">
           <div className="flex items-center gap-4">
-            <p className="text-gray-400 text-sm">
+            <p className="text-gray-600 text-sm">
               {hasActiveFilters ? '該当件数' : '全件数'}：
-              <span className="font-bold text-white ml-1">{total}件</span>
+              <span className="font-bold text-gray-900 ml-1">{total}件</span>
             </p>
             {hasActiveFilters && (
               <button
                 onClick={clearFilters}
-                className="text-sm text-blue-400 hover:text-blue-300 transition-colors"
+                className="text-sm text-blue-600 hover:text-blue-700 transition-colors"
               >
                 フィルターをクリア
               </button>
@@ -207,7 +207,7 @@ export default function HomePage() {
           <button
             onClick={handleExportCsv}
             disabled={total === 0}
-            className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white text-sm font-medium rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+            className="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white text-sm font-medium rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
             title="表示中のフレーズをCSV形式でダウンロード"
           >
             <span>📥</span>
@@ -219,41 +219,41 @@ export default function HomePage() {
       {/* フレーズ一覧 */}
       {loading ? (
         <div className="text-center py-12">
-          <p className="text-gray-400">読み込み中...</p>
+          <p className="text-gray-600">読み込み中...</p>
         </div>
       ) : error ? (
         <div className="text-center py-12">
-          <p className="text-red-400">エラーが発生しました: {error}</p>
+          <p className="text-red-600">エラーが発生しました: {error}</p>
         </div>
       ) : items.length === 0 ? (
         <>
           {/* ウェルカムメッセージ（フレーズがない場合のみ） */}
-          <div className="bg-[#2a2a2a] rounded-lg p-8 mb-8 text-center">
-            <h1 className="text-3xl font-bold text-white mb-4">
+          <div className="bg-white rounded-lg p-8 mb-8 text-center shadow-lg border border-gray-200">
+            <h1 className="text-3xl font-bold text-gray-900 mb-4">
               ようこそ、抜き書きアプリへ
             </h1>
-            <p className="text-gray-400 mb-6">
+            <p className="text-gray-600 mb-6">
               本やSNSから気になったフレーズを保存して、あなただけの知識ベースを作りましょう
             </p>
             <div className="flex justify-center gap-4">
-              <div className="bg-[#1a1a1a] rounded-lg p-6 flex-1 max-w-xs">
+              <div className="bg-gray-50 rounded-lg p-6 flex-1 max-w-xs border border-gray-200">
                 <div className="text-4xl mb-2">📚</div>
-                <h3 className="text-white font-semibold mb-2">フレーズを登録</h3>
-                <p className="text-gray-400 text-sm">
+                <h3 className="text-gray-900 font-semibold mb-2">フレーズを登録</h3>
+                <p className="text-gray-600 text-sm">
                   本やSNSから気になった言葉を保存
                 </p>
               </div>
-              <div className="bg-[#1a1a1a] rounded-lg p-6 flex-1 max-w-xs">
+              <div className="bg-gray-50 rounded-lg p-6 flex-1 max-w-xs border border-gray-200">
                 <div className="text-4xl mb-2">🏷️</div>
-                <h3 className="text-white font-semibold mb-2">タグで整理</h3>
-                <p className="text-gray-400 text-sm">
+                <h3 className="text-gray-900 font-semibold mb-2">タグで整理</h3>
+                <p className="text-gray-600 text-sm">
                   活動領域やタグで分類して管理
                 </p>
               </div>
-              <div className="bg-[#1a1a1a] rounded-lg p-6 flex-1 max-w-xs">
+              <div className="bg-gray-50 rounded-lg p-6 flex-1 max-w-xs border border-gray-200">
                 <div className="text-4xl mb-2">🔍</div>
-                <h3 className="text-white font-semibold mb-2">簡単に検索</h3>
-                <p className="text-gray-400 text-sm">
+                <h3 className="text-gray-900 font-semibold mb-2">簡単に検索</h3>
+                <p className="text-gray-600 text-sm">
                   キーワードやフィルターで素早く見つける
                 </p>
               </div>
@@ -261,18 +261,18 @@ export default function HomePage() {
           </div>
 
           {/* クイックスタートガイド */}
-          <div className="bg-[#2a2a2a] rounded-lg p-8">
-            <h2 className="text-2xl font-bold text-white mb-6">はじめ方</h2>
+          <div className="bg-white rounded-lg p-8 shadow-lg border border-gray-200">
+            <h2 className="text-2xl font-bold text-gray-900 mb-6">はじめ方</h2>
             <div className="space-y-4">
               <div className="flex items-start gap-4">
                 <div className="flex-shrink-0 w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center text-white font-bold">
                   1
                 </div>
                 <div>
-                  <h3 className="text-white font-semibold mb-1">
+                  <h3 className="text-gray-900 font-semibold mb-1">
                     フレーズを登録する
                   </h3>
-                  <p className="text-gray-400 text-sm">
+                  <p className="text-gray-600 text-sm">
                     右下の「+ 新規登録」ボタンから、気になったフレーズを登録しましょう
                   </p>
                 </div>
@@ -282,10 +282,10 @@ export default function HomePage() {
                   2
                 </div>
                 <div>
-                  <h3 className="text-white font-semibold mb-1">
+                  <h3 className="text-gray-900 font-semibold mb-1">
                     活動領域とタグを付ける
                   </h3>
-                  <p className="text-gray-400 text-sm">
+                  <p className="text-gray-600 text-sm">
                     「仕事・キャリア」「学習・研究」などの活動領域や、自分でタグを作成して整理できます
                   </p>
                 </div>
@@ -295,8 +295,8 @@ export default function HomePage() {
                   3
                 </div>
                 <div>
-                  <h3 className="text-white font-semibold mb-1">検索とフィルター</h3>
-                  <p className="text-gray-400 text-sm">
+                  <h3 className="text-gray-900 font-semibold mb-1">検索とフィルター</h3>
+                  <p className="text-gray-600 text-sm">
                     キーワード検索や、活動領域・タグのフィルターで必要な情報をすぐに見つけられます
                   </p>
                 </div>
@@ -333,7 +333,7 @@ export default function HomePage() {
               <button
                 onClick={loadMore}
                 disabled={loadingMore}
-                className="px-8 py-3 bg-[#2a2a2a] hover:bg-[#353535] text-white font-medium rounded-lg border border-gray-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="px-8 py-3 bg-white hover:bg-gray-50 text-gray-900 font-medium rounded-lg border border-gray-300 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {loadingMore ? '読み込み中...' : 'もっと見る'}
               </button>

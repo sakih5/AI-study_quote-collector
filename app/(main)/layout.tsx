@@ -18,7 +18,7 @@ export default async function MainLayout({
   }
 
   return (
-    <div className="min-h-screen bg-[#1a1a1a]">
+    <div className="min-h-screen bg-gray-50">
       <Header user={user} />
       <main className="container mx-auto px-4 py-8">{children}</main>
     </div>

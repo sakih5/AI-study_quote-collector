@@ -47,9 +47,7 @@ interface OtherData {
 
 export default function QuoteModal({ isOpen, onClose }: QuoteModalProps) {
   const [activeSection, setActiveSection] = useState<'phrase' | 'source'>('phrase');
-  const [quotes, setQuotes] = useState<QuoteInput[]>([
-    { text: '', activity_ids: [], tag_ids: [] },
-  ]);
+  const [quotes, setQuotes] = useState<QuoteInput[]>([{ text: '', activity_ids: [], tag_ids: [] }]);
   const [sourceType, setSourceType] = useState<'BOOK' | 'SNS' | 'OTHER'>('BOOK');
 
   const { activities, loading: activitiesLoading } = useActivities();
@@ -102,7 +100,7 @@ export default function QuoteModal({ isOpen, onClose }: QuoteModalProps) {
 
   const handleOCRSelectionsComplete = (selections: SelectionResult[]) => {
     // OCR結果をフレーズ入力欄に反映
-    const newQuotes: QuoteInput[] = selections.map(selection => ({
+    const newQuotes: QuoteInput[] = selections.map((selection) => ({
       text: selection.text,
       activity_ids: [],
       tag_ids: [],
@@ -399,23 +397,20 @@ export default function QuoteModal({ isOpen, onClose }: QuoteModalProps) {
   return (
     <>
       {/* オーバーレイ */}
-      <div
-        className="fixed inset-0 bg-black/50 z-40"
-        onClick={onClose}
-      />
+      <div className="fixed inset-0 bg-gray-900/20 z-40" onClick={onClose} />
 
       {/* モーダル */}
       <div className="fixed inset-0 z-50 flex items-center justify-center p-4 pointer-events-none">
         <div
-          className="bg-[#2a2a2a] rounded-lg shadow-2xl w-full max-w-3xl max-h-[90vh] overflow-y-auto pointer-events-auto"
+          className="bg-white rounded-lg shadow-2xl w-full max-w-3xl max-h-[90vh] overflow-y-auto pointer-events-auto"
           onClick={(e) => e.stopPropagation()}
         >
           {/* ヘッダー */}
-          <div className="sticky top-0 bg-[#2a2a2a] border-b border-gray-700 px-6 py-4 flex items-center justify-between z-10">
-            <h2 className="text-2xl font-bold text-white">フレーズを登録</h2>
+          <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between z-10">
+            <h2 className="text-2xl font-bold text-gray-900">フレーズを登録</h2>
             <button
               onClick={onClose}
-              className="text-gray-400 hover:text-white transition-colors text-2xl"
+              className="text-gray-600 hover:text-gray-900 transition-colors text-2xl"
             >
               ×
             </button>
@@ -428,10 +423,10 @@ export default function QuoteModal({ isOpen, onClose }: QuoteModalProps) {
               <div className="flex items-center justify-between mb-2">
                 <div className="flex items-center gap-2">
                   <span className="text-2xl">📷</span>
-                  <h3 className="text-lg font-semibold text-white">画像からテキストを抽出</h3>
+                  <h3 className="text-lg font-semibold text-gray-900">画像からテキストを抽出</h3>
                 </div>
               </div>
-              <p className="text-sm text-gray-400 mb-3">
+              <p className="text-sm text-gray-600 mb-3">
                 書籍やメモの画像をアップロードして、テキストを自動で抽出できます。
               </p>
               <button
@@ -443,10 +438,10 @@ export default function QuoteModal({ isOpen, onClose }: QuoteModalProps) {
             </div>
 
             {/* セクション1: フレーズ & 分類分け */}
-            <div className="border border-gray-700 rounded-lg overflow-hidden">
+            <div className="border border-gray-200 rounded-lg overflow-hidden">
               <button
                 onClick={() => setActiveSection('phrase')}
-                className="w-full px-4 py-3 bg-[#1a1a1a] text-white text-left font-medium flex items-center justify-between hover:bg-[#252525] transition-colors"
+                className="w-full px-4 py-3 bg-white text-gray-900 text-left font-medium flex items-center justify-between hover:bg-gray-50 transition-colors"
               >
                 <span>1. フレーズ & 分類分け</span>
                 <span className="text-xl">{activeSection === 'phrase' ? '▲' : '▼'}</span>
@@ -454,10 +449,13 @@ export default function QuoteModal({ isOpen, onClose }: QuoteModalProps) {
               {activeSection === 'phrase' && (
                 <div className="p-4 space-y-6">
                   {quotes.map((quote, index) => (
-                    <div key={index} className="space-y-4 pb-6 border-b border-gray-700 last:border-b-0">
+                    <div
+                      key={index}
+                      className="space-y-4 pb-6 border-b border-gray-200 last:border-b-0"
+                    >
                       {/* フレーズテキスト入力 */}
                       <div>
-                        <label className="block text-sm font-medium text-gray-300 mb-2">
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
                           フレーズ {quotes.length > 1 && `#${index + 1}`}
                         </label>
                         <textarea
@@ -469,23 +467,23 @@ export default function QuoteModal({ isOpen, onClose }: QuoteModalProps) {
                           }}
                           placeholder="例）集中は筋肉のように鍛えられる。"
                           rows={3}
-                          className="w-full px-4 py-2 bg-[#1a1a1a] border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          className="w-full px-4 py-2 bg-white border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
                         />
                       </div>
 
                       {/* 活動領域選択 */}
                       <div>
-                        <label className="block text-sm font-medium text-gray-300 mb-2">
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
                           活動領域（複数選択可）<span className="text-red-500">*</span>
                         </label>
                         {activitiesLoading ? (
-                          <p className="text-gray-400 text-sm">読み込み中...</p>
+                          <p className="text-gray-600 text-sm">読み込み中...</p>
                         ) : (
                           <div className="grid grid-cols-2 gap-2">
                             {activities.map((activity) => (
                               <label
                                 key={activity.id}
-                                className="flex items-center gap-2 px-3 py-2 bg-[#1a1a1a] border border-gray-600 rounded-lg hover:bg-[#252525] cursor-pointer transition-colors"
+                                className="flex items-center gap-2 px-3 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors"
                               >
                                 <input
                                   type="checkbox"
@@ -503,7 +501,7 @@ export default function QuoteModal({ isOpen, onClose }: QuoteModalProps) {
                                   }}
                                   className="w-4 h-4"
                                 />
-                                <span className="text-white text-sm">
+                                <span className="text-gray-900 text-sm">
                                   {activity.icon} {activity.name}
                                 </span>
                               </label>
@@ -514,9 +512,7 @@ export default function QuoteModal({ isOpen, onClose }: QuoteModalProps) {
 
                       {/* タグ選択 */}
                       <div>
-                        <label className="block text-sm font-medium text-gray-300 mb-2">
-                          タグ
-                        </label>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">タグ</label>
                         {/* 選択済みタグ */}
                         <div className="flex flex-wrap gap-2 mb-3">
                           {quote.tag_ids.map((tagId) => {
@@ -527,9 +523,9 @@ export default function QuoteModal({ isOpen, onClose }: QuoteModalProps) {
                                 key={tagId}
                                 onClick={() => {
                                   const newQuotes = [...quotes];
-                                  newQuotes[index].tag_ids = newQuotes[
-                                    index
-                                  ].tag_ids.filter((id) => id !== tagId);
+                                  newQuotes[index].tag_ids = newQuotes[index].tag_ids.filter(
+                                    (id) => id !== tagId
+                                  );
                                   setQuotes(newQuotes);
                                 }}
                                 className="px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white text-sm rounded-full flex items-center gap-2 transition-colors"
@@ -553,7 +549,7 @@ export default function QuoteModal({ isOpen, onClose }: QuoteModalProps) {
                                 setQuotes(newQuotes);
                               }
                             }}
-                            className="w-full px-4 py-2 bg-[#1a1a1a] border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500 mb-3"
+                            className="w-full px-4 py-2 bg-white border border-gray-300 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 mb-3"
                           >
                             <option value="">既存のタグを選択...</option>
                             {tags
@@ -573,7 +569,7 @@ export default function QuoteModal({ isOpen, onClose }: QuoteModalProps) {
                             value={newTagName}
                             onChange={(e) => setNewTagName(e.target.value)}
                             placeholder="例: 生産性"
-                            className="flex-1 px-4 py-2 bg-[#1a1a1a] border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            className="flex-1 px-4 py-2 bg-white border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
                           />
                           <button
                             onClick={async () => {
@@ -587,7 +583,7 @@ export default function QuoteModal({ isOpen, onClose }: QuoteModalProps) {
                                 }
                               }
                             }}
-                            className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors"
+                            className="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-gray-900 rounded-lg transition-colors"
                           >
                             + 追加
                           </button>
@@ -613,7 +609,7 @@ export default function QuoteModal({ isOpen, onClose }: QuoteModalProps) {
                     onClick={() => {
                       setQuotes([...quotes, { text: '', activity_ids: [], tag_ids: [] }]);
                     }}
-                    className="w-full py-3 border-2 border-dashed border-gray-600 hover:border-blue-500 text-gray-400 hover:text-blue-400 rounded-lg transition-colors font-medium"
+                    className="w-full py-3 border-2 border-dashed border-gray-300 hover:border-blue-500 text-gray-600 hover:text-blue-400 rounded-lg transition-colors font-medium"
                   >
                     + フレーズを追加
                   </button>
@@ -622,10 +618,10 @@ export default function QuoteModal({ isOpen, onClose }: QuoteModalProps) {
             </div>
 
             {/* セクション2: 出典 */}
-            <div className="border border-gray-700 rounded-lg overflow-hidden">
+            <div className="border border-gray-200 rounded-lg overflow-hidden">
               <button
                 onClick={() => setActiveSection('source')}
-                className="w-full px-4 py-3 bg-[#1a1a1a] text-white text-left font-medium flex items-center justify-between hover:bg-[#252525] transition-colors"
+                className="w-full px-4 py-3 bg-white text-gray-900 text-left font-medium flex items-center justify-between hover:bg-gray-50 transition-colors"
               >
                 <span>2. 出典（本 / SNS / その他）</span>
                 <span className="text-xl">{activeSection === 'source' ? '▲' : '▼'}</span>
@@ -634,7 +630,7 @@ export default function QuoteModal({ isOpen, onClose }: QuoteModalProps) {
                 <div className="p-4 space-y-4">
                   {/* 出典タイプ選択 */}
                   <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-3">
+                    <label className="block text-sm font-medium text-gray-700 mb-3">
                       出典の種類
                     </label>
                     <div className="flex gap-4">
@@ -643,59 +639,61 @@ export default function QuoteModal({ isOpen, onClose }: QuoteModalProps) {
                           type="radio"
                           value="BOOK"
                           checked={sourceType === 'BOOK'}
-                          onChange={(e) => setSourceType(e.target.value as 'BOOK' | 'SNS' | 'OTHER')}
+                          onChange={(e) =>
+                            setSourceType(e.target.value as 'BOOK' | 'SNS' | 'OTHER')
+                          }
                           className="w-4 h-4"
                         />
-                        <span className="text-white">本</span>
+                        <span className="text-gray-900">本</span>
                       </label>
                       <label className="flex items-center gap-2 cursor-pointer">
                         <input
                           type="radio"
                           value="SNS"
                           checked={sourceType === 'SNS'}
-                          onChange={(e) => setSourceType(e.target.value as 'BOOK' | 'SNS' | 'OTHER')}
+                          onChange={(e) =>
+                            setSourceType(e.target.value as 'BOOK' | 'SNS' | 'OTHER')
+                          }
                           className="w-4 h-4"
                         />
-                        <span className="text-white">SNS</span>
+                        <span className="text-gray-900">SNS</span>
                       </label>
                       <label className="flex items-center gap-2 cursor-pointer">
                         <input
                           type="radio"
                           value="OTHER"
                           checked={sourceType === 'OTHER'}
-                          onChange={(e) => setSourceType(e.target.value as 'BOOK' | 'SNS' | 'OTHER')}
+                          onChange={(e) =>
+                            setSourceType(e.target.value as 'BOOK' | 'SNS' | 'OTHER')
+                          }
                           className="w-4 h-4"
                         />
-                        <span className="text-white">その他</span>
+                        <span className="text-gray-900">その他</span>
                       </label>
                     </div>
                   </div>
 
-                  <div className="border-t border-gray-700 pt-4">
+                  <div className="border-t border-gray-200 pt-4">
                     {/* 本の場合 */}
                     {sourceType === 'BOOK' && (
                       <div className="space-y-4">
                         <div className="flex gap-4 mb-4">
                           <button
-                            onClick={() =>
-                              setBookData({ ...bookData, selectionMode: 'existing' })
-                            }
+                            onClick={() => setBookData({ ...bookData, selectionMode: 'existing' })}
                             className={`px-4 py-2 rounded-lg font-medium transition-colors ${
                               bookData.selectionMode === 'existing'
                                 ? 'bg-blue-600 text-white'
-                                : 'bg-[#1a1a1a] text-gray-400 hover:bg-[#252525]'
+                                : 'bg-white text-gray-600 hover:bg-gray-50'
                             }`}
                           >
                             既存の書籍から選択
                           </button>
                           <button
-                            onClick={() =>
-                              setBookData({ ...bookData, selectionMode: 'new' })
-                            }
+                            onClick={() => setBookData({ ...bookData, selectionMode: 'new' })}
                             className={`px-4 py-2 rounded-lg font-medium transition-colors ${
                               bookData.selectionMode === 'new'
                                 ? 'bg-blue-600 text-white'
-                                : 'bg-[#1a1a1a] text-gray-400 hover:bg-[#252525]'
+                                : 'bg-white text-gray-600 hover:bg-gray-50'
                             }`}
                           >
                             新しい書籍を登録
@@ -704,13 +702,13 @@ export default function QuoteModal({ isOpen, onClose }: QuoteModalProps) {
 
                         {bookData.selectionMode === 'existing' ? (
                           <div>
-                            <label className="block text-sm font-medium text-gray-300 mb-2">
+                            <label className="block text-sm font-medium text-gray-700 mb-2">
                               書籍を選択
                             </label>
                             {booksLoading ? (
-                              <p className="text-gray-400 text-sm">読み込み中...</p>
+                              <p className="text-gray-600 text-sm">読み込み中...</p>
                             ) : books.length === 0 ? (
-                              <p className="text-gray-400 text-sm">
+                              <p className="text-gray-600 text-sm">
                                 登録されている書籍がありません
                               </p>
                             ) : (
@@ -722,7 +720,7 @@ export default function QuoteModal({ isOpen, onClose }: QuoteModalProps) {
                                     selectedBookId: parseInt(e.target.value) || null,
                                   })
                                 }
-                                className="w-full px-4 py-2 bg-[#1a1a1a] border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                className="w-full px-4 py-2 bg-white border border-gray-300 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
                               >
                                 <option value="">書籍を選択...</option>
                                 {books.map((book) => (
@@ -737,8 +735,8 @@ export default function QuoteModal({ isOpen, onClose }: QuoteModalProps) {
                         ) : (
                           <div className="space-y-3">
                             {/* Amazon URLから取得 */}
-                            <div className="p-4 bg-[#252525] rounded-lg border border-gray-700">
-                              <label className="block text-sm font-medium text-gray-300 mb-2">
+                            <div className="p-4 bg-gray-50 rounded-lg border border-gray-200">
+                              <label className="block text-sm font-medium text-gray-700 mb-2">
                                 Amazon URLから自動取得
                               </label>
                               <div className="flex gap-2">
@@ -747,7 +745,7 @@ export default function QuoteModal({ isOpen, onClose }: QuoteModalProps) {
                                   value={bookUrl}
                                   onChange={(e) => setBookUrl(e.target.value)}
                                   placeholder="例: https://www.amazon.co.jp/dp/..."
-                                  className="flex-1 px-4 py-2 bg-[#1a1a1a] border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                  className="flex-1 px-4 py-2 bg-white border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
                                   disabled={isFetchingBookInfo}
                                 />
                                 <button
@@ -764,7 +762,7 @@ export default function QuoteModal({ isOpen, onClose }: QuoteModalProps) {
                             </div>
 
                             <div>
-                              <label className="block text-sm font-medium text-gray-300 mb-2">
+                              <label className="block text-sm font-medium text-gray-700 mb-2">
                                 タイトル<span className="text-red-500">*</span>
                               </label>
                               <input
@@ -777,11 +775,11 @@ export default function QuoteModal({ isOpen, onClose }: QuoteModalProps) {
                                   })
                                 }
                                 placeholder="例: 深い仕事"
-                                className="w-full px-4 py-2 bg-[#1a1a1a] border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                className="w-full px-4 py-2 bg-white border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
                               />
                             </div>
                             <div>
-                              <label className="block text-sm font-medium text-gray-300 mb-2">
+                              <label className="block text-sm font-medium text-gray-700 mb-2">
                                 著者
                               </label>
                               <input
@@ -794,11 +792,11 @@ export default function QuoteModal({ isOpen, onClose }: QuoteModalProps) {
                                   })
                                 }
                                 placeholder="例: カル・ニューポート"
-                                className="w-full px-4 py-2 bg-[#1a1a1a] border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                className="w-full px-4 py-2 bg-white border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
                               />
                             </div>
                             <div>
-                              <label className="block text-sm font-medium text-gray-300 mb-2">
+                              <label className="block text-sm font-medium text-gray-700 mb-2">
                                 出版社
                               </label>
                               <input
@@ -814,7 +812,7 @@ export default function QuoteModal({ isOpen, onClose }: QuoteModalProps) {
                                   })
                                 }
                                 placeholder="例: ダイヤモンド社"
-                                className="w-full px-4 py-2 bg-[#1a1a1a] border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                className="w-full px-4 py-2 bg-white border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
                               />
                             </div>
                           </div>
@@ -827,7 +825,7 @@ export default function QuoteModal({ isOpen, onClose }: QuoteModalProps) {
                       <div className="space-y-4">
                         {/* プラットフォーム選択 */}
                         <div>
-                          <label className="block text-sm font-medium text-gray-300 mb-2">
+                          <label className="block text-sm font-medium text-gray-700 mb-2">
                             プラットフォーム
                           </label>
                           <div className="flex gap-4">
@@ -844,7 +842,7 @@ export default function QuoteModal({ isOpen, onClose }: QuoteModalProps) {
                                 }
                                 className="w-4 h-4"
                               />
-                              <span className="text-white">X (旧Twitter)</span>
+                              <span className="text-gray-900">X (旧Twitter)</span>
                             </label>
                             <label className="flex items-center gap-2 cursor-pointer">
                               <input
@@ -859,7 +857,7 @@ export default function QuoteModal({ isOpen, onClose }: QuoteModalProps) {
                                 }
                                 className="w-4 h-4"
                               />
-                              <span className="text-white">Threads</span>
+                              <span className="text-gray-900">Threads</span>
                             </label>
                           </div>
                         </div>
@@ -867,25 +865,21 @@ export default function QuoteModal({ isOpen, onClose }: QuoteModalProps) {
                         {/* 既存/新規選択 */}
                         <div className="flex gap-4">
                           <button
-                            onClick={() =>
-                              setSnsData({ ...snsData, selectionMode: 'existing' })
-                            }
+                            onClick={() => setSnsData({ ...snsData, selectionMode: 'existing' })}
                             className={`px-4 py-2 rounded-lg font-medium transition-colors ${
                               snsData.selectionMode === 'existing'
                                 ? 'bg-blue-600 text-white'
-                                : 'bg-[#1a1a1a] text-gray-400 hover:bg-[#252525]'
+                                : 'bg-white text-gray-600 hover:bg-gray-50'
                             }`}
                           >
                             既存のユーザーから選択
                           </button>
                           <button
-                            onClick={() =>
-                              setSnsData({ ...snsData, selectionMode: 'new' })
-                            }
+                            onClick={() => setSnsData({ ...snsData, selectionMode: 'new' })}
                             className={`px-4 py-2 rounded-lg font-medium transition-colors ${
                               snsData.selectionMode === 'new'
                                 ? 'bg-blue-600 text-white'
-                                : 'bg-[#1a1a1a] text-gray-400 hover:bg-[#252525]'
+                                : 'bg-white text-gray-600 hover:bg-gray-50'
                             }`}
                           >
                             新しいユーザーを登録
@@ -894,14 +888,14 @@ export default function QuoteModal({ isOpen, onClose }: QuoteModalProps) {
 
                         {snsData.selectionMode === 'existing' ? (
                           <div>
-                            <label className="block text-sm font-medium text-gray-300 mb-2">
+                            <label className="block text-sm font-medium text-gray-700 mb-2">
                               ユーザーを選択
                             </label>
                             {snsUsersLoading ? (
-                              <p className="text-gray-400 text-sm">読み込み中...</p>
-                            ) : snsUsers.filter((u) => u.platform === snsData.platform)
-                                .length === 0 ? (
-                              <p className="text-gray-400 text-sm">
+                              <p className="text-gray-600 text-sm">読み込み中...</p>
+                            ) : snsUsers.filter((u) => u.platform === snsData.platform).length ===
+                              0 ? (
+                              <p className="text-gray-600 text-sm">
                                 登録されている{snsData.platform}ユーザーがありません
                               </p>
                             ) : (
@@ -913,7 +907,7 @@ export default function QuoteModal({ isOpen, onClose }: QuoteModalProps) {
                                     selectedSnsUserId: parseInt(e.target.value) || null,
                                   })
                                 }
-                                className="w-full px-4 py-2 bg-[#1a1a1a] border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                className="w-full px-4 py-2 bg-white border border-gray-300 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
                               >
                                 <option value="">ユーザーを選択...</option>
                                 {snsUsers
@@ -930,8 +924,8 @@ export default function QuoteModal({ isOpen, onClose }: QuoteModalProps) {
                         ) : (
                           <div className="space-y-3">
                             {/* SNS URLから取得 */}
-                            <div className="p-4 bg-[#252525] rounded-lg border border-gray-700">
-                              <label className="block text-sm font-medium text-gray-300 mb-2">
+                            <div className="p-4 bg-gray-50 rounded-lg border border-gray-200">
+                              <label className="block text-sm font-medium text-gray-700 mb-2">
                                 SNS URLから自動取得
                               </label>
                               <div className="flex gap-2">
@@ -940,7 +934,7 @@ export default function QuoteModal({ isOpen, onClose }: QuoteModalProps) {
                                   value={snsUrl}
                                   onChange={(e) => setSnsUrl(e.target.value)}
                                   placeholder="例: https://x.com/username/status/... または https://www.threads.com/@username/post/..."
-                                  className="flex-1 px-4 py-2 bg-[#1a1a1a] border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                  className="flex-1 px-4 py-2 bg-white border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
                                   disabled={isFetchingSnsInfo}
                                 />
                                 <button
@@ -957,7 +951,7 @@ export default function QuoteModal({ isOpen, onClose }: QuoteModalProps) {
                             </div>
 
                             <div>
-                              <label className="block text-sm font-medium text-gray-300 mb-2">
+                              <label className="block text-sm font-medium text-gray-700 mb-2">
                                 ユーザーID<span className="text-red-500">*</span>
                               </label>
                               <input
@@ -973,11 +967,11 @@ export default function QuoteModal({ isOpen, onClose }: QuoteModalProps) {
                                   })
                                 }
                                 placeholder="例: kentaro_dev"
-                                className="w-full px-4 py-2 bg-[#1a1a1a] border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                className="w-full px-4 py-2 bg-white border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
                               />
                             </div>
                             <div>
-                              <label className="block text-sm font-medium text-gray-300 mb-2">
+                              <label className="block text-sm font-medium text-gray-700 mb-2">
                                 表示名
                               </label>
                               <input
@@ -993,7 +987,7 @@ export default function QuoteModal({ isOpen, onClose }: QuoteModalProps) {
                                   })
                                 }
                                 placeholder="例: Kentaro | エンジニア"
-                                className="w-full px-4 py-2 bg-[#1a1a1a] border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                className="w-full px-4 py-2 bg-white border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
                               />
                             </div>
                           </div>
@@ -1005,31 +999,27 @@ export default function QuoteModal({ isOpen, onClose }: QuoteModalProps) {
                     {sourceType === 'OTHER' && (
                       <div className="space-y-3">
                         <div>
-                          <label className="block text-sm font-medium text-gray-300 mb-2">
+                          <label className="block text-sm font-medium text-gray-700 mb-2">
                             出典（任意）
                           </label>
                           <input
                             type="text"
                             value={otherData.source}
-                            onChange={(e) =>
-                              setOtherData({ ...otherData, source: e.target.value })
-                            }
+                            onChange={(e) => setOtherData({ ...otherData, source: e.target.value })}
                             placeholder="例: 社内研修"
-                            className="w-full px-4 py-2 bg-[#1a1a1a] border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            className="w-full px-4 py-2 bg-white border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
                           />
                         </div>
                         <div>
-                          <label className="block text-sm font-medium text-gray-300 mb-2">
+                          <label className="block text-sm font-medium text-gray-700 mb-2">
                             メモ（任意）
                           </label>
                           <textarea
                             value={otherData.note}
-                            onChange={(e) =>
-                              setOtherData({ ...otherData, note: e.target.value })
-                            }
+                            onChange={(e) => setOtherData({ ...otherData, note: e.target.value })}
                             placeholder="例: 10月の全社研修での気づき"
                             rows={3}
-                            className="w-full px-4 py-2 bg-[#1a1a1a] border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            className="w-full px-4 py-2 bg-white border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
                           />
                         </div>
                       </div>
@@ -1041,7 +1031,7 @@ export default function QuoteModal({ isOpen, onClose }: QuoteModalProps) {
           </div>
 
           {/* フッター */}
-          <div className="sticky bottom-0 bg-[#2a2a2a] border-t border-gray-700 px-6 py-4">
+          <div className="sticky bottom-0 bg-white border-t border-gray-200 px-6 py-4">
             {/* エラーメッセージ */}
             {error && (
               <div className="mb-4 p-3 bg-red-900/50 border border-red-700 rounded-lg text-red-200 text-sm">
@@ -1054,7 +1044,7 @@ export default function QuoteModal({ isOpen, onClose }: QuoteModalProps) {
               <button
                 onClick={onClose}
                 disabled={isSubmitting}
-                className="px-6 py-2 bg-gray-700 hover:bg-gray-600 text-white font-medium rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="px-6 py-2 bg-blue-400 hover:bg-blue-500 text-gray-900 font-medium rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 キャンセル
               </button>
@@ -1075,7 +1065,7 @@ export default function QuoteModal({ isOpen, onClose }: QuoteModalProps) {
         <>
           {/* オーバーレイ */}
           <div
-            className="fixed inset-0 bg-black/70"
+            className="fixed inset-0 bg-gray-900/30"
             style={{ zIndex: 60 }}
             onClick={handleOCRCancel}
           />
@@ -1086,15 +1076,12 @@ export default function QuoteModal({ isOpen, onClose }: QuoteModalProps) {
             style={{ zIndex: 70 }}
           >
             <div
-              className="bg-[#2a2a2a] rounded-lg shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-y-auto pointer-events-auto"
+              className="bg-white rounded-lg shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-y-auto pointer-events-auto"
               onClick={(e) => e.stopPropagation()}
             >
               <div className="p-6">
                 {ocrStep === 'upload' && (
-                  <OCRUploader
-                    onOCRComplete={handleOCRComplete}
-                    onCancel={handleOCRCancel}
-                  />
+                  <OCRUploader onOCRComplete={handleOCRComplete} onCancel={handleOCRCancel} />
                 )}
                 {ocrStep === 'select' && ocrResult && (
                   <OCRCanvas

@@ -1,6 +1,6 @@
 # プロジェクト進捗状況
 
-最終更新: 2025年11月03日（Next.js Phase 2: 95%完了 - フロントエンド統合（部分完了）、SNS表示名取得は保留）
+最終更新: 2025年11月10日（Vercel本番デプロイ完了、TypeScript/ESLintエラー修正完了、ログインループ・API接続エラー修正完了）
 
 ---
 
@@ -10,7 +10,7 @@
 ```
 Phase 1 (MVP): ██████████ 100% ✅
 Phase 2:       █████████░  95% ⚠️ (SNS表示名取得保留)
-Phase 3:       ░░░░░░░░░░   0%
+コード品質:     ██████████ 100% ✅ TypeScript/ESLintエラー0件
 ```
 
 ### FastAPI バックエンド移行
@@ -19,6 +19,14 @@ Phase 1: ██████████ 100% ✅ 環境構築
 Phase 2: ██████████ 100% ✅ 認証基盤
 Phase 3: ██████████ 100% ✅ API実装 (4/5完了、1件問題あり)
 Phase 4: ██████████ 100% ✅ Next.js統合
+Phase 5: ██████████ 100% ✅ Cloud Runデプロイ
+```
+
+### 本番環境
+```
+フロントエンド: ✅ Vercelデプロイ完了
+バックエンド:   ✅ Cloud Runデプロイ完了
+認証・DB:       ✅ Supabase稼働中
 ```
 
 ---
@@ -316,8 +324,12 @@ Phase 4: ██████████ 100% ✅ Next.js統合
 | マイルストーン | 目標日 | ステータス |
 |---------------|--------|-----------|
 | Phase 1完了（MVP） | 2025-10-30 | ✅ 完了 |
-| Phase 2完了 | 未定 | ⏳ 進行中（95% - SNS表示名取得保留） |
-| 本番リリース | 未定 | 📝 計画中 |
+| Phase 2完了 | 2025-11-03 | ✅ 完了（95% - SNS表示名取得のみ保留） |
+| FastAPI移行完了 | 2025-11-03 | ✅ 完了 |
+| 本番デプロイ | 2025-11-03 | ✅ 完了（Vercel + Cloud Run） |
+| コード品質改善 | 2025-11-03 | ✅ 完了（TypeScript/ESLintエラー0件） |
+| 本番環境安定化 | 2025-11-10 | ✅ 完了（ログインループ・API接続エラー修正） |
+| 修正計画書の実装 | 未定 | 📝 計画中 |
 
 ---
 
@@ -347,13 +359,72 @@ Phase 4: ██████████ 100% ✅ Next.js統合
 | 2025-11-02 | Phase 3-4: /api/sns-users実装 | 1.5時間 |
 | 2025-11-02 | Phase 3-5: /api/quotes実装 | 2.5時間 |
 | 2025-11-03 | Phase 4: Next.js統合 | 2時間 |
-| **小計** | | **13.5時間** |
+| 2025-11-03 | Phase 5: Cloud Runデプロイ | 2時間 |
+| **小計** | | **15.5時間** |
 
-| **総合計** | | **38時間** |
+### コード品質・デプロイ
+
+| 日付 | 作業内容 | 時間 |
+|------|---------|------|
+| 2025-11-03 | TypeScript/ESLintエラー修正（41件） | 2.5時間 |
+| 2025-11-03 | Vercelデプロイ | 1時間 |
+| 2025-11-10 | ログインループ・API接続エラー修正 | 3時間 |
+| **小計** | | **6.5時間** |
+
+| **総合計** | | **46.5時間** |
 
 ---
 
 ## 次回作業時の優先タスク
+
+### 🎉 現在の状態（2025-11-10時点）
+
+**✅ 完了している主要タスク**:
+- Next.js Phase 1 (MVP): 100%完了
+- Next.js Phase 2 (重要機能): 95%完了（SNS表示名取得のみ保留）
+- FastAPI移行 Phase 1-5: すべて完了
+- TypeScript/ESLintエラー: 0件（完全修正済み）
+- 本番デプロイ: Vercel + Cloud Run + Supabase すべて稼働中
+- ログインループ・API接続エラー: 修正完了
+
+**🎯 本番環境URL**:
+- フロントエンド: https://ai-study-quote-collector.vercel.app
+- バックエンド: https://quote-collector-api-3276884015.asia-northeast1.run.app
+- データベース: Supabase (https://rrtcpgizbgghxylhnvtu.supabase.co)
+
+---
+
+### 📋 残りのタスク（修正計画書より）
+
+#### 1. 修正計画書の実装（推奨: フェーズ1から順に実装）
+
+**フェーズ1: 優先度高（2〜3時間）**
+1. **件数カウント修正** - グループ数→フレーズ総数に変更
+2. **見た目の修正**
+   - ダーク→ライトテーマ
+   - フレーズを大きく太字に、カード化
+   - 本タイトル・著者名をグレーに
+3. **Amazon表紙画像取得**
+
+**フェーズ2: 中優先度（1〜1.5時間）**
+4. **キーワード検索修正**
+   - 著者名での部分一致検索
+   - リアルタイム検索（検索ボタン削除）
+
+**フェーズ3: OCR修正（2〜3時間）**
+5. **OCR改善**
+   - スペース除去
+   - Snipping Tool風のなぞり選択UI
+
+**フェーズ4: 公開機能（2〜3時間）**
+6. **ログイン前画面** - 公開フレーズのランダム表示
+
+**フェーズ5: Python化（4〜6時間）**
+7. **バックエンドPython統一** - lib/配下をPythonで書き換え
+
+**詳細**: [修正計画書.md](../修正計画書.md)
+
+---
 
 ### ⚠️ SNS表示名取得の方針決定（保留中）
 
@@ -374,68 +445,21 @@ Phase 4: ██████████ 100% ✅ Next.js統合
 
 ---
 
-### 🎯 FastAPI Phase 5: デプロイ
+### 🔮 将来的なタスク（優先度: 低）
 
-FastAPI Phase 4（Next.js統合）が完了しました。次はPhase 5として、FastAPIバックエンドをCloud Runにデプロイします。
-
-**実装内容**（見積もり: 3〜4時間）:
-1. Dockerfile作成
-2. Cloud Run設定
-3. 環境変数設定
-4. デプロイスクリプト作成
-5. 本番環境テスト
-
-**参考ドキュメント**:
-- [FastAPIセットアップガイド.md](../FastAPIセットアップガイド.md)
-- [API設計書_v3_FastAPI補足.md](../API設計書_v3_FastAPI補足.md)
-
----
-
-### ✅ 完了: CSVエクスポート & タグ管理画面実装（Next.js）
-
-Phase 2の最初の2機能（CSVエクスポート、タグ管理画面）が完了しました。
-
-**作業ログ**:
-- [2025-10-30_mvp_completion.md](./work_logs/2025-10-30_mvp_completion.md)
-- [2025-10-30_csv_export.md](./work_logs/2025-10-30_csv_export.md)
-- [2025-10-30_tag_management.md](./work_logs/2025-10-30_tag_management.md)
-
-### 🔧 準備完了: OCR機能
-
-OCR機能の基盤が完成しました。次回の実装に向けて以下が整備済み：
-- ✅ Tesseract.jsインストール済み
-- ✅ 型定義作成済み（lib/ocr/types.ts）
-- ✅ スケルトン実装済み（lib/ocr/tesseract.ts）
-- ✅ 実装ガイド作成済み（lib/ocr/README.md）
-
-**次回実装内容**（9〜11時間）:
-- OCR基本機能の実装（extractTextFromImage, extractTextFromSelection）
-- UIコンポーネント作成（OCRUploader, OCRCanvas）
-- フレーズ登録モーダルへの統合
-
-**実装ガイド**: [lib/ocr/README.md](../../lib/ocr/README.md)
-
-### Phase 2実装（推奨順序）
-
-1. **OCR機能（本格実装）** - 9〜11時間
-   - 基本機能実装（tesseract.ts）
-   - UIコンポーネント作成
-   - モーダル統合
-
-2. **Amazon書籍情報取得** - 4〜5時間
-   - URL解析（ASIN抽出）
-   - Webスクレイピング
-   - レート制限実装
-
-3. **SNSユーザー情報取得** - 4〜5時間
-   - URL解析（X/Threads）
-   - Google検索 or SerpAPI
-   - ユーザー名抽出
+- カスタムドメイン設定（オプション）
+- モニタリング設定（Vercel Analytics, Cloud Run Metrics）
+- テストカバレッジの追加
+- パフォーマンス最適化
+- CI/CDパイプライン構築
 
 ---
 
 **更新履歴**:
 
+- 2025-11-10: **本番環境安定化完了🎉** - ログインループ・API接続エラー修正完了、アプリ正常稼働中
+- 2025-11-03: **本番デプロイ完了🎉** - Vercelデプロイ、TypeScript/ESLintエラー0件達成
+- 2025-11-03: **FastAPI Phase 5完了🎉** - Cloud Runデプロイ完了、バックエンド本番稼働開始
 - 2025-11-03: **Next.js Phase 2完了🎉** - Amazon/SNS情報取得機能実装完了（Phase 2: 100%達成）
 - 2025-11-03: **FastAPI Phase 4完了🎉** - Next.js統合完了（全フック更新、FastAPI経由で動作確認済み）
 - 2025-11-02: **FastAPI Phase 3完了🎉** - /api/quotes実装完了（全エンドポイント動作確認済み）
@@ -612,12 +636,81 @@ AttributeError: 'SyncQueryRequestBuilder' object has no attribute 'select'
 
 ---
 
-### Phase 5: デプロイ ⏳ 0%
+### Phase 5: デプロイ ✅ 100%
 
-- [ ] Cloud Run設定
-- [ ] Dockerfile作成
-- [ ] 環境変数設定
-- [ ] デプロイスクリプト作成
-- [ ] 本番環境テスト
+- [x] Cloud Run設定
+- [x] Dockerfile作成
+- [x] 環境変数設定
+- [x] デプロイスクリプト作成
+- [x] 本番環境テスト
+- [x] デプロイドキュメント作成（4ファイル）
+- [x] 動作確認（ヘルスチェック、Swagger UI、APIエンドポイント）
 
-**見積もり**: 3〜4時間
+**完了**: 2025-11-03
+**作業時間**: 2時間
+**デプロイURL**: https://quote-collector-api-3276884015.asia-northeast1.run.app
+**作業ログ**: [2025-11-03_fastapi_cloud_run_deployment.md](./work_logs/2025-11-03_fastapi_cloud_run_deployment.md)
+
+---
+
+## コード品質改善
+
+### TypeScript/ESLintエラー修正 ✅ 100%
+
+- [x] `any`型の修正（31箇所）
+  - [x] エラーハンドリングの型修正（`unknown`型と型ガードを使用）
+  - [x] 複雑なデータ構造の型定義追加
+  - [x] 関数パラメータの型修正
+  - [x] QuoteModalの型定義追加
+- [x] `<img>`タグをNext.js `<Image>`コンポーネントに変更（2箇所）
+- [x] useEffect依存配列の修正（`useCallback`でメモ化）
+- [x] 未使用変数の削除（6箇所）
+- [x] next.config.jsの一時設定削除（型チェック再有効化）
+- [x] ビルド成功確認
+
+**完了**: 2025-11-03
+**作業時間**: 2.5時間
+**成果**:
+- ESLintエラー: 31 → 0 ✅
+- ESLintワーニング: 10 → 0 ✅
+- 修正ファイル: 17ファイル
+**作業ログ**: [2025-11-03_typescript_eslint_fixes.md](./work_logs/2025-11-03_typescript_eslint_fixes.md)
+
+---
+
+## 本番デプロイ
+
+### Vercelデプロイ（Next.js） ✅ 100%
+
+- [x] ビルドエラー修正（TypeScript/ESLint）
+- [x] next.config.js設定（一時的にチェック無効化）
+- [x] Vercelプロジェクト作成・設定
+- [x] 環境変数設定（Supabase、FastAPI URL）
+- [x] GitHub連携・自動デプロイ設定
+- [x] CORS設定（FastAPI側）
+- [x] 本番環境動作確認
+
+**完了**: 2025-11-03
+**作業時間**: 約1時間
+**デプロイURL**: https://ai-study-quote-collector.vercel.app
+**作業ログ**: [2025-11-03_vercel_deployment.md](./work_logs/2025-11-03_vercel_deployment.md)
+
+---
+
+### ログインループ・API接続エラー修正 ✅ 100%
+
+**問題1: ログインループ**
+- [x] Next.jsバージョンの違いを調査（Next.js 14 vs 16）
+- [x] `cookies()`の動作の違いを確認
+- [x] 複数の修正を試行錯誤（Supabase SSRパターン、middleware等）
+- [x] 以前の動作していたコミットに戻すことで解決
+
+**問題2: API接続エラー（Failed to fetch）**
+- [x] エラーの原因特定（FastAPIベースURLの設定ミス）
+- [x] `lib/api/client.ts`の修正（`localhost:8000` → 空文字列）
+- [x] Next.js API Routes経由でのデータ取得に修正
+- [x] 動作確認（データが正常に表示）
+
+**完了**: 2025-11-10
+**作業時間**: 約3時間（試行錯誤含む）
+**作業ログ**: [2025-11-10_login-loop-and-api-fix.md](./work_logs/2025-11-10_login-loop-and-api-fix.md)

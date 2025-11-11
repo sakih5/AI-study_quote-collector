@@ -14,9 +14,7 @@ import { useActivities } from '../../hooks/useActivities';
 export default function TagsManagementPage() {
   const [searchKeyword, setSearchKeyword] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
-  const [sortBy, setSortBy] = useState<'name' | 'created_at' | 'usage_count'>(
-    'usage_count'
-  );
+  const [sortBy, setSortBy] = useState<'name' | 'created_at' | 'usage_count'>('usage_count');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
 
   const { tags, loading, error, refetch } = useTagsManagement({
@@ -133,13 +131,11 @@ export default function TagsManagementPage() {
           <span className="mr-2">←</span>
           <span>戻る</span>
         </Link>
-        <h1 className="text-3xl font-bold text-white flex items-center gap-3">
+        <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-3">
           <span>🏷️</span>
           <span>タグ管理</span>
         </h1>
-        <p className="text-gray-400 mt-2">
-          タグの編集、統合、削除を行うことができます
-        </p>
+        <p className="text-gray-600 mt-2">タグの編集、統合、削除を行うことができます</p>
       </div>
 
       {/* 検索・ソートセクション */}
@@ -151,7 +147,7 @@ export default function TagsManagementPage() {
             onChange={(e) => setSearchKeyword(e.target.value)}
             onKeyPress={handleKeyPress}
             placeholder="タグ名で検索..."
-            className="flex-1 px-4 py-3 bg-[#2a2a2a] border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="flex-1 px-4 py-3 bg-white border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
           <button
             onClick={handleSearch}
@@ -163,13 +159,11 @@ export default function TagsManagementPage() {
 
         {/* ソート */}
         <div className="flex items-center gap-4">
-          <label className="text-gray-400 text-sm">並び替え:</label>
+          <label className="text-gray-600 text-sm">並び替え:</label>
           <select
             value={sortBy}
-            onChange={(e) =>
-              setSortBy(e.target.value as 'name' | 'created_at' | 'usage_count')
-            }
-            className="px-4 py-2 bg-[#2a2a2a] border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+            onChange={(e) => setSortBy(e.target.value as 'name' | 'created_at' | 'usage_count')}
+            className="px-4 py-2 bg-white border border-gray-300 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
             <option value="usage_count">使用数順</option>
             <option value="name">名前順</option>
@@ -178,22 +172,20 @@ export default function TagsManagementPage() {
           <select
             value={sortOrder}
             onChange={(e) => setSortOrder(e.target.value as 'asc' | 'desc')}
-            className="px-4 py-2 bg-[#2a2a2a] border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="px-4 py-2 bg-white border border-gray-300 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
             <option value="desc">降順</option>
             <option value="asc">昇順</option>
           </select>
         </div>
 
-        <div className="text-gray-400 text-sm">
-          全{tags.length}件のタグ
-        </div>
+        <div className="text-gray-600 text-sm">全{tags.length}件のタグ</div>
       </div>
 
       {/* タグ一覧 */}
       {loading ? (
         <div className="text-center py-12">
-          <p className="text-gray-400">読み込み中...</p>
+          <p className="text-gray-600">読み込み中...</p>
         </div>
       ) : error ? (
         <div className="text-center py-12">
@@ -202,41 +194,32 @@ export default function TagsManagementPage() {
       ) : tags.length === 0 ? (
         <div className="text-center py-12">
           <p className="text-gray-500">タグがまだありません</p>
-          <p className="text-gray-500 text-sm mt-2">
-            フレーズ登録時にタグを作成できます
-          </p>
+          <p className="text-gray-500 text-sm mt-2">フレーズ登録時にタグを作成できます</p>
         </div>
       ) : (
         <div className="space-y-4">
           {tags.map((tag) => (
-            <div
-              key={tag.id}
-              className="bg-[#2a2a2a] rounded-lg p-6 border border-gray-700"
-            >
+            <div key={tag.id} className="bg-white rounded-lg p-6 border border-gray-200">
               {/* タグ名と使用数 */}
               <div className="flex items-center justify-between mb-4">
-                <h3 className="text-xl font-bold text-white">{tag.name}</h3>
-                <span className="text-gray-400 text-sm">
-                  {tag.usage_count}件で使用中
-                </span>
+                <h3 className="text-xl font-bold text-gray-900">{tag.name}</h3>
+                <span className="text-gray-600 text-sm">{tag.usage_count}件で使用中</span>
               </div>
 
               {/* 活動領域別分布 */}
               {Object.keys(tag.activity_distribution).length > 0 && (
                 <div className="mb-4">
-                  <p className="text-gray-400 text-sm mb-2">📊 活動領域別分布:</p>
+                  <p className="text-gray-600 text-sm mb-2">📊 活動領域別分布:</p>
                   <div className="flex flex-wrap gap-2">
                     {Object.entries(tag.activity_distribution)
                       .sort((a, b) => b[1] - a[1])
                       .map(([activityId, count]) => (
                         <span
                           key={activityId}
-                          className="px-3 py-1 bg-[#1a1a1a] rounded-lg text-sm text-gray-300"
+                          className="px-3 py-1 bg-white rounded-lg text-sm text-gray-700"
                         >
                           {getActivityName(parseInt(activityId))}
-                          <span className="ml-1 text-blue-400 font-bold">
-                            ({count})
-                          </span>
+                          <span className="ml-1 text-blue-400 font-bold">({count})</span>
                         </span>
                       ))}
                   </div>
@@ -261,14 +244,14 @@ export default function TagsManagementPage() {
                     setTargetTagId(null);
                   }}
                   disabled={deletingTagId === tag.id || tags.length < 2}
-                  className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white text-sm rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white text-sm rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   統合
                 </button>
                 <button
                   onClick={() => handleDelete(tag)}
                   disabled={deletingTagId === tag.id}
-                  className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-sm rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="px-4 py-2 bg-rose-400 hover:bg-rose-500 text-white text-sm rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {deletingTagId === tag.id ? '削除中...' : '削除'}
                 </button>
@@ -281,17 +264,15 @@ export default function TagsManagementPage() {
       {/* リネームモーダル */}
       {renamingTag && (
         <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50">
-          <div className="bg-[#2a2a2a] rounded-lg p-6 w-full max-w-md border border-gray-700">
-            <h2 className="text-xl font-bold text-white mb-4">タグ名を変更</h2>
-            <p className="text-gray-400 text-sm mb-4">
-              変更前: {renamingTag.name}
-            </p>
+          <div className="bg-white rounded-lg p-6 w-full max-w-md border border-gray-200">
+            <h2 className="text-xl font-bold text-gray-900 mb-4">タグ名を変更</h2>
+            <p className="text-gray-600 text-sm mb-4">変更前: {renamingTag.name}</p>
             <input
               type="text"
               value={newTagName}
               onChange={(e) => setNewTagName(e.target.value)}
               placeholder="新しいタグ名"
-              className="w-full px-4 py-3 bg-[#1a1a1a] border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 mb-4"
+              className="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 mb-4"
               autoFocus
             />
             <div className="flex gap-3">
@@ -308,7 +289,7 @@ export default function TagsManagementPage() {
                   setNewTagName('');
                 }}
                 disabled={isRenaming}
-                className="flex-1 px-4 py-3 bg-gray-600 hover:bg-gray-700 text-white font-medium rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex-1 px-4 py-3 bg-blue-400 hover:bg-blue-500 text-white font-medium rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 キャンセル
               </button>
@@ -320,16 +301,14 @@ export default function TagsManagementPage() {
       {/* 統合モーダル */}
       {mergingTag && (
         <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50">
-          <div className="bg-[#2a2a2a] rounded-lg p-6 w-full max-w-md border border-gray-700">
-            <h2 className="text-xl font-bold text-white mb-4">タグを統合</h2>
-            <p className="text-gray-400 text-sm mb-2">統合元: {mergingTag.name}</p>
-            <p className="text-gray-400 text-sm mb-4">
-              統合先のタグを選択してください:
-            </p>
+          <div className="bg-white rounded-lg p-6 w-full max-w-md border border-gray-200">
+            <h2 className="text-xl font-bold text-gray-900 mb-4">タグを統合</h2>
+            <p className="text-gray-600 text-sm mb-2">統合元: {mergingTag.name}</p>
+            <p className="text-gray-600 text-sm mb-4">統合先のタグを選択してください:</p>
             <select
               value={targetTagId || ''}
               onChange={(e) => setTargetTagId(parseInt(e.target.value))}
-              className="w-full px-4 py-3 bg-[#1a1a1a] border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500 mb-4"
+              className="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 mb-4"
             >
               <option value="">選択してください</option>
               {tags
@@ -344,7 +323,7 @@ export default function TagsManagementPage() {
               <button
                 onClick={handleMerge}
                 disabled={isMerging || !targetTagId}
-                className="flex-1 px-4 py-3 bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex-1 px-4 py-3 bg-blue-500 hover:bg-blue-600 text-white font-medium rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {isMerging ? '統合中...' : '統合'}
               </button>
@@ -354,7 +333,7 @@ export default function TagsManagementPage() {
                   setTargetTagId(null);
                 }}
                 disabled={isMerging}
-                className="flex-1 px-4 py-3 bg-gray-600 hover:bg-gray-700 text-white font-medium rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex-1 px-4 py-3 bg-blue-400 hover:bg-blue-500 text-white font-medium rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 キャンセル
               </button>

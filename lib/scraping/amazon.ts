@@ -90,13 +90,33 @@ export async function fetchBookInfo(url: string): Promise<BookInfo | null> {
     ).first();
     const author = authorElement.text().trim() || undefined;
 
-    // カバー画像を取得
-    const coverImageUrl =
+    // カバー画像を取得（複数のセレクターを試す）
+    let coverImageUrl =
       $('#landingImage').attr('src') ||
       $('#imgBlkFront').attr('src') ||
       $('#ebooksImgBlkFront').attr('src') ||
       $('.a-dynamic-image').first().attr('src') ||
+      $('img.a-dynamic-image').first().attr('data-old-hires') ||
+      $('img[data-a-dynamic-image]').first().attr('src') ||
+      $('#main-image').attr('src') ||
+      $('#imageBlock img').first().attr('src') ||
       undefined;
+
+    // data-a-dynamic-image属性からより高解像度の画像URLを取得
+    if (!coverImageUrl) {
+      const dynamicImageData = $('img[data-a-dynamic-image]').first().attr('data-a-dynamic-image');
+      if (dynamicImageData) {
+        try {
+          const imageUrls = JSON.parse(dynamicImageData);
+          const urls = Object.keys(imageUrls);
+          if (urls.length > 0) {
+            coverImageUrl = urls[0];
+          }
+        } catch {
+          // JSON解析エラーは無視
+        }
+      }
+    }
 
     // ISBNを取得（商品詳細から）
     let isbn: string | undefined;

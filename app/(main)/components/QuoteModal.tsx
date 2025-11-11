@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Image from 'next/image';
 import { useActivities } from '../hooks/useActivities';
 import { useTags } from '../hooks/useTags';
 import { useBooks } from '../hooks/useBooks';
@@ -27,6 +28,7 @@ interface BookData {
     title: string;
     author: string;
     publisher: string;
+    cover_image_url?: string;
   };
 }
 
@@ -61,7 +63,7 @@ export default function QuoteModal({ isOpen, onClose }: QuoteModalProps) {
   const [bookData, setBookData] = useState<BookData>({
     selectionMode: 'new',
     selectedBookId: null,
-    newBook: { title: '', author: '', publisher: '' },
+    newBook: { title: '', author: '', publisher: '', cover_image_url: '' },
   });
 
   const [snsData, setSnsData] = useState<SnsData>({
@@ -156,6 +158,7 @@ export default function QuoteModal({ isOpen, onClose }: QuoteModalProps) {
           title: bookInfo.title || '',
           author: bookInfo.author || '',
           publisher: bookInfo.publisher || '',
+          cover_image_url: bookInfo.cover_image_url || '',
         },
       });
 
@@ -272,6 +275,7 @@ export default function QuoteModal({ isOpen, onClose }: QuoteModalProps) {
               title: bookData.newBook.title.trim(),
               author: bookData.newBook.author.trim() || null,
               publisher: bookData.newBook.publisher.trim() || null,
+              cover_image_url: bookData.newBook.cover_image_url?.trim() || null,
             }),
           });
 
@@ -380,7 +384,7 @@ export default function QuoteModal({ isOpen, onClose }: QuoteModalProps) {
     setBookData({
       selectionMode: 'new',
       selectedBookId: null,
-      newBook: { title: '', author: '', publisher: '' },
+      newBook: { title: '', author: '', publisher: '', cover_image_url: '' },
     });
     setSnsData({
       selectionMode: 'new',
@@ -760,6 +764,22 @@ export default function QuoteModal({ isOpen, onClose }: QuoteModalProps) {
                                 ※ Amazon URLを入力すると、書籍情報を自動取得できます
                               </p>
                             </div>
+
+                            {/* 書籍画像プレビュー */}
+                            {bookData.newBook.cover_image_url && (
+                              <div className="flex justify-center p-4 bg-gray-50 rounded-lg border border-gray-200">
+                                <div className="text-center">
+                                  <p className="text-sm font-medium text-gray-700 mb-2">取得した書籍画像</p>
+                                  <Image
+                                    src={bookData.newBook.cover_image_url}
+                                    alt={bookData.newBook.title || '書籍カバー'}
+                                    width={120}
+                                    height={160}
+                                    className="w-30 h-40 object-cover rounded shadow-md"
+                                  />
+                                </div>
+                              </div>
+                            )}
 
                             <div>
                               <label className="block text-sm font-medium text-gray-700 mb-2">

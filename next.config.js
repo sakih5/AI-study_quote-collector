@@ -16,11 +16,29 @@ const nextConfig = {
       },
       {
         protocol: 'https',
+        hostname: 'images-na.ssl-images-amazon.com',
+        pathname: '/images/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'images-fe.ssl-images-amazon.com',
+        pathname: '/images/**',
+      },
+      {
+        protocol: 'https',
+        hostname: '**.media-amazon.com',
+      },
+      {
+        protocol: 'https',
+        hostname: '**.ssl-images-amazon.com',
+      },
+      {
+        protocol: 'https',
         hostname: '**.supabase.co',
         pathname: '/storage/**',
       },
     ],
   },
-}
+};
 
-module.exports = nextConfig
+module.exports = nextConfig;

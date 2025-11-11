@@ -23,7 +23,7 @@ export default function Header({ user }: HeaderProps) {
   };
 
   // ユーザー表示名を取得（メールアドレスの@前）
-  const displayName = user.email?.split('@')[0] || 'ユーザー';
+  const displayName = user.email || 'ユーザー名取得失敗';
 
   return (
     <header className="bg-white border-b border-gray-200 shadow-sm">
@@ -47,7 +47,7 @@ export default function Header({ user }: HeaderProps) {
             {/* タグ管理リンク */}
             <Link
               href="/settings/tags"
-              className="px-4 py-2 text-sm text-gray-700 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors flex items-center gap-1"
+              className="px-4 py-2 bg-white border border-gray-700 text-gray-700 hover:bg-gray-50 rounded-lg transition-colors flex items-center gap-1"
             >
               <span>🏷️</span>
               <span>タグ管理</span>
@@ -57,7 +57,7 @@ export default function Header({ user }: HeaderProps) {
             <button
               onClick={handleLogout}
               disabled={loading}
-              className="px-4 py-2 text-sm bg-rose-400 hover:bg-rose-500 disabled:bg-gray-600 disabled:cursor-not-allowed text-white rounded-lg transition-colors"
+              className="px-4 py-2 bg-gray-400 hover:bg-gray-600 text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loading ? '処理中...' : 'ログアウト'}
             </button>

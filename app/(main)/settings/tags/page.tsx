@@ -251,7 +251,7 @@ export default function TagsManagementPage() {
                 <button
                   onClick={() => handleDelete(tag)}
                   disabled={deletingTagId === tag.id}
-                  className="px-4 py-2 bg-rose-400 hover:bg-rose-500 text-white text-sm rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="px-4 py-2 bg-gray-400 hover:bg-gray-600 text-white text-sm rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {deletingTagId === tag.id ? '削除中...' : '削除'}
                 </button>

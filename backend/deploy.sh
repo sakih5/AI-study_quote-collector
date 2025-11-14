@@ -56,20 +56,34 @@ gcloud builds submit --tag ${IMAGE_NAME} --project ${PROJECT_ID}
 
 # Step 2: Deploy to Cloud Run
 echo -e "${GREEN}Step 2: Deploying to Cloud Run...${NC}"
-gcloud run deploy ${SERVICE_NAME} \
+
+# === gcloud run services describeで取得できるアプリのURLが旧型式のため、止める ===
+# gcloud run deploy ${SERVICE_NAME} \
+#   --image ${IMAGE_NAME} \
+#   --platform managed \
+#   --region ${REGION} \
+#   --allow-unauthenticated \
+#   --set-env-vars="SUPABASE_URL=${SUPABASE_URL},SUPABASE_KEY=${SUPABASE_KEY}" \
+#   --project ${PROJECT_ID}
+
+# # Get service URL
+# SERVICE_URL=$(gcloud run services describe ${SERVICE_NAME} \
+#   --platform managed \
+#   --region ${REGION} \
+#   --project ${PROJECT_ID} \
+#   --format 'value(status.url)')
+# === gcloud run services describeで取得できるアプリのURLが旧型式のため、止める ===
+
+# === gcloud run services describeで取得できるアプリのURLが旧型式のため、止める → 修正後 ===
+SERVICE_URL=$(gcloud run deploy ${SERVICE_NAME} \
   --image ${IMAGE_NAME} \
   --platform managed \
   --region ${REGION} \
   --allow-unauthenticated \
   --set-env-vars="SUPABASE_URL=${SUPABASE_URL},SUPABASE_KEY=${SUPABASE_KEY}" \
-  --project ${PROJECT_ID}
-
-# Get service URL
-SERVICE_URL=$(gcloud run services describe ${SERVICE_NAME} \
-  --platform managed \
-  --region ${REGION} \
   --project ${PROJECT_ID} \
   --format 'value(status.url)')
+# === gcloud run services describeで取得できるアプリのURLが旧型式のため、止める → 修正後 ===
 
 echo -e "${GREEN}========================================${NC}"
 echo -e "${GREEN}Deployment Successful!${NC}"

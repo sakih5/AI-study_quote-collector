@@ -14,6 +14,7 @@ async def get_books(
     limit: int = Query(50, ge=1, le=100, description="取得件数"),
     offset: int = Query(0, ge=0, description="オフセット"),
     search: str = Query("", description="検索キーワード（タイトル・著者名）"),
+    has_quotes: bool = Query(False, description="フレーズが存在する書籍のみ取得"),
     user=Depends(get_current_user),
     supabase: Client = Depends(get_supabase_client)
 ):
@@ -24,13 +25,38 @@ async def get_books(
     - **検索**: タイトルと著者名で部分一致
     - **ソート**: created_at降順
     - **ページネーション**: limit, offset
+    - **has_quotes**: Trueの場合、フレーズが1件以上ある書籍のみを返す
     """
     try:
+        # has_quotesがTrueの場合、フレーズが存在する書籍のIDを取得
+        book_ids_with_quotes = None
+        if has_quotes:
+            quotes_response = supabase.table('quotes') \
+                .select('book_id') \
+                .eq('user_id', user.id) \
+                .eq('source_type', 'BOOK') \
+                .is_('deleted_at', None) \
+                .execute()
+
+            if quotes_response.data:
+                # ユニークなbook_idのリストを作成（Noneを除外）
+                book_ids_with_quotes = list(set([q['book_id'] for q in quotes_response.data if q['book_id'] is not None]))
+            else:
+                book_ids_with_quotes = []
+
+            # フレーズが存在する書籍がない場合、空のリストを返す
+            if not book_ids_with_quotes:
+                return BooksResponse(books=[], total=0, has_more=False)
+
         # 基本クエリ
         query = supabase.table('books') \
             .select('id, user_id, title, author, cover_image_url, isbn, asin, publisher, publication_date, created_at, updated_at', count='exact') \
             .eq('user_id', user.id) \
             .is_('deleted_at', None)
+
+        # has_quotesによるフィルタを追加
+        if book_ids_with_quotes is not None:
+            query = query.in_('id', book_ids_with_quotes)
 
         # 検索条件を追加
         if search:

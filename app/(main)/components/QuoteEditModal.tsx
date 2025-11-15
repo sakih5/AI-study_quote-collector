@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { Quote } from '../hooks/useQuotesGrouped';
 import { useActivities } from '../hooks/useActivities';
 import { useTags } from '../hooks/useTags';
+import { apiPut } from '@/lib/api/client';
 
 interface QuoteEditModalProps {
   isOpen: boolean;
@@ -21,6 +22,7 @@ export default function QuoteEditModal({
   const [text, setText] = useState('');
   const [activityIds, setActivityIds] = useState<number[]>([]);
   const [tagIds, setTagIds] = useState<number[]>([]);
+  const [isPublic, setIsPublic] = useState(false);
   const [newTagName, setNewTagName] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -34,6 +36,7 @@ export default function QuoteEditModal({
       setText(quote.text);
       setActivityIds(quote.activities.map((a) => a.id));
       setTagIds(quote.tags.map((t) => t.id));
+      setIsPublic(quote.is_public);
     }
   }, [quote]);
 
@@ -56,20 +59,12 @@ export default function QuoteEditModal({
     setIsSubmitting(true);
 
     try {
-      const response = await fetch(`/api/quotes/${quote.id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          text: text.trim(),
-          activity_ids: activityIds,
-          tag_ids: tagIds,
-        }),
+      await apiPut(`/api/quotes/${quote.id}`, {
+        text: text.trim(),
+        activity_ids: activityIds,
+        tag_ids: tagIds,
+        is_public: isPublic,
       });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error?.message || '更新に失敗しました');
-      }
 
       // 成功
       onSuccess();
@@ -84,7 +79,7 @@ export default function QuoteEditModal({
   return (
     <>
       {/* オーバーレイ */}
-      <div className="fixed inset-0 bg-gray-900/20 z-40" onClick={onClose} />
+      <div className="fixed inset-0 bg-gray-900/20 z-40" />
 
       {/* モーダル */}
       <div className="fixed inset-0 z-50 flex items-center justify-center p-4 pointer-events-none">
@@ -228,6 +223,24 @@ export default function QuoteEditModal({
 
           {/* フッター */}
           <div className="sticky bottom-0 bg-white border-t border-gray-200 px-6 py-4">
+            {/* 公開/非公開トグル */}
+            <div className="mb-4">
+              <label className="flex items-center gap-3 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={isPublic}
+                  onChange={(e) => setIsPublic(e.target.checked)}
+                  className="w-5 h-5 text-blue-600 border-gray-300 rounded focus:ring-2 focus:ring-blue-500"
+                />
+                <div className="flex flex-col">
+                  <span className="text-sm font-medium text-gray-900">このフレーズを公開する</span>
+                  <span className="text-xs text-gray-500">
+                    ログインしていないユーザーも閲覧できます
+                  </span>
+                </div>
+              </label>
+            </div>
+
             {/* エラーメッセージ */}
             {error && (
               <div className="mb-4 p-3 bg-red-900/50 border border-red-700 rounded-lg text-red-200 text-sm">

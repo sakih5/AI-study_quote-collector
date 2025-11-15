@@ -4,13 +4,19 @@ version = "1.0.0"
 description = "抜き書きアプリ FastAPI Backend"
 requires-python = ">=3.11"
 dependencies = [
-    "fastapi==0.104.1",
-    "uvicorn[standard]==0.24.0",
-    "pydantic==2.5.0",
-    "pydantic-settings==2.1.0",
-    "supabase==2.0.0",
-    "python-jose[cryptography]==3.3.0",
-    "python-multipart==0.0.6",
+    "fastapi>=0.104.1",
+    "uvicorn[standard]>=0.24.0",
+    "pydantic>=2.5.0",
+    "pydantic-settings>=2.1.0",
+    "supabase>=2.10.0",
+    "python-jose[cryptography]>=3.3.0",
+    "python-multipart>=0.0.6",
+    "beautifulsoup4>=4.12.0",
+    "requests>=2.31.0",
+    "paddleocr>=2.7.0",
+    "paddlepaddle>=2.6.0",
+    "pillow>=10.0.0",
+    "numpy>=1.24.0",
 ]
 
 [project.optional-dependencies]

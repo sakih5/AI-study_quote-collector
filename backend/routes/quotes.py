@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, status, Query
 from supabase import Client
-from auth import get_current_user, get_supabase_client
+from auth import get_current_user, get_supabase_client, get_supabase_client_public
 from models.quote import (
     QuoteCreate,
     QuoteUpdate,
@@ -49,7 +49,7 @@ async def delete_quote(
             .select('id') \
             .eq('id', quote_id) \
             .eq('user_id', user.id) \
-            .is_('deleted_at', None) \
+            .is_('deleted_at', 'null') \
             .execute()
 
         if not existing_response.data or len(existing_response.data) == 0:
@@ -102,6 +102,7 @@ async def update_quote(
     - **text**: フレーズテキスト（任意）
     - **activity_ids**: 活動領域IDリスト（任意）
     - **tag_ids**: タグIDリスト（任意）
+    - **is_public**: 公開フラグ（任意）
     """
     try:
         # フレーズの存在確認と権限チェック
@@ -109,7 +110,7 @@ async def update_quote(
             .select('id') \
             .eq('id', quote_id) \
             .eq('user_id', user.id) \
-            .is_('deleted_at', None) \
+            .is_('deleted_at', 'null') \
             .execute()
 
         if not existing_response.data or len(existing_response.data) == 0:
@@ -118,10 +119,16 @@ async def update_quote(
                 detail="フレーズが見つかりません"
             )
 
-        # テキストを更新
+        # テキストまたは公開フラグを更新
+        update_data = {}
         if quote_update.text is not None:
+            update_data['text'] = quote_update.text
+        if quote_update.is_public is not None:
+            update_data['is_public'] = quote_update.is_public
+
+        if update_data:
             update_response = supabase.table('quotes') \
-                .update({'text': quote_update.text}) \
+                .update(update_data) \
                 .eq('id', quote_id) \
                 .eq('user_id', user.id) \
                 .execute()
@@ -183,7 +190,7 @@ async def update_quote(
         # 更新後のフレーズを取得
         # Supabaseの機能で関連データを取得
         quote_response = supabase.table('quotes') \
-            .select('id, text, page_number, created_at, quote_activities(activities(id, name, icon)), quote_tags(tags(id, name))') \
+            .select('id, text, page_number, is_public, created_at, quote_activities(activities(id, name, icon)), quote_tags(tags(id, name))') \
             .eq('id', quote_id) \
             .single() \
             .execute()
@@ -209,6 +216,7 @@ async def update_quote(
             id=quote_data['id'],
             text=quote_data['text'],
             page_number=quote_data.get('page_number'),
+            is_public=quote_data.get('is_public', False),
             activities=activities,
             tags=tags,
             created_at=quote_data['created_at']
@@ -388,6 +396,7 @@ async def get_quotes_grouped(
                 sns_user_id,
                 page_number,
                 source_meta,
+                is_public,
                 created_at,
                 books(id, title, author, cover_image_url),
                 sns_users(id, platform, handle, display_name),
@@ -395,7 +404,7 @@ async def get_quotes_grouped(
                 quote_tags(tags(id, name))
             ''') \
             .eq('user_id', user.id) \
-            .is_('deleted_at', None)
+            .is_('deleted_at', 'null')
 
         # 検索条件
         if search:
@@ -455,6 +464,7 @@ async def get_quotes_grouped(
                     id=q['id'],
                     text=q['text'],
                     page_number=q.get('page_number'),
+                    is_public=q.get('is_public', False),
                     activities=[ActivityNested(**qa['activities']) for qa in q.get('quote_activities', [])],
                     tags=[TagNested(**qt['tags']) for qt in q.get('quote_tags', [])],
                     created_at=q['created_at']
@@ -484,6 +494,7 @@ async def get_quotes_grouped(
                     id=q['id'],
                     text=q['text'],
                     page_number=None,
+                    is_public=q.get('is_public', False),
                     activities=[ActivityNested(**qa['activities']) for qa in q.get('quote_activities', [])],
                     tags=[TagNested(**qt['tags']) for qt in q.get('quote_tags', [])],
                     created_at=q['created_at']
@@ -505,6 +516,7 @@ async def get_quotes_grouped(
                     id=quote['id'],
                     text=quote['text'],
                     page_number=quote.get('page_number'),
+                    is_public=quote.get('is_public', False),
                     activities=[ActivityNested(**qa['activities']) for qa in quote.get('quote_activities', [])],
                     tags=[TagNested(**qt['tags']) for qt in quote.get('quote_tags', [])],
                     created_at=quote['created_at']
@@ -529,6 +541,160 @@ async def get_quotes_grouped(
         raise
     except Exception as e:
         print(f"[ERROR] グループ化フレーズ取得エラー: {type(e).__name__}: {str(e)}")
+        import traceback
+        traceback.print_exc()
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"サーバーエラーが発生しました: {str(e)}"
+        )
+
+
+# ====================================
+# GET /api/quotes/public
+# ====================================
+@router.get("/public", response_model=QuotesGroupedResponse)
+async def get_public_quotes(
+    limit: int = Query(50, ge=1, le=100, description="取得件数"),
+    offset: int = Query(0, ge=0, description="オフセット"),
+    supabase: Client = Depends(get_supabase_client_public)
+):
+    """
+    公開フレーズを取得（認証不要）
+
+    - **認証**: 不要
+    - **limit**: 取得件数（デフォルト: 50）
+    - **offset**: オフセット（デフォルト: 0）
+
+    is_public = true のフレーズを書籍・SNSユーザー別にグループ化して返す
+    """
+    try:
+        # 公開フレーズを取得（通常のquotesテーブルから）
+        quotes_query = supabase.table('quotes') \
+            .select('''
+                id,
+                text,
+                source_type,
+                book_id,
+                sns_user_id,
+                page_number,
+                source_meta,
+                is_public,
+                created_at,
+                books(id, title, author, cover_image_url),
+                sns_users(id, platform, handle, display_name),
+                quote_activities(activities(id, name, icon)),
+                quote_tags(tags(id, name))
+            ''') \
+            .eq('is_public', True) \
+            .is_('deleted_at', 'null') \
+            .order('created_at', desc=True) \
+            .execute()
+
+        if not quotes_query.data:
+            return QuotesGroupedResponse(items=[], total=0, has_more=False)
+
+        quotes = quotes_query.data
+
+        # グループ化処理（/api/quotes/groupedと同じロジック）
+        grouped_items = []
+
+        # 書籍単位でグループ化
+        book_groups = defaultdict(list)
+        for quote in quotes:
+            if quote['source_type'] == 'BOOK' and quote['book_id'] and quote.get('books'):
+                book_groups[quote['book_id']].append(quote)
+
+        for book_id, book_quotes in book_groups.items():
+            first_quote = book_quotes[0]
+            book_data = first_quote.get('books')
+
+            # 書籍データがない場合はスキップ
+            if not book_data:
+                continue
+
+            quote_list = [
+                QuoteInGroup(
+                    id=q['id'],
+                    text=q['text'],
+                    page_number=q.get('page_number'),
+                    is_public=q.get('is_public', False),
+                    activities=[ActivityNested(**qa['activities']) for qa in q.get('quote_activities', [])],
+                    tags=[TagNested(**qt['tags']) for qt in q.get('quote_tags', [])],
+                    created_at=q['created_at']
+                )
+                for q in book_quotes
+            ]
+
+            grouped_items.append(
+                BookGroupItem(
+                    book=BookNested(**book_data),
+                    quotes=quote_list
+                )
+            )
+
+        # SNSユーザー単位でグループ化
+        sns_groups = defaultdict(list)
+        for quote in quotes:
+            if quote['source_type'] == 'SNS' and quote['sns_user_id'] and quote.get('sns_users'):
+                sns_groups[quote['sns_user_id']].append(quote)
+
+        for sns_user_id, sns_quotes in sns_groups.items():
+            first_quote = sns_quotes[0]
+            sns_user_data = first_quote.get('sns_users')
+
+            # SNSユーザーデータがない場合はスキップ
+            if not sns_user_data:
+                continue
+
+            quote_list = [
+                QuoteInGroup(
+                    id=q['id'],
+                    text=q['text'],
+                    page_number=None,
+                    is_public=q.get('is_public', False),
+                    activities=[ActivityNested(**qa['activities']) for qa in q.get('quote_activities', [])],
+                    tags=[TagNested(**qt['tags']) for qt in q.get('quote_tags', [])],
+                    created_at=q['created_at']
+                )
+                for q in sns_quotes
+            ]
+
+            grouped_items.append(
+                SnsGroupItem(
+                    sns_user=SnsUserNested(**sns_user_data),
+                    quotes=quote_list
+                )
+            )
+
+        # その他のフレーズ（グループ化なし）
+        for quote in quotes:
+            if quote['source_type'] == 'OTHER':
+                quote_with_details = QuoteWithDetails(
+                    id=quote['id'],
+                    text=quote['text'],
+                    page_number=quote.get('page_number'),
+                    is_public=quote.get('is_public', False),
+                    activities=[ActivityNested(**qa['activities']) for qa in quote.get('quote_activities', [])],
+                    tags=[TagNested(**qt['tags']) for qt in quote.get('quote_tags', [])],
+                    created_at=quote['created_at']
+                )
+                grouped_items.append(
+                    OtherGroupItem(quote=quote_with_details)
+                )
+
+        # ページネーション適用
+        total = len(quotes)
+        paginated_items = grouped_items[offset:offset + limit]
+        has_more = offset + limit < len(grouped_items)
+
+        return QuotesGroupedResponse(
+            items=paginated_items,
+            total=total,
+            has_more=has_more
+        )
+
+    except Exception as e:
+        print(f"[ERROR] 公開フレーズ取得エラー: {type(e).__name__}: {str(e)}")
         import traceback
         traceback.print_exc()
         raise HTTPException(

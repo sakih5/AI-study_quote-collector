@@ -35,7 +35,7 @@ async def get_tags(
         query = supabase.table('tags') \
             .select('id, name, created_at') \
             .eq('user_id', user.id) \
-            .is_('deleted_at', None)
+            .is_('deleted_at', 'null')
 
         # 検索条件を追加
         if search:
@@ -138,7 +138,7 @@ async def create_tag(
             .select('id') \
             .eq('user_id', user.id) \
             .eq('name', tag_name) \
-            .is_('deleted_at', None) \
+            .is_('deleted_at', 'null') \
             .execute()
 
         if active_tag_response.data and len(active_tag_response.data) > 0:
@@ -225,7 +225,7 @@ async def update_tag(
             .select('id') \
             .eq('id', tag_id) \
             .eq('user_id', user.id) \
-            .is_('deleted_at', None) \
+            .is_('deleted_at', 'null') \
             .execute()
 
         if not existing_tag_response.data or len(existing_tag_response.data) == 0:
@@ -240,7 +240,7 @@ async def update_tag(
             .eq('user_id', user.id) \
             .eq('name', tag_name) \
             .neq('id', tag_id) \
-            .is_('deleted_at', None) \
+            .is_('deleted_at', 'null') \
             .execute()
 
         if duplicate_response.data and len(duplicate_response.data) > 0:
@@ -294,7 +294,7 @@ async def delete_tag(
             .select('id') \
             .eq('id', tag_id) \
             .eq('user_id', user.id) \
-            .is_('deleted_at', None) \
+            .is_('deleted_at', 'null') \
             .execute()
 
         if not existing_tag_response.data or len(existing_tag_response.data) == 0:
@@ -365,7 +365,7 @@ async def merge_tag(
             .select('id, name') \
             .eq('id', source_tag_id) \
             .eq('user_id', user.id) \
-            .is_('deleted_at', None) \
+            .is_('deleted_at', 'null') \
             .execute()
 
         if not source_tag_response.data or len(source_tag_response.data) == 0:
@@ -379,7 +379,7 @@ async def merge_tag(
             .select('id, name') \
             .eq('id', target_tag_id) \
             .eq('user_id', user.id) \
-            .is_('deleted_at', None) \
+            .is_('deleted_at', 'null') \
             .execute()
 
         if not target_tag_response.data or len(target_tag_response.data) == 0:

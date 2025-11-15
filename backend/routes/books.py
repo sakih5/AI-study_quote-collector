@@ -1,12 +1,24 @@
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from supabase import Client
+from pydantic import BaseModel
 from auth import get_current_user, get_supabase_client
 from models.book import Book, BookCreate, BooksResponse, BookResponse
+from services.amazon_scraper import AmazonScraper
 
 router = APIRouter(
     prefix="/api/books",
     tags=["books"]
 )
+
+
+class BookFromUrlRequest(BaseModel):
+    """URLから書籍情報を取得するリクエスト"""
+    url: str
+
+
+class BookFromUrlResponse(BaseModel):
+    """URLから書籍情報を取得するレスポンス"""
+    book_info: dict
 
 
 @router.get("", response_model=BooksResponse)
@@ -35,7 +47,7 @@ async def get_books(
                 .select('book_id') \
                 .eq('user_id', user.id) \
                 .eq('source_type', 'BOOK') \
-                .is_('deleted_at', None) \
+                .is_('deleted_at', 'null') \
                 .execute()
 
             if quotes_response.data:
@@ -52,7 +64,7 @@ async def get_books(
         query = supabase.table('books') \
             .select('id, user_id, title, author, cover_image_url, isbn, asin, publisher, publication_date, created_at, updated_at', count='exact') \
             .eq('user_id', user.id) \
-            .is_('deleted_at', None)
+            .is_('deleted_at', 'null')
 
         # has_quotesによるフィルタを追加
         if book_ids_with_quotes is not None:
@@ -111,7 +123,7 @@ async def create_book(
             .eq('user_id', user.id) \
             .eq('title', book_data.title) \
             .eq('author', book_data.author) \
-            .is_('deleted_at', None) \
+            .is_('deleted_at', 'null') \
             .execute()
 
         if existing_response.data and len(existing_response.data) > 0:
@@ -167,6 +179,54 @@ async def create_book(
         raise
     except Exception as e:
         print(f"[ERROR] 書籍登録エラー: {type(e).__name__}: {str(e)}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"サーバーエラーが発生しました: {str(e)}"
+        )
+
+
+@router.post("/from-url", response_model=BookFromUrlResponse)
+async def fetch_book_from_url(
+    request: BookFromUrlRequest,
+    # user=Depends(get_current_user),
+):
+    """
+    Amazon URLから書籍情報を取得
+
+    - **認証**: 必須
+    - **url**: Amazon URL
+    """
+    try:
+        url = request.url
+
+        if not url or not isinstance(url, str):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="URLが指定されていません"
+            )
+
+        # Amazon URLかチェック
+        if not AmazonScraper.is_amazon_url(url):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Amazon URLではありません"
+            )
+
+        # 書籍情報を取得
+        book_info = await AmazonScraper.fetch_book_info(url)
+
+        if not book_info:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="書籍情報の取得に失敗しました"
+            )
+
+        return BookFromUrlResponse(book_info=book_info)
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"[ERROR] 書籍情報取得エラー: {type(e).__name__}: {str(e)}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"サーバーエラーが発生しました: {str(e)}"

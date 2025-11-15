@@ -1,8 +1,9 @@
-from fastapi import FastAPI, Depends
+from fastapi import FastAPI, Depends, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.openapi.utils import get_openapi
-from auth import get_current_user
-from routes import activities, tags, books, sns_users, quotes
+from auth import get_current_user, get_supabase_client
+from routes import activities, tags, books, sns_users, quotes, export, ocr
+from supabase import Client
 
 app = FastAPI(
     title="抜き書きアプリ API",
@@ -55,6 +56,8 @@ app.include_router(tags.router)
 app.include_router(books.router)
 app.include_router(sns_users.router)
 app.include_router(quotes.router)
+app.include_router(export.router)
+app.include_router(ocr.router)
 
 @app.get("/")
 def root():
@@ -71,6 +74,42 @@ async def get_me(user = Depends(get_current_user)):
         "user_id": user.id,
         "email": user.email
     }
+
+
+@app.get("/api/get-token")
+async def get_token(
+    supabase: Client = Depends(get_supabase_client)
+):
+    """
+    現在のセッションのアクセストークンを取得
+
+    認証済みの場合、access_tokenとユーザー情報を返す
+    """
+    try:
+        session_response = await supabase.auth.get_session()
+        session = session_response.session
+
+        if not session:
+            raise HTTPException(
+                status_code=401,
+                detail="Not authenticated"
+            )
+
+        return {
+            "access_token": session.access_token,
+            "user": {
+                "id": session.user.id,
+                "email": session.user.email
+            }
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"[ERROR] トークン取得エラー: {type(e).__name__}: {str(e)}")
+        raise HTTPException(
+            status_code=500,
+            detail="Internal server error"
+        )
 
 if __name__ == "__main__":
     import uvicorn

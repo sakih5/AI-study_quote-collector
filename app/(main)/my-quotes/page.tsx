@@ -7,6 +7,7 @@ import QuoteGroupCard from '../components/QuoteGroupCard';
 import { useQuotesGrouped, Quote } from '../hooks/useQuotesGrouped';
 import { useActivities } from '../hooks/useActivities';
 import { useTags } from '../hooks/useTags';
+import { apiDelete } from '@/lib/api/client';
 
 export default function HomePage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -96,14 +97,7 @@ export default function HomePage() {
     setIsDeleting(true);
 
     try {
-      const response = await fetch(`/api/quotes/${quoteId}`, {
-        method: 'DELETE',
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error?.message || '削除に失敗しました');
-      }
+      await apiDelete(`/api/quotes/${quoteId}`);
 
       // 成功：一覧を再取得
       refetch();

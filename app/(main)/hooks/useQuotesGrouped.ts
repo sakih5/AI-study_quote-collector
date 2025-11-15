@@ -17,6 +17,7 @@ export interface Quote {
   id: number;
   text: string;
   page_number?: number;
+  is_public: boolean;
   activities: Activity[];
   tags: Tag[];
   created_at: string;

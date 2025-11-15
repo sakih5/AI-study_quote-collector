@@ -62,6 +62,7 @@ class Quote(BaseModel):
     sns_user_id: Optional[int] = None
     page_number: Optional[int] = None
     source_meta: Optional[dict] = None
+    is_public: bool = False
     created_at: datetime
     updated_at: datetime
 
@@ -74,6 +75,7 @@ class QuoteWithDetails(BaseModel):
     id: int
     text: str
     page_number: Optional[int] = None
+    is_public: bool = False
     activities: list[ActivityNested]
     tags: list[TagNested]
     created_at: datetime
@@ -87,6 +89,7 @@ class QuoteInGroup(BaseModel):
     id: int
     text: str
     page_number: Optional[int] = None
+    is_public: bool = False
     activities: list[ActivityNested] = []
     tags: list[TagNested] = []
     created_at: datetime
@@ -114,6 +117,7 @@ class QuoteCreate(BaseModel):
     sns_user_id: Optional[int] = None
     page_number: Optional[int] = None
     source_meta: Optional[dict] = None
+    is_public: bool = False
 
 
 class QuoteUpdate(BaseModel):
@@ -121,6 +125,7 @@ class QuoteUpdate(BaseModel):
     text: Optional[str] = Field(None, min_length=1, max_length=10000)
     activity_ids: Optional[list[int]] = None
     tag_ids: Optional[list[int]] = None
+    is_public: Optional[bool] = None
 
 
 # ====================================

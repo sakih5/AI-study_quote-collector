@@ -21,6 +21,7 @@ interface Quote {
   id: number;
   text: string;
   page_number?: number;
+  is_public: boolean;
   activities: number[];
   tags: number[];
   created_at: string;
@@ -85,14 +86,28 @@ export default function PublicHomePage() {
 
       try {
         setLoading(true);
-        const response = await fetch('/api/quotes/public?limit=50');
+        const apiUrl = process.env.NEXT_PUBLIC_FASTAPI_URL || '';
+        const response = await fetch(`${apiUrl}/api/quotes/public?limit=50`);
         if (!response.ok) {
           throw new Error('Failed to fetch public quotes');
         }
 
         const data = await response.json();
-        setBookGroups(data.books || []);
-        setSnsGroups(data.sns_users || []);
+
+        // FastAPIのレスポンス構造に合わせる
+        const books: BookGroup[] = [];
+        const sns: SnsGroup[] = [];
+
+        for (const item of data.items || []) {
+          if (item.type === 'book') {
+            books.push({ book: item.book, quotes: item.quotes });
+          } else if (item.type === 'sns') {
+            sns.push({ sns_user: item.sns_user, quotes: item.quotes });
+          }
+        }
+
+        setBookGroups(books);
+        setSnsGroups(sns);
         setTotal(data.total || 0);
       } catch (error) {
         console.error('Error fetching public quotes:', error);

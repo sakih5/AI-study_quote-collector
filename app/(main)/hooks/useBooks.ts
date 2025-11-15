@@ -35,7 +35,7 @@ export function useBooks() {
   const fetchBooks = async () => {
     try {
       setLoading(true);
-      const data = await apiGet<BooksResponse>('/api/books?limit=100');
+      const data = await apiGet<BooksResponse>('/api/books?limit=100&has_quotes=true');
       setBooks(data.books || []);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Unknown error');

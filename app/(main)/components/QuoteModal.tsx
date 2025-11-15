@@ -1,14 +1,13 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef, useCallback } from 'react';
 import Image from 'next/image';
 import { useActivities } from '../hooks/useActivities';
 import { useTags } from '../hooks/useTags';
 import { useBooks } from '../hooks/useBooks';
 import { useSnsUsers } from '../hooks/useSnsUsers';
-import OCRUploader from './OCRUploader';
-import OCRCanvas from './OCRCanvas';
-import type { OCRResult, SelectionResult } from '@/lib/ocr/types';
+import OCRTextSelector from './OCRTextSelector';
+import { apiPost } from '@/lib/api/client';
 
 interface QuoteModalProps {
   isOpen: boolean;
@@ -84,10 +83,13 @@ export default function QuoteModal({ isOpen, onClose }: QuoteModalProps) {
   const [error, setError] = useState<string | null>(null);
 
   // OCR機能の状態管理
-  const [isOCRModalOpen, setIsOCRModalOpen] = useState(false);
-  const [ocrStep, setOcrStep] = useState<'upload' | 'select'>('upload');
-  const [ocrResult, setOcrResult] = useState<OCRResult | null>(null);
+  const [ocrText, setOcrText] = useState<string>('');
   const [ocrImageUrl, setOcrImageUrl] = useState<string>('');
+  const [ocrImageFile, setOcrImageFile] = useState<File | null>(null);
+  const [isOCRProcessing, setIsOCRProcessing] = useState(false);
+  const [ocrProgress, setOcrProgress] = useState<string>('');
+  const [ocrError, setOcrError] = useState<string>('');
+  const ocrFileInputRef = useRef<HTMLInputElement>(null);
 
   // URL取得機能の状態管理
   const [bookUrl, setBookUrl] = useState('');
@@ -96,36 +98,99 @@ export default function QuoteModal({ isOpen, onClose }: QuoteModalProps) {
   const [isFetchingSnsInfo, setIsFetchingSnsInfo] = useState(false);
 
   // OCR機能のハンドラー
-  const handleOCRComplete = (result: OCRResult, imageUrl: string) => {
-    setOcrResult(result);
-    setOcrImageUrl(imageUrl);
-    setOcrStep('select');
-  };
+  // OCR実行
+  const handleOCRExtractText = async (imageDataUrl: string) => {
+    setIsOCRProcessing(true);
+    setOcrError('');
+    setOcrProgress('画像を読み込んでいます...');
 
-  const handleOCRSelectionsComplete = (selections: SelectionResult[]) => {
-    // OCR結果をフレーズ入力欄に反映
-    const newQuotes: QuoteInput[] = selections.map((selection) => ({
-      text: selection.text,
-      activity_ids: [],
-      tag_ids: [],
-    }));
+    try {
+      // 画像読み込み完了
+      await new Promise(resolve => setTimeout(resolve, 300));
+      setOcrProgress('AIが文字を認識しています...');
 
-    if (newQuotes.length > 0) {
-      setQuotes(newQuotes);
+      // バックエンドAPIを呼び出し
+      const response = await apiPost<{ text: string; lines: any[] }>('/api/ocr/extract-text', {
+        image_data: imageDataUrl,
+        min_confidence: 0.5
+      });
+
+      setOcrProgress('テキストを整形しています...');
+      await new Promise(resolve => setTimeout(resolve, 200));
+
+      setOcrText(response.text);
+      setOcrProgress('');
+    } catch (err) {
+      console.error('OCR error:', err);
+      setOcrError('テキスト抽出に失敗しました。画像を確認してください。');
+      setOcrProgress('');
+    } finally {
+      setIsOCRProcessing(false);
     }
-
-    // OCRモーダルを閉じる
-    setIsOCRModalOpen(false);
-    setOcrStep('upload');
-    setOcrResult(null);
-    setOcrImageUrl('');
   };
 
-  const handleOCRCancel = () => {
-    setIsOCRModalOpen(false);
-    setOcrStep('upload');
-    setOcrResult(null);
+  const handleOCRImageSelect = async (file: File) => {
+    setOcrImageFile(file);
+    setOcrError('');
+
+    // プレビュー用のURLを作成
+    const url = URL.createObjectURL(file);
+    setOcrImageUrl(url);
+
+    // Base64に変換
+    const reader = new FileReader();
+    reader.onloadend = async () => {
+      const base64Data = reader.result as string;
+      // 即座にOCR処理を実行
+      await handleOCRExtractText(base64Data);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  // ファイル選択
+  const handleOCRFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      handleOCRImageSelect(file);
+    }
+  };
+
+  // ドラッグ&ドロップ対応
+  const handleOCRDrop = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    const file = e.dataTransfer.files[0];
+    if (file && file.type.startsWith('image/')) {
+      handleOCRImageSelect(file);
+    } else {
+      setOcrError('画像ファイルを選択してください');
+    }
+  };
+
+  const handleOCRDragOver = useCallback((e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+  }, []);
+
+  // ファイル選択ダイアログを開く
+  const handleOCRClickUpload = () => {
+    ocrFileInputRef.current?.click();
+  };
+
+  const handleOCRTextSelect = (selectedText: string) => {
+    // 選択されたテキストをフレーズ入力欄に追加
+    if (selectedText.trim()) {
+      setQuotes([...quotes, {
+        text: selectedText.trim(),
+        activity_ids: [],
+        tag_ids: [],
+      }]);
+    }
+  };
+
+  const handleOCRReset = () => {
+    setOcrText('');
     setOcrImageUrl('');
+    setOcrImageFile(null);
+    setOcrError('');
   };
 
   // Amazon URLから書籍情報を取得
@@ -139,18 +204,7 @@ export default function QuoteModal({ isOpen, onClose }: QuoteModalProps) {
     setError(null);
 
     try {
-      const response = await fetch('/api/books/from-url', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ url: bookUrl.trim() }),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error?.message || '書籍情報の取得に失敗しました');
-      }
-
-      const data = await response.json();
+      const data = await apiPost<{ book_info: { title: string; author: string; publisher: string; cover_image_url: string } }>('/api/books/from-url', { url: bookUrl.trim() });
       const bookInfo = data.book_info;
 
       // 取得した情報をフォームに自動入力
@@ -184,18 +238,7 @@ export default function QuoteModal({ isOpen, onClose }: QuoteModalProps) {
     setError(null);
 
     try {
-      const response = await fetch('/api/sns-users/from-url', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ url: snsUrl.trim() }),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error?.message || 'ユーザー情報の取得に失敗しました');
-      }
-
-      const data = await response.json();
+      const data = await apiPost<{ user_info: { platform: 'X' | 'THREADS'; handle: string; display_name: string } }>('/api/sns-users/from-url', { url: snsUrl.trim() });
       const userInfo = data.user_info;
 
       // 取得した情報をフォームに自動入力
@@ -264,57 +307,35 @@ export default function QuoteModal({ isOpen, onClose }: QuoteModalProps) {
     setIsSubmitting(true);
 
     try {
-      let bookId = null;
-      let snsUserId = null;
+      let bookId: number | undefined = undefined;
+      let snsUserId: number | undefined = undefined;
 
       // 本の場合：新規作成または既存選択
       if (sourceType === 'BOOK') {
         if (bookData.selectionMode === 'new') {
-          const response = await fetch('/api/books', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              title: bookData.newBook.title.trim(),
-              author: bookData.newBook.author.trim() || null,
-              publisher: bookData.newBook.publisher.trim() || null,
-              cover_image_url: bookData.newBook.cover_image_url?.trim() || null,
-            }),
+          const data = await apiPost<{ book: { id: number } }>('/api/books', {
+            title: bookData.newBook.title.trim(),
+            author: bookData.newBook.author.trim() || null,
+            publisher: bookData.newBook.publisher.trim() || null,
+            cover_image_url: bookData.newBook.cover_image_url?.trim() || null,
           });
-
-          if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(errorData.error?.message || '書籍の登録に失敗しました');
-          }
-
-          const data = await response.json();
           bookId = data.book.id;
         } else {
-          bookId = bookData.selectedBookId;
+          bookId = bookData.selectedBookId ?? undefined;
         }
       }
 
       // SNSの場合：新規作成または既存選択
       if (sourceType === 'SNS') {
         if (snsData.selectionMode === 'new') {
-          const response = await fetch('/api/sns-users', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              platform: snsData.platform,
-              handle: snsData.newSnsUser.handle.trim(),
-              display_name: snsData.newSnsUser.display_name.trim() || null,
-            }),
+          const data = await apiPost<{ sns_user: { id: number } }>('/api/sns-users', {
+            platform: snsData.platform,
+            handle: snsData.newSnsUser.handle.trim(),
+            display_name: snsData.newSnsUser.display_name.trim() || null,
           });
-
-          if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(errorData.error?.message || 'SNSユーザーの登録に失敗しました');
-          }
-
-          const data = await response.json();
           snsUserId = data.sns_user.id;
         } else {
-          snsUserId = snsData.selectedSnsUserId;
+          snsUserId = snsData.selectedSnsUserId ?? undefined;
         }
       }
 
@@ -360,16 +381,7 @@ export default function QuoteModal({ isOpen, onClose }: QuoteModalProps) {
         };
       }
 
-      const response = await fetch('/api/quotes', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error?.message || 'フレーズの登録に失敗しました');
-      }
+      await apiPost('/api/quotes', payload);
 
       // 成功：モーダルを閉じてフォームをリセット
       onClose();
@@ -405,7 +417,7 @@ export default function QuoteModal({ isOpen, onClose }: QuoteModalProps) {
   return (
     <>
       {/* オーバーレイ */}
-      <div className="fixed inset-0 bg-gray-900/20 z-40" onClick={onClose} />
+      <div className="fixed inset-0 bg-gray-900/20 z-40" />
 
       {/* モーダル */}
       <div className="fixed inset-0 z-50 flex items-center justify-center p-4 pointer-events-none">
@@ -437,12 +449,93 @@ export default function QuoteModal({ isOpen, onClose }: QuoteModalProps) {
               <p className="text-sm text-gray-600 mb-3">
                 書籍やメモの画像をアップロードして、テキストを自動で抽出できます。
               </p>
-              <button
-                onClick={() => setIsOCRModalOpen(true)}
-                className="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-500 transition-colors font-medium"
-              >
-                画像をアップロード
-              </button>
+
+              {/* ファイル選択用input（非表示） */}
+              <input
+                ref={ocrFileInputRef}
+                type="file"
+                accept="image/*"
+                onChange={handleOCRFileChange}
+                className="hidden"
+              />
+
+              {/* 画像が選択されていない場合 */}
+              {!ocrImageFile && !isOCRProcessing && (
+                <div
+                  onDrop={handleOCRDrop}
+                  onDragOver={handleOCRDragOver}
+                  onClick={handleOCRClickUpload}
+                  className="border-2 border-dashed border-blue-400 rounded-lg p-6 text-center hover:border-blue-600 hover:bg-blue-50 transition-colors cursor-pointer"
+                >
+                  <div className="text-4xl mb-2">📷</div>
+                  <p className="text-gray-700 mb-1 font-medium">画像をドラッグ&ドロップ</p>
+                  <p className="text-gray-500 text-sm">または クリックして選択</p>
+                </div>
+              )}
+
+              {/* 画像プレビュー（処理前のみ） */}
+              {ocrImageFile && !isOCRProcessing && !ocrText && (
+                <div className="space-y-3">
+                  <div className="relative">
+                    <Image
+                      src={ocrImageUrl}
+                      alt="プレビュー"
+                      width={400}
+                      height={300}
+                      className="max-w-full max-h-48 mx-auto rounded-lg object-contain"
+                      unoptimized
+                    />
+                  </div>
+                </div>
+              )}
+
+              {/* 別の画像を選択ボタン（処理前） */}
+              {ocrImageFile && !isOCRProcessing && !ocrText && (
+                <button
+                  onClick={handleOCRReset}
+                  className="w-full px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors text-sm"
+                >
+                  別の画像を選択
+                </button>
+              )}
+
+              {/* 処理中表示 */}
+              {isOCRProcessing && (
+                <div className="py-6 px-4 bg-blue-50 border border-blue-200 rounded-lg">
+                  <div className="flex items-center justify-center gap-3 mb-4">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                    <p className="text-lg font-medium text-blue-900">{ocrProgress}</p>
+                  </div>
+
+                  {/* プログレスバー */}
+                  <div className="w-full bg-blue-200 rounded-full h-2 overflow-hidden">
+                    <div className="bg-blue-600 h-full rounded-full animate-pulse" style={{ width: '70%' }}></div>
+                  </div>
+
+                  <p className="mt-3 text-sm text-gray-600 text-center">
+                    処理には数秒かかる場合があります
+                  </p>
+                </div>
+              )}
+
+              {/* OCR結果のテキスト表示・選択 */}
+              {ocrText && !isOCRProcessing && (
+                <div className="p-4 bg-white border border-gray-300 rounded-lg">
+                  <OCRTextSelector
+                    text={ocrText}
+                    imageUrl={ocrImageUrl}
+                    onTextSelect={handleOCRTextSelect}
+                    onClose={handleOCRReset}
+                  />
+                </div>
+              )}
+
+              {/* エラー表示 */}
+              {ocrError && (
+                <div className="p-3 bg-red-50 border border-red-300 rounded-lg text-red-700 text-sm">
+                  {ocrError}
+                </div>
+              )}
             </div>
 
             {/* セクション1: フレーズ & 分類分け */}
@@ -765,17 +858,18 @@ export default function QuoteModal({ isOpen, onClose }: QuoteModalProps) {
                                 </button>
                               </div>
                               <p className="text-xs text-gray-500 mt-2">
-                                ※ Amazon URLを入力すると、書籍情報を自動取得できます
+                                ※ Amazon URLを入力すると、書籍情報（画像含む）を自動取得できます
                               </p>
                             </div>
 
-                            {/* 書籍画像プレビュー */}
-                            {bookData.newBook.cover_image_url && (
-                              <div className="flex justify-center p-4 bg-gray-50 rounded-lg border border-gray-200">
-                                <div className="text-center">
-                                  <p className="text-sm font-medium text-gray-700 mb-2">
-                                    取得した書籍画像
-                                  </p>
+                            {/* 書籍画像アップロード・プレビュー */}
+                            <div className="p-4 bg-gray-50 rounded-lg border border-gray-200">
+                              <label className="block text-sm font-medium text-gray-700 mb-3">
+                                書籍の画像
+                              </label>
+
+                              {bookData.newBook.cover_image_url ? (
+                                <div className="flex flex-col items-center gap-3">
                                   <Image
                                     src={bookData.newBook.cover_image_url}
                                     alt={bookData.newBook.title || '書籍カバー'}
@@ -783,9 +877,53 @@ export default function QuoteModal({ isOpen, onClose }: QuoteModalProps) {
                                     height={160}
                                     className="w-30 h-40 object-cover rounded shadow-md"
                                   />
+                                  <button
+                                    onClick={() => setBookData({
+                                      ...bookData,
+                                      newBook: { ...bookData.newBook, cover_image_url: '' }
+                                    })}
+                                    className="text-sm text-red-600 hover:text-red-700 transition-colors"
+                                  >
+                                    画像を削除
+                                  </button>
                                 </div>
-                              </div>
-                            )}
+                              ) : (
+                                <div className="flex flex-col items-center gap-3">
+                                  <div className="w-30 h-40 bg-gray-100 rounded flex items-center justify-center shadow-sm">
+                                    <span className="text-5xl">📚</span>
+                                  </div>
+                                  <label className="cursor-pointer">
+                                    <input
+                                      type="file"
+                                      accept="image/*"
+                                      className="hidden"
+                                      onChange={(e) => {
+                                        const file = e.target.files?.[0];
+                                        if (file) {
+                                          const reader = new FileReader();
+                                          reader.onloadend = () => {
+                                            setBookData({
+                                              ...bookData,
+                                              newBook: {
+                                                ...bookData.newBook,
+                                                cover_image_url: reader.result as string
+                                              }
+                                            });
+                                          };
+                                          reader.readAsDataURL(file);
+                                        }
+                                      }}
+                                    />
+                                    <span className="px-4 py-2 bg-white border border-gray-300 rounded-lg text-sm text-gray-700 hover:bg-gray-50 transition-colors inline-block">
+                                      画像をアップロード
+                                    </span>
+                                  </label>
+                                </div>
+                              )}
+                              <p className="text-xs text-gray-500 mt-2 text-center">
+                                ※ Amazon URLから自動取得、または手動でアップロードできます
+                              </p>
+                            </div>
 
                             <div>
                               <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -1104,42 +1242,6 @@ export default function QuoteModal({ isOpen, onClose }: QuoteModalProps) {
         </div>
       </div>
 
-      {/* OCRモーダル */}
-      {isOCRModalOpen && (
-        <>
-          {/* オーバーレイ */}
-          <div
-            className="fixed inset-0 bg-gray-900/30"
-            style={{ zIndex: 60 }}
-            onClick={handleOCRCancel}
-          />
-
-          {/* OCRモーダルコンテンツ */}
-          <div
-            className="fixed inset-0 flex items-center justify-center p-4 pointer-events-none"
-            style={{ zIndex: 70 }}
-          >
-            <div
-              className="bg-white rounded-lg shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-y-auto pointer-events-auto"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <div className="p-6">
-                {ocrStep === 'upload' && (
-                  <OCRUploader onOCRComplete={handleOCRComplete} onCancel={handleOCRCancel} />
-                )}
-                {ocrStep === 'select' && ocrResult && (
-                  <OCRCanvas
-                    imageUrl={ocrImageUrl}
-                    ocrResult={ocrResult}
-                    onSelectionsComplete={handleOCRSelectionsComplete}
-                    onBack={() => setOcrStep('upload')}
-                  />
-                )}
-              </div>
-            </div>
-          </div>
-        </>
-      )}
     </>
   );
 }

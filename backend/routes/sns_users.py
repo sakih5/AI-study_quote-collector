@@ -1,12 +1,24 @@
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from supabase import Client
+from pydantic import BaseModel
 from auth import get_current_user, get_supabase_client
 from models.sns_user import SnsUser, SnsUserCreate, SnsUsersResponse, SnsUserResponse
+from services.sns_scraper import SnsUrlParser, SnsScraper
 
 router = APIRouter(
     prefix="/api/sns-users",
     tags=["sns-users"]
 )
+
+
+class SnsUserFromUrlRequest(BaseModel):
+    """URLからSNSユーザー情報を取得するリクエスト"""
+    url: str
+
+
+class SnsUserFromUrlResponse(BaseModel):
+    """URLからSNSユーザー情報を取得するレスポンス"""
+    user_info: dict
 
 
 @router.get("", response_model=SnsUsersResponse)
@@ -32,7 +44,7 @@ async def get_sns_users(
         query = supabase.table('sns_users') \
             .select('id, user_id, platform, handle, display_name, created_at, updated_at', count='exact') \
             .eq('user_id', user.id) \
-            .is_('deleted_at', None)
+            .is_('deleted_at', 'null')
 
         # プラットフォームフィルター
         if platform:
@@ -92,7 +104,7 @@ async def create_sns_user(
             .eq('user_id', user.id) \
             .eq('platform', sns_user_data.platform) \
             .eq('handle', sns_user_data.handle) \
-            .is_('deleted_at', None) \
+            .is_('deleted_at', 'null') \
             .execute()
 
         if existing_response.data and len(existing_response.data) > 0:
@@ -144,6 +156,66 @@ async def create_sns_user(
         raise
     except Exception as e:
         print(f"[ERROR] SNSユーザー登録エラー: {type(e).__name__}: {str(e)}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"サーバーエラーが発生しました: {str(e)}"
+        )
+
+
+@router.post("/from-url", response_model=SnsUserFromUrlResponse)
+async def fetch_sns_user_from_url(
+    request: SnsUserFromUrlRequest,
+    user=Depends(get_current_user),
+):
+    """
+    SNS URLからユーザー情報を取得
+
+    - **認証**: 必須
+    - **url**: SNS URL (X または Threads)
+    """
+    try:
+        url = request.url
+
+        if not url or not isinstance(url, str):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="URLが指定されていません"
+            )
+
+        # SNS URLかチェック
+        if not SnsUrlParser.is_sns_url(url):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="サポートされているSNS URLではありません（X, Threadsのみ対応）"
+            )
+
+        # URLを解析
+        parsed = SnsUrlParser.parse_sns_url(url)
+
+        if not parsed:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="URL の解析に失敗しました"
+            )
+
+        # ユーザー情報を取得
+        user_info = await SnsScraper.fetch_sns_user_info(
+            parsed['platform'],
+            parsed['handle']
+        )
+
+        if not user_info:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="ユーザー情報の取得に失敗しました"
+            )
+
+        return SnsUserFromUrlResponse(user_info=user_info)
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"[ERROR] SNSユーザー情報取得エラー: {type(e).__name__}: {str(e)}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"サーバーエラーが発生しました: {str(e)}"

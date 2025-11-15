@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -223,7 +224,11 @@ export default function LoginPage() {
 
         {/* フッター */}
         <p className="text-center text-gray-500 text-sm mt-8">
-          ログインすることで、利用規約に同意したものとみなされます
+          ログインすることで、
+          <Link href="/terms" className="text-blue-600 hover:text-blue-700 underline">
+            利用規約
+          </Link>
+          に同意したものとみなされます
         </p>
       </div>
     </div>

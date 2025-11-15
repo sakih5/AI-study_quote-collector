@@ -37,7 +37,7 @@ export async function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
 
   // 認証不要のパス
-  const publicPaths = ['/login', '/auth/callback', '/api/quotes/public'];
+  const publicPaths = ['/login', '/auth/callback', '/api/quotes/public', '/terms'];
   const isPublicPath = publicPaths.some(
     (path) => pathname === path || pathname.startsWith(path + '/')
   );

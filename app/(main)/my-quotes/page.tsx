@@ -109,25 +109,74 @@ export default function HomePage() {
     searchQuery || selectedActivityIds.length > 0 || selectedTagIds.length > 0;
 
   // CSVエクスポート処理
-  const handleExportCsv = () => {
-    // クエリパラメータを構築
-    const params = new URLSearchParams();
+  const handleExportCsv = async () => {
+    try {
+      // クエリパラメータを構築
+      const params = new URLSearchParams();
 
-    if (searchQuery) {
-      params.append('search', searchQuery);
+      if (searchQuery) {
+        params.append('search', searchQuery);
+      }
+
+      if (selectedActivityIds.length > 0) {
+        params.append('activity_ids', selectedActivityIds.join(','));
+      }
+
+      if (selectedTagIds.length > 0) {
+        params.append('tag_ids', selectedTagIds.join(','));
+      }
+
+      // FastAPI URLを使用
+      const apiUrl = process.env.NEXT_PUBLIC_FASTAPI_URL || '';
+      const url = `${apiUrl}/api/export/csv${params.toString() ? '?' + params.toString() : ''}`;
+
+      // fetchで認証付きリクエスト
+      const { createClient } = await import('@/lib/supabase/client');
+      const supabase = createClient();
+      const { data: { session } } = await supabase.auth.getSession();
+
+      if (!session) {
+        alert('認証が必要です。ログインしてください。');
+        return;
+      }
+
+      const response = await fetch(url, {
+        headers: {
+          'Authorization': `Bearer ${session.access_token}`
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error('CSVエクスポートに失敗しました');
+      }
+
+      // Blobとして取得
+      const blob = await response.blob();
+
+      // ダウンロード用のリンクを作成
+      const downloadUrl = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = downloadUrl;
+
+      // Content-Dispositionヘッダーからファイル名を取得
+      const contentDisposition = response.headers.get('Content-Disposition');
+      let filename = 'quotes.csv';
+      if (contentDisposition) {
+        const filenameMatch = contentDisposition.match(/filename="(.+)"/);
+        if (filenameMatch) {
+          filename = filenameMatch[1];
+        }
+      }
+
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(downloadUrl);
+    } catch (error) {
+      console.error('CSVエクスポートエラー:', error);
+      alert(error instanceof Error ? error.message : 'CSVエクスポートに失敗しました');
     }
-
-    if (selectedActivityIds.length > 0) {
-      params.append('activity_ids', selectedActivityIds.join(','));
-    }
-
-    if (selectedTagIds.length > 0) {
-      params.append('tag_ids', selectedTagIds.join(','));
-    }
-
-    // CSVエクスポートAPIにリクエスト
-    const url = `/api/export/csv${params.toString() ? '?' + params.toString() : ''}`;
-    window.location.href = url;
   };
 
   // フレーズ削除処理

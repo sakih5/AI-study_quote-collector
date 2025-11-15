@@ -525,11 +525,38 @@ async def get_quotes_grouped(
                     OtherGroupItem(quote=quote_with_details)
                 )
 
-        # ページネーション適用
-        # フレーズの総数をカウント（グループ数ではなく）
+        # ページネーション適用（フレーズ単位）
         total = len(quotes)
-        paginated_items = grouped_items[offset:offset + limit]
-        has_more = offset + limit < len(grouped_items)
+
+        # フレーズ数を累積しながらグループを選択
+        paginated_items = []
+        quote_count = 0
+        start_counting = False
+
+        for item in grouped_items:
+            # 各グループのフレーズ数を取得
+            if hasattr(item, 'quotes'):
+                group_quote_count = len(item.quotes)
+            else:
+                group_quote_count = 1  # OTHER typeは1件
+
+            # offsetに達するまでスキップ
+            if not start_counting:
+                if quote_count + group_quote_count > offset:
+                    start_counting = True
+                else:
+                    quote_count += group_quote_count
+                    continue
+
+            # limitに達したら終了（ただし現在のグループは含める）
+            if start_counting:
+                paginated_items.append(item)
+                quote_count += group_quote_count
+
+                if quote_count >= offset + limit:
+                    break
+
+        has_more = quote_count < total
 
         return QuotesGroupedResponse(
             items=paginated_items,

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import QuoteModal from '../components/QuoteModal';
 import QuoteEditModal from '../components/QuoteEditModal';
 import QuoteGroupCard from '../components/QuoteGroupCard';
@@ -18,6 +18,9 @@ export default function HomePage() {
   const [editingQuote, setEditingQuote] = useState<Quote | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
 
+  // 無限スクロール用のref
+  const observerTarget = useRef<HTMLDivElement>(null);
+
   const { activities } = useActivities();
   const { tags } = useTags();
 
@@ -28,6 +31,30 @@ export default function HomePage() {
       tagIds: selectedTagIds.length > 0 ? selectedTagIds : undefined,
       limit: 50,
     });
+
+  // 無限スクロール実装
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        // 要素が画面に入ったら、かつ、まだ読み込むデータがある場合
+        if (entries[0].isIntersecting && hasMore && !loadingMore) {
+          loadMore();
+        }
+      },
+      { threshold: 0.1 } // 10%見えたらトリガー
+    );
+
+    const currentTarget = observerTarget.current;
+    if (currentTarget) {
+      observer.observe(currentTarget);
+    }
+
+    return () => {
+      if (currentTarget) {
+        observer.unobserve(currentTarget);
+      }
+    };
+  }, [hasMore, loadingMore, loadMore]);
 
   const handleSearch = () => {
     setSearchQuery(searchKeyword);
@@ -321,16 +348,15 @@ export default function HomePage() {
             ))}
           </div>
 
-          {/* もっと見るボタン */}
+          {/* 無限スクロールトリガー */}
           {hasMore && (
-            <div className="mt-8 text-center">
-              <button
-                onClick={loadMore}
-                disabled={loadingMore}
-                className="px-8 py-3 bg-white hover:bg-gray-50 text-gray-900 font-medium rounded-lg border border-gray-300 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {loadingMore ? '読み込み中...' : 'もっと見る'}
-              </button>
+            <div ref={observerTarget} className="mt-8 py-4 text-center">
+              {loadingMore && (
+                <div className="flex items-center justify-center gap-2">
+                  <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
+                  <p className="text-gray-600">読み込み中...</p>
+                </div>
+              )}
             </div>
           )}
         </>

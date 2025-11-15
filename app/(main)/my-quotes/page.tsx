@@ -18,6 +18,10 @@ export default function HomePage() {
   const [editingQuote, setEditingQuote] = useState<Quote | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
 
+  // 選択モード関連
+  const [isSelectionMode, setIsSelectionMode] = useState(false);
+  const [selectedQuoteIds, setSelectedQuoteIds] = useState<Set<number>>(new Set());
+
   // 無限スクロール用のref
   const observerTarget = useRef<HTMLDivElement>(null);
 
@@ -152,6 +156,64 @@ export default function HomePage() {
     setEditingQuote(quote);
   };
 
+  // 選択モード切り替え
+  const toggleSelectionMode = () => {
+    setIsSelectionMode(!isSelectionMode);
+    setSelectedQuoteIds(new Set());
+  };
+
+  // フレーズ選択トグル
+  const toggleQuoteSelection = (quoteId: number) => {
+    const newSet = new Set(selectedQuoteIds);
+    if (newSet.has(quoteId)) {
+      newSet.delete(quoteId);
+    } else {
+      newSet.add(quoteId);
+    }
+    setSelectedQuoteIds(newSet);
+  };
+
+  // すべて選択
+  const selectAllQuotes = () => {
+    const allQuoteIds = new Set<number>();
+    items.forEach((group) => {
+      if ('quotes' in group) {
+        group.quotes.forEach((quote) => allQuoteIds.add(quote.id));
+      }
+    });
+    setSelectedQuoteIds(allQuoteIds);
+  };
+
+  // 一括削除
+  const handleBulkDelete = async () => {
+    if (selectedQuoteIds.size === 0) return;
+
+    const confirmed = confirm(
+      `選択した${selectedQuoteIds.size}件のフレーズを削除してもよろしいですか？`
+    );
+    if (!confirmed) return;
+
+    setIsDeleting(true);
+
+    try {
+      // 各フレーズを個別に削除（現在のAPI仕様に合わせる）
+      const deletePromises = Array.from(selectedQuoteIds).map((quoteId) =>
+        apiDelete(`/api/quotes/${quoteId}`)
+      );
+
+      await Promise.all(deletePromises);
+
+      // 成功：選択をクリアして一覧を再取得
+      setSelectedQuoteIds(new Set());
+      setIsSelectionMode(false);
+      refetch();
+    } catch (err) {
+      alert(err instanceof Error ? err.message : '予期しないエラーが発生しました');
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
   return (
     <div className="max-w-6xl mx-auto">
       {/* 検索バー */}
@@ -220,32 +282,83 @@ export default function HomePage() {
           </div>
         </div>
 
-        {/* 件数表示とクリアボタン */}
+        {/* 件数表示とアクションバー */}
         <div className="flex items-center justify-between pt-2 border-t border-gray-300">
-          <div className="flex items-center gap-4">
-            <p className="text-gray-600 text-sm">
-              {hasActiveFilters ? '該当フレーズ数' : 'フレーズ総数'}：
-              <span className="font-bold text-gray-900 ml-1">{total}件</span>
-            </p>
-            {hasActiveFilters && (
-              <button
-                onClick={clearFilters}
-                className="text-sm text-blue-600 hover:text-blue-700 transition-colors"
-              >
-                フィルターをクリア
-              </button>
-            )}
-          </div>
-          {/* CSVエクスポートボタン */}
-          <button
-            onClick={handleExportCsv}
-            disabled={total === 0}
-            className="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white text-sm font-medium rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
-            title="表示中のフレーズをCSV形式でダウンロード"
-          >
-            <span>📥</span>
-            <span>CSVエクスポート</span>
-          </button>
+          {!isSelectionMode ? (
+            <>
+              {/* 通常モード */}
+              <div className="flex items-center gap-4">
+                <p className="text-gray-600 text-sm">
+                  {hasActiveFilters ? '該当フレーズ数' : 'フレーズ総数'}：
+                  <span className="font-bold text-gray-900 ml-1">{total}件</span>
+                </p>
+                {hasActiveFilters && (
+                  <button
+                    onClick={clearFilters}
+                    className="text-sm text-blue-600 hover:text-blue-700 transition-colors"
+                  >
+                    フィルターをクリア
+                  </button>
+                )}
+              </div>
+              <div className="flex items-center gap-3">
+                {/* 選択削除モードボタン */}
+                <button
+                  onClick={toggleSelectionMode}
+                  disabled={total === 0}
+                  className="px-4 py-2 bg-gray-500 hover:bg-gray-600 text-white text-sm font-medium rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                  title="複数のフレーズを選択して一括削除"
+                >
+                  <span>☑️</span>
+                  <span>選択削除</span>
+                </button>
+                {/* CSVエクスポートボタン */}
+                <button
+                  onClick={handleExportCsv}
+                  disabled={total === 0}
+                  className="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white text-sm font-medium rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                  title="表示中のフレーズをCSV形式でダウンロード"
+                >
+                  <span>📥</span>
+                  <span>CSVエクスポート</span>
+                </button>
+              </div>
+            </>
+          ) : (
+            <>
+              {/* 選択モード */}
+              <div className="flex items-center gap-4">
+                <p className="text-gray-900 text-sm font-medium">
+                  {selectedQuoteIds.size}件選択中
+                </p>
+                <button
+                  onClick={selectAllQuotes}
+                  className="text-sm text-blue-600 hover:text-blue-700 transition-colors"
+                >
+                  すべて選択
+                </button>
+              </div>
+              <div className="flex items-center gap-3">
+                {/* 削除ボタン */}
+                <button
+                  onClick={handleBulkDelete}
+                  disabled={selectedQuoteIds.size === 0 || isDeleting}
+                  className="px-4 py-2 bg-red-500 hover:bg-red-600 text-white text-sm font-medium rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                >
+                  <span>🗑️</span>
+                  <span>{isDeleting ? '削除中...' : '削除'}</span>
+                </button>
+                {/* キャンセルボタン */}
+                <button
+                  onClick={toggleSelectionMode}
+                  disabled={isDeleting}
+                  className="px-4 py-2 bg-gray-400 hover:bg-gray-500 text-white text-sm font-medium rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  キャンセル
+                </button>
+              </div>
+            </>
+          )}
         </div>
       </div>
 
@@ -356,6 +469,9 @@ export default function HomePage() {
                 group={group}
                 onEdit={handleEdit}
                 onDelete={handleDelete}
+                isSelectionMode={isSelectionMode}
+                selectedQuoteIds={selectedQuoteIds}
+                onToggleSelection={toggleQuoteSelection}
               />
             ))}
           </div>

@@ -6,9 +6,19 @@ interface QuoteGroupCardProps {
   group: QuoteGroup;
   onEdit?: (quote: Quote) => void;
   onDelete?: (quoteId: number) => void;
+  isSelectionMode?: boolean;
+  selectedQuoteIds?: Set<number>;
+  onToggleSelection?: (quoteId: number) => void;
 }
 
-export default function QuoteGroupCard({ group, onEdit, onDelete }: QuoteGroupCardProps) {
+export default function QuoteGroupCard({
+  group,
+  onEdit,
+  onDelete,
+  isSelectionMode,
+  selectedQuoteIds,
+  onToggleSelection
+}: QuoteGroupCardProps) {
   if (group.type === 'book') {
     const { book, quotes } = group;
     return (
@@ -51,6 +61,9 @@ export default function QuoteGroupCard({ group, onEdit, onDelete }: QuoteGroupCa
                   pageNumber={quote.page_number}
                   onEdit={onEdit}
                   onDelete={onDelete}
+                  isSelectionMode={isSelectionMode}
+                  isSelected={selectedQuoteIds?.has(quote.id)}
+                  onToggleSelection={() => onToggleSelection?.(quote.id)}
                 />
               ))}
             </div>
@@ -90,7 +103,15 @@ export default function QuoteGroupCard({ group, onEdit, onDelete }: QuoteGroupCa
           <div className="flex-1">
             <div className="space-y-3">
               {quotes.map((quote) => (
-                <QuoteItem key={quote.id} quote={quote} onEdit={onEdit} onDelete={onDelete} />
+                <QuoteItem
+                  key={quote.id}
+                  quote={quote}
+                  onEdit={onEdit}
+                  onDelete={onDelete}
+                  isSelectionMode={isSelectionMode}
+                  isSelected={selectedQuoteIds?.has(quote.id)}
+                  onToggleSelection={() => onToggleSelection?.(quote.id)}
+                />
               ))}
             </div>
           </div>
@@ -128,7 +149,15 @@ export default function QuoteGroupCard({ group, onEdit, onDelete }: QuoteGroupCa
         <div className="flex-1">
           <div className="space-y-3">
             {quotes.map((quote) => (
-              <QuoteItem key={quote.id} quote={quote} onEdit={onEdit} onDelete={onDelete} />
+              <QuoteItem
+                key={quote.id}
+                quote={quote}
+                onEdit={onEdit}
+                onDelete={onDelete}
+                isSelectionMode={isSelectionMode}
+                isSelected={selectedQuoteIds?.has(quote.id)}
+                onToggleSelection={() => onToggleSelection?.(quote.id)}
+              />
             ))}
           </div>
         </div>

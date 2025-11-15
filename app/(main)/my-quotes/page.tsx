@@ -56,7 +56,19 @@ export default function HomePage() {
     };
   }, [hasMore, loadingMore, loadMore]);
 
+  // リアルタイム検索（デバウンス処理）
+  useEffect(() => {
+    // 入力から500ms後に検索を実行
+    const timer = setTimeout(() => {
+      setSearchQuery(searchKeyword);
+    }, 500);
+
+    // クリーンアップ: 次の入力があったらタイマーをキャンセル
+    return () => clearTimeout(timer);
+  }, [searchKeyword]);
+
   const handleSearch = () => {
+    // 検索ボタン押下時は即座に検索
     setSearchQuery(searchKeyword);
   };
 
@@ -150,7 +162,7 @@ export default function HomePage() {
             value={searchKeyword}
             onChange={(e) => setSearchKeyword(e.target.value)}
             onKeyPress={handleKeyPress}
-            placeholder="キーワードで絞り込み..."
+            placeholder="本のタイトル/著者名・SNSのアカウント名・フレーズで検索"
             className="flex-1 px-4 py-3 bg-white border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
           <button

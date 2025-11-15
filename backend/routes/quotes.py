@@ -406,10 +406,6 @@ async def get_quotes_grouped(
             .eq('user_id', user.id) \
             .is_('deleted_at', 'null')
 
-        # 検索条件
-        if search:
-            quotes_query = quotes_query.ilike('text', f'%{search}%')
-
         # 出典タイプフィルター
         if source_type:
             quotes_query = quotes_query.eq('source_type', source_type)
@@ -423,6 +419,36 @@ async def get_quotes_grouped(
             return QuotesGroupedResponse(items=[], total=0, has_more=False)
 
         quotes = quotes_response.data
+
+        # 検索条件（クライアント側で実施）
+        # フレーズテキスト、本のタイトル・著者名、SNSのアカウント名・表示名で部分一致検索
+        if search:
+            search_lower = search.lower()
+            filtered_quotes = []
+
+            for quote in quotes:
+                # フレーズテキストで検索
+                if search_lower in quote.get('text', '').lower():
+                    filtered_quotes.append(quote)
+                    continue
+
+                # 書籍タイトル・著者名で検索
+                if quote.get('books'):
+                    book = quote['books']
+                    if (book.get('title') and search_lower in book['title'].lower()) or \
+                       (book.get('author') and search_lower in book['author'].lower()):
+                        filtered_quotes.append(quote)
+                        continue
+
+                # SNSアカウント名・表示名で検索
+                if quote.get('sns_users'):
+                    sns_user = quote['sns_users']
+                    if (sns_user.get('handle') and search_lower in sns_user['handle'].lower()) or \
+                       (sns_user.get('display_name') and search_lower in sns_user['display_name'].lower()):
+                        filtered_quotes.append(quote)
+                        continue
+
+            quotes = filtered_quotes
 
         # 活動領域フィルター（クライアント側で実施）
         if activity_ids:

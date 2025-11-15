@@ -59,19 +59,21 @@ async def get_tags(
         # 各タグのメタデータを取得
         tags_with_metadata = []
         for tag in tags:
-            # 使用数を取得
+            # 使用数を取得（削除済みフレーズを除外）
             count_response = supabase.table('quote_tags') \
-                .select('*', count='exact', head=True) \
+                .select('*, quotes!inner(id)', count='exact', head=True) \
                 .eq('tag_id', tag['id']) \
+                .is_('quotes.deleted_at', 'null') \
                 .execute()
 
             usage_count = count_response.count or 0
 
-            # 活動領域別分布を取得
+            # 活動領域別分布を取得（削除済みフレーズを除外）
             # quote_tags -> quotes -> quote_activities -> activity_id
             distribution_response = supabase.table('quote_tags') \
-                .select('quote_id, quotes!inner(quote_activities!inner(activity_id))') \
+                .select('quote_id, quotes!inner(deleted_at, quote_activities!inner(activity_id))') \
                 .eq('tag_id', tag['id']) \
+                .is_('quotes.deleted_at', 'null') \
                 .execute()
 
             # 活動領域別にカウント
@@ -162,10 +164,15 @@ async def create_tag(
         if deleted_tags and len(deleted_tags) > 0:
             # 削除済みタグを復活させる
             deleted_tag = deleted_tags[0]
-            restore_response = supabase.table('tags') \
+            supabase.table('tags') \
                 .update({'deleted_at': None}) \
                 .eq('id', deleted_tag['id']) \
+                .execute()
+
+            # 復活したタグを取得
+            restore_response = supabase.table('tags') \
                 .select('id, name, created_at') \
+                .eq('id', deleted_tag['id']) \
                 .execute()
 
             if restore_response.data and len(restore_response.data) > 0:
@@ -177,11 +184,19 @@ async def create_tag(
                     'user_id': user.id,
                     'name': tag_name
                 }) \
-                .select('id, name, created_at') \
                 .execute()
 
             if create_response.data and len(create_response.data) > 0:
-                tag = create_response.data[0]
+                created_tag_id = create_response.data[0]['id']
+
+                # 作成したタグを取得
+                select_response = supabase.table('tags') \
+                    .select('id, name, created_at') \
+                    .eq('id', created_tag_id) \
+                    .execute()
+
+                if select_response.data and len(select_response.data) > 0:
+                    tag = select_response.data[0]
 
         if not tag:
             raise HTTPException(

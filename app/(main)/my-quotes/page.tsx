@@ -26,7 +26,10 @@ export default function HomePage() {
   const observerTarget = useRef<HTMLDivElement>(null);
 
   const { activities } = useActivities();
-  const { tags } = useTags();
+  const { tags: allTags } = useTags();
+
+  // 使用中のタグのみをフィルタリング
+  const tags = allTags.filter(tag => (tag.usage_count || 0) > 0);
 
   const { items, loading, loadingMore, error, total, hasMore, loadMore, refetch } =
     useQuotesGrouped({

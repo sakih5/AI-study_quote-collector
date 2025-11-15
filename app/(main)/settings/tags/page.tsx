@@ -17,11 +17,14 @@ export default function TagsManagementPage() {
   const [sortBy, setSortBy] = useState<'name' | 'created_at' | 'usage_count'>('usage_count');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
 
-  const { tags, loading, error, refetch } = useTagsManagement({
+  const { tags: allTags, loading, error, refetch } = useTagsManagement({
     search: searchQuery,
     sort: sortBy,
     order: sortOrder,
   });
+
+  // 使用中のタグのみをフィルタリング
+  const tags = allTags.filter(tag => (tag.usage_count || 0) > 0);
 
   const { activities } = useActivities();
 

@@ -669,10 +669,25 @@ export default function QuoteModal({ isOpen, onClose }: QuoteModalProps) {
                             type="text"
                             value={newTagName}
                             onChange={(e) => setNewTagName(e.target.value)}
-                            placeholder="例: 生産性"
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter' && newTagName.trim()) {
+                                e.preventDefault();
+                                (async () => {
+                                  const tag = await createTag(newTagName.trim());
+                                  if (tag) {
+                                    const newQuotes = [...quotes];
+                                    newQuotes[index].tag_ids.push(tag.id);
+                                    setQuotes(newQuotes);
+                                    setNewTagName('');
+                                  }
+                                })();
+                              }
+                            }}
+                            placeholder="新しいタグ名を入力（例: 生産性）"
                             className="flex-1 px-4 py-2 bg-white border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
                           />
                           <button
+                            type="button"
                             onClick={async () => {
                               if (newTagName.trim()) {
                                 const tag = await createTag(newTagName.trim());
@@ -684,7 +699,8 @@ export default function QuoteModal({ isOpen, onClose }: QuoteModalProps) {
                                 }
                               }
                             }}
-                            className="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-gray-900 rounded-lg transition-colors"
+                            disabled={!newTagName.trim()}
+                            className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                           >
                             + 追加
                           </button>

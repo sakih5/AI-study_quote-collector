@@ -100,27 +100,37 @@ export default function QuoteGroupCard({ group, onEdit, onDelete }: QuoteGroupCa
   }
 
   // OTHER タイプ
-  const { quote } = group;
+  const { source_info, quotes } = group;
   return (
     <div className="bg-white p-6">
       <div className="flex gap-6 items-start">
         {/* 左側：その他メタ情報（1/3） */}
         <div className="w-1/3 flex-shrink-0 sticky top-6 self-start bg-gray-50 p-4 rounded-lg">
           <div className="text-center">
+            <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mb-3 mx-auto">
+              <span className="text-3xl">📝</span>
+            </div>
             <h3 className="text-sm font-medium text-gray-900 mb-1">その他</h3>
-            {quote.source_meta?.source && (
-              <p className="text-xs text-gray-500">出典: {quote.source_meta.source}</p>
+            {source_info?.source && (
+              <p className="text-xs text-gray-500">出典: {source_info.source}</p>
             )}
-            {quote.source_meta?.note && (
-              <p className="text-xs text-gray-400 mt-1">{quote.source_meta.note}</p>
+            {source_info?.note && (
+              <p className="text-xs text-gray-400 mt-1">{source_info.note}</p>
             )}
-            <p className="text-xs text-gray-400 mt-2">1件のフレーズ</p>
+            {!source_info?.source && !source_info?.note && (
+              <p className="text-xs text-gray-400">出典情報なし</p>
+            )}
+            <p className="text-xs text-gray-400 mt-2">{quotes.length}件のフレーズ</p>
           </div>
         </div>
 
-        {/* 右側：フレーズ本体（2/3） */}
+        {/* 右側：フレーズ一覧（2/3） */}
         <div className="flex-1">
-          <QuoteItem quote={quote} onEdit={onEdit} onDelete={onDelete} />
+          <div className="space-y-3">
+            {quotes.map((quote) => (
+              <QuoteItem key={quote.id} quote={quote} onEdit={onEdit} onDelete={onDelete} />
+            ))}
+          </div>
         </div>
       </div>
     </div>

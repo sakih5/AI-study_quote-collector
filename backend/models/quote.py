@@ -166,14 +166,59 @@ class SnsGroupItem(BaseModel):
     quotes: list[QuoteInGroup]
 
 
+class OtherSource(BaseModel):
+    """その他の出典情報"""
+    source: Optional[str] = None
+    note: Optional[str] = None
+
+
 class OtherGroupItem(BaseModel):
     """その他グループアイテム"""
     type: Literal["other"] = "other"
-    quote: QuoteWithDetails
+    source_info: OtherSource
+    quotes: list[QuoteInGroup]
 
 
 class QuotesGroupedResponse(BaseModel):
     """グループ化フレーズ一覧レスポンス"""
     items: list[BookGroupItem | SnsGroupItem | OtherGroupItem]
+    total: int
+    has_more: bool
+
+
+# ====================================
+# 公開フレーズ用モデル
+# ====================================
+
+class PublicQuoteSource(BaseModel):
+    """公開フレーズの出典情報"""
+    type: Literal["BOOK", "SNS", "OTHER"]
+    # BOOK用
+    book_title: Optional[str] = None
+    book_author: Optional[str] = None
+    # SNS用
+    sns_platform: Optional[str] = None
+    sns_handle: Optional[str] = None
+    sns_display_name: Optional[str] = None
+    # OTHER用
+    other_source: Optional[str] = None
+    other_note: Optional[str] = None
+    # 共通
+    page_number: Optional[int] = None
+
+
+class PublicQuoteItem(BaseModel):
+    """公開フレーズアイテム"""
+    id: int
+    text: str
+    source: PublicQuoteSource
+    activities: list[ActivityNested] = []
+    tags: list[TagNested] = []
+    created_at: datetime
+
+
+class PublicQuotesResponse(BaseModel):
+    """公開フレーズ一覧レスポンス"""
+    items: list[PublicQuoteItem]
     total: int
     has_more: bool

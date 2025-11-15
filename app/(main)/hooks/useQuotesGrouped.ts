@@ -49,14 +49,15 @@ export interface SnsGroup {
   quotes: Quote[];
 }
 
+export interface OtherSource {
+  source?: string | null;
+  note?: string | null;
+}
+
 export interface OtherGroup {
   type: 'other';
-  quote: Quote & {
-    source_meta: {
-      source?: string;
-      note?: string;
-    };
-  };
+  source_info: OtherSource;
+  quotes: Quote[];
 }
 
 export type QuoteGroup = BookGroup | SnsGroup | OtherGroup;

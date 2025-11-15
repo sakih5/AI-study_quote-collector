@@ -8,9 +8,13 @@ from models.quote import (
     QuoteResponse,
     QuoteDeleteResponse,
     QuotesGroupedResponse,
+    PublicQuotesResponse,
+    PublicQuoteItem,
+    PublicQuoteSource,
     BookGroupItem,
     SnsGroupItem,
     OtherGroupItem,
+    OtherSource,
     QuoteInGroup,
     ActivityNested,
     TagNested,
@@ -535,21 +539,37 @@ async def get_quotes_grouped(
                 )
             )
 
-        # その他のフレーズ（グループ化なし）
+        # その他のフレーズ（出典とメモでグループ化）
+        other_groups = defaultdict(list)
         for quote in quotes:
             if quote['source_type'] == 'OTHER':
-                quote_with_details = QuoteWithDetails(
-                    id=quote['id'],
-                    text=quote['text'],
-                    page_number=quote.get('page_number'),
-                    is_public=quote.get('is_public', False),
-                    activities=[ActivityNested(**qa['activities']) for qa in quote.get('quote_activities', [])],
-                    tags=[TagNested(**qt['tags']) for qt in quote.get('quote_tags', [])],
-                    created_at=quote['created_at']
+                source_meta = quote.get('source_meta') or {}
+                source = source_meta.get('source', '') or ''
+                note = source_meta.get('note', '') or ''
+                # sourceとnoteの組み合わせでグループ化
+                group_key = (source, note)
+                other_groups[group_key].append(quote)
+
+        for (source, note), other_quotes in other_groups.items():
+            quote_list = [
+                QuoteInGroup(
+                    id=q['id'],
+                    text=q['text'],
+                    page_number=q.get('page_number'),
+                    is_public=q.get('is_public', False),
+                    activities=[ActivityNested(**qa['activities']) for qa in q.get('quote_activities', [])],
+                    tags=[TagNested(**qt['tags']) for qt in q.get('quote_tags', [])],
+                    created_at=q['created_at']
                 )
-                grouped_items.append(
-                    OtherGroupItem(quote=quote_with_details)
+                for q in other_quotes
+            ]
+
+            grouped_items.append(
+                OtherGroupItem(
+                    source_info=OtherSource(source=source if source else None, note=note if note else None),
+                    quotes=quote_list
                 )
+            )
 
         # ページネーション適用（フレーズ単位）
         total = len(quotes)
@@ -605,23 +625,26 @@ async def get_quotes_grouped(
 # ====================================
 # GET /api/quotes/public
 # ====================================
-@router.get("/public", response_model=QuotesGroupedResponse)
+@router.get("/public", response_model=PublicQuotesResponse)
 async def get_public_quotes(
     limit: int = Query(50, ge=1, le=100, description="取得件数"),
     offset: int = Query(0, ge=0, description="オフセット"),
     supabase: Client = Depends(get_supabase_client_public)
 ):
     """
-    公開フレーズを取得（認証不要）
+    公開フレーズをランダムに取得（認証不要）
 
     - **認証**: 不要
     - **limit**: 取得件数（デフォルト: 50）
     - **offset**: オフセット（デフォルト: 0）
 
-    is_public = true のフレーズを書籍・SNSユーザー別にグループ化して返す
+    is_public = true のフレーズをランダムな順序で返す
+    出典情報、活動領域、タグを含む
     """
     try:
-        # 公開フレーズを取得（通常のquotesテーブルから）
+        import random
+
+        # 公開フレーズを取得（全件）
         quotes_query = supabase.table('quotes') \
             .select('''
                 id,
@@ -640,108 +663,58 @@ async def get_public_quotes(
             ''') \
             .eq('is_public', True) \
             .is_('deleted_at', 'null') \
-            .order('created_at', desc=True) \
             .execute()
 
         if not quotes_query.data:
-            return QuotesGroupedResponse(items=[], total=0, has_more=False)
+            return PublicQuotesResponse(items=[], total=0, has_more=False)
 
         quotes = quotes_query.data
+        total = len(quotes)
 
-        # グループ化処理（/api/quotes/groupedと同じロジック）
-        grouped_items = []
+        # ランダムにシャッフル
+        random.shuffle(quotes)
 
-        # 書籍単位でグループ化
-        book_groups = defaultdict(list)
+        # フラットなフレーズリストに変換
+        public_quotes = []
         for quote in quotes:
-            if quote['source_type'] == 'BOOK' and quote['book_id'] and quote.get('books'):
-                book_groups[quote['book_id']].append(quote)
+            # 出典情報の構築
+            source_type = quote['source_type']
+            source_data = {
+                'type': source_type,
+                'page_number': quote.get('page_number')
+            }
 
-        for book_id, book_quotes in book_groups.items():
-            first_quote = book_quotes[0]
-            book_data = first_quote.get('books')
+            if source_type == 'BOOK' and quote.get('books'):
+                book = quote['books']
+                source_data['book_title'] = book.get('title')
+                source_data['book_author'] = book.get('author')
+            elif source_type == 'SNS' and quote.get('sns_users'):
+                sns_user = quote['sns_users']
+                source_data['sns_platform'] = sns_user.get('platform')
+                source_data['sns_handle'] = sns_user.get('handle')
+                source_data['sns_display_name'] = sns_user.get('display_name')
+            elif source_type == 'OTHER':
+                source_meta = quote.get('source_meta') or {}
+                source_data['other_source'] = source_meta.get('source')
+                source_data['other_note'] = source_meta.get('note')
 
-            # 書籍データがない場合はスキップ
-            if not book_data:
-                continue
-
-            quote_list = [
-                QuoteInGroup(
-                    id=q['id'],
-                    text=q['text'],
-                    page_number=q.get('page_number'),
-                    is_public=q.get('is_public', False),
-                    activities=[ActivityNested(**qa['activities']) for qa in q.get('quote_activities', [])],
-                    tags=[TagNested(**qt['tags']) for qt in q.get('quote_tags', [])],
-                    created_at=q['created_at']
-                )
-                for q in book_quotes
-            ]
-
-            grouped_items.append(
-                BookGroupItem(
-                    book=BookNested(**book_data),
-                    quotes=quote_list
-                )
+            # PublicQuoteItemを構築
+            public_quote = PublicQuoteItem(
+                id=quote['id'],
+                text=quote['text'],
+                source=PublicQuoteSource(**source_data),
+                activities=[ActivityNested(**qa['activities']) for qa in quote.get('quote_activities', [])],
+                tags=[TagNested(**qt['tags']) for qt in quote.get('quote_tags', [])],
+                created_at=quote['created_at']
             )
-
-        # SNSユーザー単位でグループ化
-        sns_groups = defaultdict(list)
-        for quote in quotes:
-            if quote['source_type'] == 'SNS' and quote['sns_user_id'] and quote.get('sns_users'):
-                sns_groups[quote['sns_user_id']].append(quote)
-
-        for sns_user_id, sns_quotes in sns_groups.items():
-            first_quote = sns_quotes[0]
-            sns_user_data = first_quote.get('sns_users')
-
-            # SNSユーザーデータがない場合はスキップ
-            if not sns_user_data:
-                continue
-
-            quote_list = [
-                QuoteInGroup(
-                    id=q['id'],
-                    text=q['text'],
-                    page_number=None,
-                    is_public=q.get('is_public', False),
-                    activities=[ActivityNested(**qa['activities']) for qa in q.get('quote_activities', [])],
-                    tags=[TagNested(**qt['tags']) for qt in q.get('quote_tags', [])],
-                    created_at=q['created_at']
-                )
-                for q in sns_quotes
-            ]
-
-            grouped_items.append(
-                SnsGroupItem(
-                    sns_user=SnsUserNested(**sns_user_data),
-                    quotes=quote_list
-                )
-            )
-
-        # その他のフレーズ（グループ化なし）
-        for quote in quotes:
-            if quote['source_type'] == 'OTHER':
-                quote_with_details = QuoteWithDetails(
-                    id=quote['id'],
-                    text=quote['text'],
-                    page_number=quote.get('page_number'),
-                    is_public=quote.get('is_public', False),
-                    activities=[ActivityNested(**qa['activities']) for qa in quote.get('quote_activities', [])],
-                    tags=[TagNested(**qt['tags']) for qt in quote.get('quote_tags', [])],
-                    created_at=quote['created_at']
-                )
-                grouped_items.append(
-                    OtherGroupItem(quote=quote_with_details)
-                )
+            public_quotes.append(public_quote)
 
         # ページネーション適用
-        total = len(quotes)
-        paginated_items = grouped_items[offset:offset + limit]
-        has_more = offset + limit < len(grouped_items)
+        paginated_quotes = public_quotes[offset:offset + limit]
+        has_more = offset + limit < total
 
-        return QuotesGroupedResponse(
-            items=paginated_items,
+        return PublicQuotesResponse(
+            items=paginated_quotes,
             total=total,
             has_more=has_more
         )

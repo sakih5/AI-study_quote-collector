@@ -29,7 +29,7 @@ export default function HomePage() {
   const { tags: allTags } = useTags();
 
   // 使用中のタグのみをフィルタリング
-  const tags = allTags.filter(tag => (tag.usage_count || 0) > 0);
+  const tags = allTags.filter((tag) => (tag.usage_count || 0) > 0);
 
   const { items, loading, loadingMore, error, total, hasMore, loadMore, refetch } =
     useQuotesGrouped({
@@ -136,7 +136,9 @@ export default function HomePage() {
       // fetchで認証付きリクエスト
       const { createClient } = await import('@/lib/supabase/client');
       const supabase = createClient();
-      const { data: { session } } = await supabase.auth.getSession();
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
 
       if (!session) {
         alert('認証が必要です。ログインしてください。');
@@ -145,8 +147,8 @@ export default function HomePage() {
 
       const response = await fetch(url, {
         headers: {
-          'Authorization': `Bearer ${session.access_token}`
-        }
+          Authorization: `Bearer ${session.access_token}`,
+        },
       });
 
       if (!response.ok) {
@@ -380,9 +382,7 @@ export default function HomePage() {
             <>
               {/* 選択モード */}
               <div className="flex items-center gap-4">
-                <p className="text-gray-900 text-sm font-medium">
-                  {selectedQuoteIds.size}件選択中
-                </p>
+                <p className="text-gray-900 text-sm font-medium">{selectedQuoteIds.size}件選択中</p>
                 <button
                   onClick={selectAllQuotes}
                   className="text-sm text-blue-600 hover:text-blue-700 transition-colors"
@@ -427,33 +427,30 @@ export default function HomePage() {
         <>
           {/* ウェルカムメッセージ（フレーズがない場合のみ） */}
           <div className="bg-white rounded-lg p-8 mb-8 text-center shadow-lg border border-gray-200">
-            <h1 className="text-3xl font-bold text-gray-900 mb-4">
-              ようこそ、抜き書きアプリへ
-            </h1>
+            <h1 className="text-3xl font-bold text-gray-900 mb-4">ようこそ、ことばアーカイブへ</h1>
             <p className="text-gray-600 mb-6">
-              本やSNSから気になったフレーズを保存して、あなただけの知識ベースを作りましょう
+              本やSNSから気になったフレーズを保存して、あなただけのアーカイブを作りましょう
             </p>
             <div className="flex justify-center gap-4">
               <div className="bg-gray-50 rounded-lg p-6 flex-1 max-w-xs border border-gray-200">
                 <div className="text-4xl mb-2">📚</div>
                 <h3 className="text-gray-900 font-semibold mb-2">フレーズを登録</h3>
-                <p className="text-gray-600 text-sm">
-                  本やSNSから気になった言葉を保存
-                </p>
+                <p className="text-gray-600 text-sm">本やSNSから気になった言葉を保存</p>
               </div>
               <div className="bg-gray-50 rounded-lg p-6 flex-1 max-w-xs border border-gray-200">
                 <div className="text-4xl mb-2">🏷️</div>
                 <h3 className="text-gray-900 font-semibold mb-2">タグで整理</h3>
-                <p className="text-gray-600 text-sm">
-                  活動領域やタグで分類して管理
-                </p>
+                <p className="text-gray-600 text-sm">活動領域やタグで分類して管理</p>
               </div>
               <div className="bg-gray-50 rounded-lg p-6 flex-1 max-w-xs border border-gray-200">
                 <div className="text-4xl mb-2">🔍</div>
                 <h3 className="text-gray-900 font-semibold mb-2">簡単に検索</h3>
-                <p className="text-gray-600 text-sm">
-                  キーワードやフィルターで素早く見つける
-                </p>
+                <p className="text-gray-600 text-sm">キーワードやフィルターで素早く見つける</p>
+              </div>
+              <div className="bg-gray-50 rounded-lg p-6 flex-1 max-w-xs border border-gray-200">
+                <div className="text-4xl mb-2">🧠</div>
+                <h3 className="text-gray-900 font-semibold mb-2">CSVエクスポート</h3>
+                <p className="text-gray-600 text-sm">集約したフレーズをCSV形式で出力可能</p>
               </div>
             </div>
           </div>
@@ -467,9 +464,7 @@ export default function HomePage() {
                   1
                 </div>
                 <div>
-                  <h3 className="text-gray-900 font-semibold mb-1">
-                    フレーズを登録する
-                  </h3>
+                  <h3 className="text-gray-900 font-semibold mb-1">フレーズを登録する</h3>
                   <p className="text-gray-600 text-sm">
                     右下の「+ 新規登録」ボタンから、気になったフレーズを登録しましょう
                   </p>
@@ -480,9 +475,7 @@ export default function HomePage() {
                   2
                 </div>
                 <div>
-                  <h3 className="text-gray-900 font-semibold mb-1">
-                    活動領域とタグを付ける
-                  </h3>
+                  <h3 className="text-gray-900 font-semibold mb-1">活動領域とタグを付ける</h3>
                   <p className="text-gray-600 text-sm">
                     「仕事・キャリア」「学習・研究」などの活動領域や、自分でタグを作成して整理できます
                   </p>
@@ -499,14 +492,23 @@ export default function HomePage() {
                   </p>
                 </div>
               </div>
+              <div className="flex items-start gap-4">
+                <div className="flex-shrink-0 w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center text-white font-bold">
+                  4
+                </div>
+                <div>
+                  <h3 className="text-gray-900 font-semibold mb-1">CSVエクスポート</h3>
+                  <p className="text-gray-600 text-sm">
+                    キーワード検索や、活動領域・タグのフィルターで絞り込んだフレーズ一覧をCSV形式でダウンロードできます
+                  </p>
+                </div>
+              </div>
             </div>
           </div>
 
           {/* 未登録メッセージ */}
           <div className="mt-8 text-center">
-            <p className="text-gray-500 text-sm">
-              まだフレーズが登録されていません
-            </p>
+            <p className="text-gray-500 text-sm">まだフレーズが登録されていません</p>
             <p className="text-gray-500 text-sm mt-2">
               フレーズを登録すると、ここに一覧が表示されます
             </p>
@@ -545,10 +547,11 @@ export default function HomePage() {
       {/* 固定フローティングボタン */}
       <button
         onClick={() => setIsModalOpen(true)}
-        className="fixed bottom-8 right-8 w-16 h-16 bg-blue-600 hover:bg-blue-700 text-white rounded-full shadow-lg flex items-center justify-center text-3xl transition-colors"
+        // className="fixed bottom-8 right-8 w-16 h-16 bg-blue-600 hover:bg-blue-700 text-white rounded-full shadow-lg flex items-center justify-center text-3xl transition-colors"
+        className="fixed bottom-8 right-8 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-full shadow-lg flex items-center gap-2 text-lg transition"
         title="新規登録"
       >
-        +
+        + 新規登録
       </button>
 
       {/* フレーズ登録モーダル */}

@@ -654,7 +654,7 @@ export default function QuoteModal({ isOpen, onClose }: QuoteModalProps) {
                           >
                             <option value="">既存のタグを選択...</option>
                             {tags
-                              .filter((tag) => !quote.tag_ids.includes(tag.id))
+                              .filter((tag) => !quote.tag_ids.includes(tag.id) && (tag.usage_count ?? 0) > 0)
                               .map((tag) => (
                                 <option key={tag.id} value={tag.id}>
                                   {tag.name}
@@ -1073,7 +1073,7 @@ export default function QuoteModal({ isOpen, onClose }: QuoteModalProps) {
                             </label>
                             {snsUsersLoading ? (
                               <p className="text-gray-600 text-sm">読み込み中...</p>
-                            ) : snsUsers.filter((u) => u.platform === snsData.platform).length ===
+                            ) : snsUsers.filter((u) => u.platform === snsData.platform && (u.usage_count ?? 0) > 0).length ===
                               0 ? (
                               <p className="text-gray-600 text-sm">
                                 登録されている{snsData.platform}ユーザーがありません
@@ -1091,7 +1091,7 @@ export default function QuoteModal({ isOpen, onClose }: QuoteModalProps) {
                               >
                                 <option value="">ユーザーを選択...</option>
                                 {snsUsers
-                                  .filter((user) => user.platform === snsData.platform)
+                                  .filter((user) => user.platform === snsData.platform && (user.usage_count ?? 0) > 0)
                                   .map((user) => (
                                     <option key={user.id} value={user.id}>
                                       @{user.handle}

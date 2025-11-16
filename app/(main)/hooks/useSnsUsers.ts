@@ -8,6 +8,7 @@ export interface SnsUser {
   platform: 'X' | 'THREADS';
   handle: string;
   display_name: string | null;
+  usage_count?: number;
 }
 
 interface SnsUsersResponse {

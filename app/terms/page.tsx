@@ -127,7 +127,16 @@ export default function TermsPage() {
           <section className="pt-6 border-t border-gray-200">
             <h2 className="text-xl font-semibold text-gray-900 mb-3">お問い合わせ</h2>
             <p>
-              本規約またはサービスに関するご質問は、GitHubのissueまたはアカウント登録時のメールアドレスよりお問い合わせください。
+              本規約またはサービスに関するご質問は、
+              <a
+                href="https://github.com/sakih5/AI-study_quote-collector/issues"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-blue-600 hover:text-blue-700 underline ml-1"
+              >
+                GitHubのIssue
+              </a>
+              よりお問い合わせください。
             </p>
           </section>
         </div>

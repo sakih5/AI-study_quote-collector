@@ -285,6 +285,7 @@ async def create_quotes(
                 'sns_user_id': quote_create.sns_user_id if quote_create.source_type == "SNS" else None,
                 'page_number': quote_create.page_number,
                 'source_meta': quote_create.source_meta if quote_create.source_type == "OTHER" else None,
+                'is_public': quote_create.is_public,
             }
 
             # Phase 3-3で確立したパターン: insert後に別途select

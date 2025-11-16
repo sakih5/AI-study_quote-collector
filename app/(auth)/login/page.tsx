@@ -80,9 +80,9 @@ export default function LoginPage() {
       <div className="max-w-md w-full">
         {/* ロゴ・タイトル */}
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">抜き書きアプリ</h1>
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">ことばアーカイブ</h1>
           <p className="text-gray-600">
-            あなたの知識を整理・管理するツール
+            心に響いた言葉を、いつでも一瞬で取り出せる。あなた専用の引き出しを作ろう
           </p>
         </div>
 
@@ -191,7 +191,7 @@ export default function LoginPage() {
               type="button"
               onClick={() => handleOAuthLogin('github')}
               disabled={loading}
-              className="w-full py-3 bg-gray-800 hover:bg-gray-900 disabled:bg-gray-600 disabled:cursor-not-allowed text-gray-900 font-medium rounded-lg transition-colors flex items-center justify-center gap-2"
+              className="w-full py-3 bg-gray-800 hover:bg-gray-900 disabled:bg-gray-600 disabled:cursor-not-allowed text-white font-medium rounded-lg transition-colors flex items-center justify-center gap-2"
             >
               <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
                 <path

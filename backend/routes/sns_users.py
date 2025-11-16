@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query, status
 from supabase import Client
 from pydantic import BaseModel
 from auth import get_current_user, get_supabase_client
-from models.sns_user import SnsUser, SnsUserCreate, SnsUsersResponse, SnsUserResponse
+from models.sns_user import SnsUser, SnsUserCreate, SnsUsersResponse, SnsUserResponse, SnsUserWithMetadata
 from services.sns_scraper import SnsUrlParser, SnsScraper
 
 router = APIRouter(
@@ -65,14 +65,36 @@ async def get_sns_users(
                 detail="SNSユーザーの取得に失敗しました"
             )
 
-        # Pydanticモデルに変換
-        sns_users = [SnsUser(**sns_user) for sns_user in response.data]
+        # 各SNSユーザーのメタデータ（使用数）を取得
+        sns_users_with_metadata = []
+        for sns_user in response.data:
+            # 使用数を取得（削除済みフレーズを除外）
+            count_response = supabase.table('quotes') \
+                .select('id', count='exact', head=True) \
+                .eq('sns_user_id', sns_user['id']) \
+                .is_('deleted_at', 'null') \
+                .execute()
+
+            usage_count = count_response.count or 0
+
+            sns_users_with_metadata.append(
+                SnsUserWithMetadata(
+                    id=sns_user['id'],
+                    user_id=sns_user['user_id'],
+                    platform=sns_user['platform'],
+                    handle=sns_user['handle'],
+                    display_name=sns_user['display_name'],
+                    created_at=sns_user['created_at'],
+                    updated_at=sns_user['updated_at'],
+                    usage_count=usage_count
+                )
+            )
 
         # totalとhas_moreを計算
         total = response.count if response.count is not None else 0
         has_more = offset + limit < total
 
-        return SnsUsersResponse(sns_users=sns_users, total=total, has_more=has_more)
+        return SnsUsersResponse(sns_users=sns_users_with_metadata, total=total, has_more=has_more)
 
     except HTTPException:
         raise

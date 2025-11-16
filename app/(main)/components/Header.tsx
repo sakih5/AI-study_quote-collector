@@ -32,7 +32,7 @@ export default function Header({ user }: HeaderProps) {
           {/* 左側: アプリ名 */}
           <div className="flex items-center gap-8">
             <Link href="/my-quotes" className="flex items-center gap-2">
-              <span className="text-2xl font-bold text-gray-900">抜き書きアプリ</span>
+              <span className="text-2xl font-bold text-gray-900">ことばアーカイブ</span>
             </Link>
           </div>
 

@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { apiGet, apiPut, apiPost, apiDelete } from '@/lib/api/client';
 
 export type TagWithMetadata = {
   id: number;
@@ -31,14 +32,7 @@ export function useTagsManagement(params: UseTagsManagementParams = {}) {
       params.append('sort', sort);
       params.append('order', order);
 
-      const response = await fetch(`/api/tags?${params.toString()}`);
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error?.message || 'タグの取得に失敗しました');
-      }
-
-      const data = await response.json();
+      const data = await apiGet<{ tags: TagWithMetadata[] }>(`/api/tags?${params.toString()}`);
       setTags(data.tags || []);
     } catch (err) {
       setError(err instanceof Error ? err.message : '予期しないエラーが発生しました');
@@ -63,18 +57,7 @@ export function useTagsManagement(params: UseTagsManagementParams = {}) {
  * タグのリネーム
  */
 export async function renameTag(tagId: number, newName: string): Promise<void> {
-  const response = await fetch(`/api/tags/${tagId}`, {
-    method: 'PUT',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ name: newName }),
-  });
-
-  if (!response.ok) {
-    const errorData = await response.json();
-    throw new Error(errorData.error?.message || 'タグの名前変更に失敗しました');
-  }
+  await apiPut(`/api/tags/${tagId}`, { name: newName });
 }
 
 /**
@@ -84,30 +67,12 @@ export async function mergeTags(
   sourceTagId: number,
   targetTagId: number
 ): Promise<void> {
-  const response = await fetch(`/api/tags/${sourceTagId}/merge`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ target_tag_id: targetTagId }),
-  });
-
-  if (!response.ok) {
-    const errorData = await response.json();
-    throw new Error(errorData.error?.message || 'タグの統合に失敗しました');
-  }
+  await apiPost(`/api/tags/${sourceTagId}/merge`, { target_tag_id: targetTagId });
 }
 
 /**
  * タグの削除
  */
 export async function deleteTag(tagId: number): Promise<void> {
-  const response = await fetch(`/api/tags/${tagId}`, {
-    method: 'DELETE',
-  });
-
-  if (!response.ok) {
-    const errorData = await response.json();
-    throw new Error(errorData.error?.message || 'タグの削除に失敗しました');
-  }
+  await apiDelete(`/api/tags/${tagId}`);
 }

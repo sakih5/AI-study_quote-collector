@@ -1,5 +1,5 @@
 from pydantic import BaseModel, Field
-from typing import Literal
+from typing import Literal, Optional
 from datetime import datetime
 
 
@@ -17,6 +17,21 @@ class SnsUser(BaseModel):
         from_attributes = True
 
 
+class SnsUserWithMetadata(BaseModel):
+    """メタデータ付きSNSユーザーモデル"""
+    id: int
+    user_id: str
+    platform: Literal["X", "THREADS"]
+    handle: str
+    display_name: str
+    created_at: datetime
+    updated_at: datetime
+    usage_count: int = 0
+
+    class Config:
+        from_attributes = True
+
+
 class SnsUserCreate(BaseModel):
     """SNSユーザー作成リクエスト"""
     platform: Literal["X", "THREADS"] = Field(..., description="プラットフォーム（XまたはTHREADS）")
@@ -26,7 +41,7 @@ class SnsUserCreate(BaseModel):
 
 class SnsUsersResponse(BaseModel):
     """SNSユーザー一覧レスポンス"""
-    sns_users: list[SnsUser]
+    sns_users: list[SnsUserWithMetadata]
     total: int
     has_more: bool
 

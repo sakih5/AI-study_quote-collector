@@ -19,6 +19,8 @@ class SnsUserFromUrlRequest(BaseModel):
 class SnsUserFromUrlResponse(BaseModel):
     """URLからSNSユーザー情報を取得するレスポンス"""
     user_info: dict
+    display_name_fetched: bool = False
+    warning: str | None = None
 
 
 @router.get("", response_model=SnsUsersResponse)
@@ -232,7 +234,18 @@ async def fetch_sns_user_from_url(
                 detail="ユーザー情報の取得に失敗しました"
             )
 
-        return SnsUserFromUrlResponse(user_info=user_info)
+        # 表示名が取得できたかチェック
+        display_name_fetched = bool(user_info.get('display_name'))
+        warning = None
+
+        if not display_name_fetched:
+            warning = "表示名を自動取得できませんでした。手動で入力してください。"
+
+        return SnsUserFromUrlResponse(
+            user_info=user_info,
+            display_name_fetched=display_name_fetched,
+            warning=warning
+        )
 
     except HTTPException:
         raise

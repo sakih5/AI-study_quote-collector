@@ -82,6 +82,7 @@ export default function QuoteModal({ isOpen, onClose }: QuoteModalProps) {
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [warning, setWarning] = useState<string | null>(null);
 
   // OCR機能の状態管理
   const [ocrText, setOcrText] = useState<string>('');
@@ -203,6 +204,7 @@ export default function QuoteModal({ isOpen, onClose }: QuoteModalProps) {
 
     setIsFetchingBookInfo(true);
     setError(null);
+    setWarning(null);
 
     try {
       const data = await apiPost<{ book_info: { title: string; author: string; publisher: string; cover_image_url: string } }>('/api/books/from-url', { url: bookUrl.trim() });
@@ -237,9 +239,14 @@ export default function QuoteModal({ isOpen, onClose }: QuoteModalProps) {
 
     setIsFetchingSnsInfo(true);
     setError(null);
+    setWarning(null);
 
     try {
-      const data = await apiPost<{ user_info: { platform: 'X' | 'THREADS'; handle: string; display_name: string } }>('/api/sns-users/from-url', { url: snsUrl.trim() });
+      const data = await apiPost<{
+        user_info: { platform: 'X' | 'THREADS'; handle: string; display_name: string | null };
+        display_name_fetched: boolean;
+        warning: string | null;
+      }>('/api/sns-users/from-url', { url: snsUrl.trim() });
       const userInfo = data.user_info;
 
       // 取得した情報をフォームに自動入力
@@ -254,6 +261,11 @@ export default function QuoteModal({ isOpen, onClose }: QuoteModalProps) {
 
       // URLフィールドをクリア
       setSnsUrl('');
+
+      // 警告メッセージがあれば表示
+      if (data.warning) {
+        setWarning(data.warning);
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'ユーザー情報の取得に失敗しました');
     } finally {
@@ -414,6 +426,7 @@ export default function QuoteModal({ isOpen, onClose }: QuoteModalProps) {
     setOtherData({ source: '', note: '' });
     setReferenceLink('');
     setError(null);
+    setWarning(null);
   };
 
   if (!isOpen) return null;
@@ -1250,6 +1263,16 @@ export default function QuoteModal({ isOpen, onClose }: QuoteModalProps) {
                 </div>
               </label>
             </div>
+
+            {/* 警告メッセージ */}
+            {warning && (
+              <div className="mb-4 p-3 bg-yellow-50 border border-yellow-400 rounded-lg text-yellow-800 text-sm flex items-start gap-2">
+                <svg className="w-5 h-5 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
+                <span>{warning}</span>
+              </div>
+            )}
 
             {/* エラーメッセージ */}
             {error && (

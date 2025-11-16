@@ -123,12 +123,14 @@ async def update_quote(
                 detail="フレーズが見つかりません"
             )
 
-        # テキストまたは公開フラグを更新
+        # テキスト、公開フラグ、またはリンクを更新
         update_data = {}
         if quote_update.text is not None:
             update_data['text'] = quote_update.text
         if quote_update.is_public is not None:
             update_data['is_public'] = quote_update.is_public
+        if quote_update.reference_link is not None:
+            update_data['reference_link'] = quote_update.reference_link
 
         if update_data:
             update_response = supabase.table('quotes') \
@@ -194,7 +196,7 @@ async def update_quote(
         # 更新後のフレーズを取得
         # Supabaseの機能で関連データを取得
         quote_response = supabase.table('quotes') \
-            .select('id, text, page_number, is_public, created_at, quote_activities(activities(id, name, icon)), quote_tags(tags(id, name))') \
+            .select('id, text, page_number, is_public, reference_link, created_at, quote_activities(activities(id, name, icon)), quote_tags(tags(id, name))') \
             .eq('id', quote_id) \
             .single() \
             .execute()
@@ -221,6 +223,7 @@ async def update_quote(
             text=quote_data['text'],
             page_number=quote_data.get('page_number'),
             is_public=quote_data.get('is_public', False),
+            reference_link=quote_data.get('reference_link'),
             activities=activities,
             tags=tags,
             created_at=quote_data['created_at']
@@ -286,6 +289,7 @@ async def create_quotes(
                 'page_number': quote_create.page_number,
                 'source_meta': quote_create.source_meta if quote_create.source_type == "OTHER" else None,
                 'is_public': quote_create.is_public,
+                'reference_link': quote_create.reference_link,
             }
 
             # Phase 3-3で確立したパターン: insert後に別途select
@@ -402,6 +406,7 @@ async def get_quotes_grouped(
                 page_number,
                 source_meta,
                 is_public,
+                reference_link,
                 created_at,
                 books(id, title, author, cover_image_url),
                 sns_users(id, platform, handle, display_name),
@@ -496,6 +501,7 @@ async def get_quotes_grouped(
                     text=q['text'],
                     page_number=q.get('page_number'),
                     is_public=q.get('is_public', False),
+                    reference_link=q.get('reference_link'),
                     activities=[ActivityNested(**qa['activities']) for qa in q.get('quote_activities', [])],
                     tags=[TagNested(**qt['tags']) for qt in q.get('quote_tags', [])],
                     created_at=q['created_at']
@@ -526,6 +532,7 @@ async def get_quotes_grouped(
                     text=q['text'],
                     page_number=None,
                     is_public=q.get('is_public', False),
+                    reference_link=q.get('reference_link'),
                     activities=[ActivityNested(**qa['activities']) for qa in q.get('quote_activities', [])],
                     tags=[TagNested(**qt['tags']) for qt in q.get('quote_tags', [])],
                     created_at=q['created_at']
@@ -558,6 +565,7 @@ async def get_quotes_grouped(
                     text=q['text'],
                     page_number=q.get('page_number'),
                     is_public=q.get('is_public', False),
+                    reference_link=q.get('reference_link'),
                     activities=[ActivityNested(**qa['activities']) for qa in q.get('quote_activities', [])],
                     tags=[TagNested(**qt['tags']) for qt in q.get('quote_tags', [])],
                     created_at=q['created_at']
@@ -656,6 +664,7 @@ async def get_public_quotes(
                 page_number,
                 source_meta,
                 is_public,
+                reference_link,
                 created_at,
                 books(id, title, author, cover_image_url),
                 sns_users(id, platform, handle, display_name),
@@ -704,6 +713,7 @@ async def get_public_quotes(
                 id=quote['id'],
                 text=quote['text'],
                 source=PublicQuoteSource(**source_data),
+                reference_link=quote.get('reference_link'),
                 activities=[ActivityNested(**qa['activities']) for qa in quote.get('quote_activities', [])],
                 tags=[TagNested(**qt['tags']) for qt in quote.get('quote_tags', [])],
                 created_at=quote['created_at']

@@ -23,6 +23,7 @@ export default function QuoteEditModal({
   const [activityIds, setActivityIds] = useState<number[]>([]);
   const [tagIds, setTagIds] = useState<number[]>([]);
   const [isPublic, setIsPublic] = useState(false);
+  const [referenceLink, setReferenceLink] = useState('');
   const [newTagName, setNewTagName] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -37,6 +38,7 @@ export default function QuoteEditModal({
       setActivityIds(quote.activities.map((a) => a.id));
       setTagIds(quote.tags.map((t) => t.id));
       setIsPublic(quote.is_public);
+      setReferenceLink(quote.reference_link || '');
     }
   }, [quote]);
 
@@ -64,6 +66,7 @@ export default function QuoteEditModal({
         activity_ids: activityIds,
         tag_ids: tagIds,
         is_public: isPublic,
+        reference_link: referenceLink.trim() || null,
       });
 
       // 成功
@@ -232,6 +235,23 @@ export default function QuoteEditModal({
                   + 追加
                 </button>
               </div>
+            </div>
+
+            {/* 参考リンク */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                🔗 参考リンク（任意）
+              </label>
+              <input
+                type="url"
+                value={referenceLink}
+                onChange={(e) => setReferenceLink(e.target.value)}
+                placeholder="例: https://example.com/article"
+                className="w-full px-4 py-2 bg-white border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+              <p className="text-xs text-gray-500 mt-1">
+                このフレーズに関連する参考URLを登録できます
+              </p>
             </div>
           </div>
 

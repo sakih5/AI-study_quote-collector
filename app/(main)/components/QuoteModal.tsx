@@ -59,6 +59,7 @@ export default function QuoteModal({ isOpen, onClose }: QuoteModalProps) {
 
   const [newTagName, setNewTagName] = useState('');
   const [isPublic, setIsPublic] = useState(false); // 公開/非公開フラグ
+  const [referenceLink, setReferenceLink] = useState(''); // 参考リンク
 
   // 出典情報の管理
   const [bookData, setBookData] = useState<BookData>({
@@ -356,6 +357,7 @@ export default function QuoteModal({ isOpen, onClose }: QuoteModalProps) {
         }>;
         source_type: 'BOOK' | 'SNS' | 'OTHER';
         is_public: boolean;
+        reference_link?: string;
         book_id?: number;
         sns_user_id?: number;
         source_meta?: {
@@ -368,6 +370,7 @@ export default function QuoteModal({ isOpen, onClose }: QuoteModalProps) {
         quotes: quotesPayload,
         source_type: sourceType,
         is_public: isPublic,
+        reference_link: referenceLink.trim() || undefined,
       };
 
       if (sourceType === 'BOOK') {
@@ -409,6 +412,7 @@ export default function QuoteModal({ isOpen, onClose }: QuoteModalProps) {
       newSnsUser: { handle: '', display_name: '' },
     });
     setOtherData({ source: '', note: '' });
+    setReferenceLink('');
     setError(null);
   };
 
@@ -720,6 +724,23 @@ export default function QuoteModal({ isOpen, onClose }: QuoteModalProps) {
                       )}
                     </div>
                   ))}
+
+                  {/* 参考リンク */}
+                  <div className="pt-4 border-t border-gray-200">
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      🔗 参考リンク（任意）
+                    </label>
+                    <input
+                      type="url"
+                      value={referenceLink}
+                      onChange={(e) => setReferenceLink(e.target.value)}
+                      placeholder="例: https://example.com/article"
+                      className="w-full px-4 py-2 bg-white border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                    <p className="text-xs text-gray-500 mt-1">
+                      このフレーズに関連する参考URLを登録できます
+                    </p>
+                  </div>
 
                   {/* フレーズ追加ボタン */}
                   <button

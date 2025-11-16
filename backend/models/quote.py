@@ -63,6 +63,7 @@ class Quote(BaseModel):
     page_number: Optional[int] = None
     source_meta: Optional[dict] = None
     is_public: bool = False
+    reference_link: Optional[str] = None
     created_at: datetime
     updated_at: datetime
 
@@ -76,6 +77,7 @@ class QuoteWithDetails(BaseModel):
     text: str
     page_number: Optional[int] = None
     is_public: bool = False
+    reference_link: Optional[str] = None
     activities: list[ActivityNested]
     tags: list[TagNested]
     created_at: datetime
@@ -90,6 +92,7 @@ class QuoteInGroup(BaseModel):
     text: str
     page_number: Optional[int] = None
     is_public: bool = False
+    reference_link: Optional[str] = None
     activities: list[ActivityNested] = []
     tags: list[TagNested] = []
     created_at: datetime
@@ -118,6 +121,7 @@ class QuoteCreate(BaseModel):
     page_number: Optional[int] = None
     source_meta: Optional[dict] = None
     is_public: bool = False
+    reference_link: Optional[str] = None
 
 
 class QuoteUpdate(BaseModel):
@@ -126,6 +130,7 @@ class QuoteUpdate(BaseModel):
     activity_ids: Optional[list[int]] = None
     tag_ids: Optional[list[int]] = None
     is_public: Optional[bool] = None
+    reference_link: Optional[str] = None
 
 
 # ====================================
@@ -212,6 +217,7 @@ class PublicQuoteItem(BaseModel):
     id: int
     text: str
     source: PublicQuoteSource
+    reference_link: Optional[str] = None
     activities: list[ActivityNested] = []
     tags: list[TagNested] = []
     created_at: datetime

@@ -24,6 +24,7 @@ class OCRResponse(BaseModel):
     """OCRレスポンス"""
     text: str
     lines: list
+    average_confidence: float  # 全体の平均信頼度（0.0-1.0）
 
 
 @router.post('/extract-text', response_model=OCRResponse)
@@ -43,7 +44,8 @@ async def extract_text_from_base64(request: OCRRequest):
             image_data=request.image_data,
             min_confidence=request.min_confidence
         )
-        print(f"[OCR] 処理成功: text length={len(result['text'])}, lines={len(result['lines'])}")
+        avg_conf = result.get('average_confidence', 0.0)
+        print(f"[OCR] 処理成功: text length={len(result['text'])}, lines={len(result['lines'])}, avg_confidence={avg_conf:.2f}")
         return OCRResponse(**result)
     except Exception as e:
         import traceback

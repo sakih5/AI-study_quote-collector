@@ -91,6 +91,7 @@ export default function QuoteModal({ isOpen, onClose }: QuoteModalProps) {
   const [isOCRProcessing, setIsOCRProcessing] = useState(false);
   const [ocrProgress, setOcrProgress] = useState<string>('');
   const [ocrError, setOcrError] = useState<string>('');
+  const [ocrConfidence, setOcrConfidence] = useState<number>(0);
   const ocrFileInputRef = useRef<HTMLInputElement>(null);
 
   // URL取得機能の状態管理
@@ -112,7 +113,7 @@ export default function QuoteModal({ isOpen, onClose }: QuoteModalProps) {
       setOcrProgress('AIが文字を認識しています...');
 
       // バックエンドAPIを呼び出し
-      const response = await apiPost<{ text: string; lines: any[] }>('/api/ocr/extract-text', {
+      const response = await apiPost<{ text: string; lines: any[]; average_confidence: number }>('/api/ocr/extract-text', {
         image_data: imageDataUrl,
         min_confidence: 0.5
       });
@@ -121,6 +122,7 @@ export default function QuoteModal({ isOpen, onClose }: QuoteModalProps) {
       await new Promise(resolve => setTimeout(resolve, 200));
 
       setOcrText(response.text);
+      setOcrConfidence(response.average_confidence);
       setOcrProgress('');
     } catch (err) {
       console.error('OCR error:', err);
@@ -180,11 +182,21 @@ export default function QuoteModal({ isOpen, onClose }: QuoteModalProps) {
   const handleOCRTextSelect = (selectedText: string) => {
     // 選択されたテキストをフレーズ入力欄に追加
     if (selectedText.trim()) {
-      setQuotes([...quotes, {
-        text: selectedText.trim(),
-        activity_ids: [],
-        tag_ids: [],
-      }]);
+      // 最初のフレーズが空の場合は、そこに入れる
+      if (quotes.length === 1 && quotes[0].text === '') {
+        setQuotes([{
+          text: selectedText.trim(),
+          activity_ids: [],
+          tag_ids: [],
+        }]);
+      } else {
+        // それ以外の場合は新しいフレーズとして追加
+        setQuotes([...quotes, {
+          text: selectedText.trim(),
+          activity_ids: [],
+          tag_ids: [],
+        }]);
+      }
     }
   };
 
@@ -541,6 +553,7 @@ export default function QuoteModal({ isOpen, onClose }: QuoteModalProps) {
                   <OCRTextSelector
                     text={ocrText}
                     imageUrl={ocrImageUrl}
+                    averageConfidence={ocrConfidence}
                     onTextSelect={handleOCRTextSelect}
                     onClose={handleOCRReset}
                   />

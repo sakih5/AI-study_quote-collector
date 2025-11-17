@@ -26,6 +26,12 @@ FROM python:3.12-slim
 # Set working directory
 WORKDIR /app
 
+# Install Tesseract OCR and Japanese language data
+RUN apt-get update && apt-get install -y \
+    tesseract-ocr \
+    tesseract-ocr-jpn \
+    && rm -rf /var/lib/apt/lists/*
+
 # Copy virtual environment from builder
 COPY --from=builder /app/.venv /app/.venv
 

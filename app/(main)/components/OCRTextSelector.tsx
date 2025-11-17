@@ -5,6 +5,7 @@ import { useState, useRef, useEffect } from 'react';
 interface OCRTextSelectorProps {
   text: string;
   imageUrl: string;
+  averageConfidence: number;
   onTextSelect: (selectedText: string) => void;
   onClose: () => void;
 }
@@ -12,33 +13,39 @@ interface OCRTextSelectorProps {
 export default function OCRTextSelector({
   text,
   imageUrl,
+  averageConfidence,
   onTextSelect,
   onClose,
 }: OCRTextSelectorProps) {
+  const [editedText, setEditedText] = useState(text);
   const [selectedText, setSelectedText] = useState('');
-  const textRef = useRef<HTMLDivElement>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  // textが変更されたら編集テキストも更新
+  useEffect(() => {
+    setEditedText(text);
+  }, [text]);
 
   // テキスト選択の監視
-  useEffect(() => {
-    const handleSelectionChange = () => {
-      const selection = window.getSelection();
-      if (selection && selection.toString().trim()) {
-        setSelectedText(selection.toString().trim());
+  const handleTextareaSelect = () => {
+    if (textareaRef.current) {
+      const start = textareaRef.current.selectionStart;
+      const end = textareaRef.current.selectionEnd;
+      if (start !== end) {
+        const selected = editedText.substring(start, end);
+        setSelectedText(selected);
       }
-    };
-
-    document.addEventListener('selectionchange', handleSelectionChange);
-    return () => {
-      document.removeEventListener('selectionchange', handleSelectionChange);
-    };
-  }, []);
+    }
+  };
 
   const handleAddSelection = () => {
     if (selectedText) {
       onTextSelect(selectedText);
       setSelectedText('');
-      // 選択をクリア
-      window.getSelection()?.removeAllRanges();
+      // textareaの選択をクリア
+      if (textareaRef.current) {
+        textareaRef.current.selectionStart = textareaRef.current.selectionEnd;
+      }
     }
   };
 
@@ -46,9 +53,14 @@ export default function OCRTextSelector({
     <div className="space-y-4">
       {/* ヘッダー */}
       <div className="flex items-center justify-between">
-        <h3 className="text-lg font-semibold text-gray-900">
-          抽出されたテキスト
-        </h3>
+        <div className="flex items-center gap-3">
+          <h3 className="text-lg font-semibold text-gray-900">
+            抽出されたテキスト
+          </h3>
+          <span className="px-3 py-1 bg-blue-100 text-blue-700 text-sm font-medium rounded-full">
+            信頼度: {(averageConfidence * 100).toFixed(1)}%
+          </span>
+        </div>
         <button
           onClick={onClose}
           className="text-gray-600 hover:text-gray-900 transition-colors text-2xl"
@@ -58,7 +70,7 @@ export default function OCRTextSelector({
       </div>
 
       <p className="text-sm text-gray-600">
-        テキストをドラッグして選択し、「選択したテキストを追加」ボタンでフレーズとして登録できます
+        左の画像を見ながら、右のテキストを編集できます。編集後、テキストをドラッグして選択し、「選択したテキストを追加」ボタンでフレーズとして登録できます
       </p>
 
       {/* 画像とテキストの横並び表示 */}
@@ -66,31 +78,26 @@ export default function OCRTextSelector({
         {/* 左側: 元画像 */}
         <div className="space-y-2">
           <h4 className="text-sm font-medium text-gray-700">元画像</h4>
-          <div className="border border-gray-300 rounded-lg overflow-hidden bg-gray-50">
+          <div className="border border-gray-300 rounded-lg overflow-hidden bg-gray-50 h-[500px] flex items-center justify-center">
             <img
               src={imageUrl}
               alt="OCR対象画像"
-              className="w-full h-auto max-h-[500px] object-contain"
+              className="w-full h-full object-contain"
             />
           </div>
         </div>
 
-        {/* 右側: 抽出されたテキスト */}
+        {/* 右側: 抽出されたテキスト（編集可能） */}
         <div className="space-y-2">
-          <h4 className="text-sm font-medium text-gray-700">抽出されたテキスト</h4>
-          <div
-            ref={textRef}
-            className="p-4 bg-white border border-gray-300 rounded-lg min-h-[300px] max-h-[500px] overflow-y-auto select-text"
-            style={{
-              userSelect: 'text',
-              WebkitUserSelect: 'text',
-              MozUserSelect: 'text',
-            }}
-          >
-            <div className="whitespace-pre-wrap text-gray-900 leading-relaxed">
-              {text}
-            </div>
-          </div>
+          <h4 className="text-sm font-medium text-gray-700">抽出されたテキスト（編集可能）</h4>
+          <textarea
+            ref={textareaRef}
+            value={editedText}
+            onChange={(e) => setEditedText(e.target.value)}
+            onSelect={handleTextareaSelect}
+            className="w-full h-[500px] p-4 bg-white border border-gray-300 rounded-lg resize-none font-sans text-gray-900 leading-relaxed focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            placeholder="OCRで抽出されたテキストがここに表示されます"
+          />
         </div>
       </div>
 

@@ -1,45 +1,108 @@
 """
-PaddleOCR画像文字認識サービス
+Tesseract画像文字認識サービス
 
-PaddleOCRを使用して画像からテキストを抽出
+pytesseractを使用して画像からテキストを抽出
 """
 
 import base64
 import io
 from typing import List, Dict, Any, Optional
 from PIL import Image
-import numpy as np
+import pytesseract
 
 
 class OCRService:
     """OCRサービスクラス"""
 
-    _ocr = None
+    @staticmethod
+    def _group_words_into_lines(data: Dict[str, Any], min_confidence: float = 0.5) -> List[Dict[str, Any]]:
+        """
+        pytesseractの単語レベルデータを行レベルにグループ化
 
-    @classmethod
-    def get_ocr(cls):
-        """PaddleOCRインスタンスをシングルトンで取得"""
-        if cls._ocr is None:
-            try:
-                print("[OCR] PaddleOCRを初期化中...")
-                from paddleocr import PaddleOCR
-                # lang='japan': 日本語モデル使用
-                # use_angle_cls=True: テキストの向きを自動検出
-                cls._ocr = PaddleOCR(
-                    lang='japan',
-                    use_angle_cls=True
-                )
-                print("[OCR] PaddleOCR初期化完了")
-            except ImportError as e:
-                print(f"[OCR ERROR] ImportError: {e}")
-                raise ImportError(
-                    "PaddleOCRがインストールされていません。"
-                    "pip install paddleocr paddlepaddle を実行してください。"
-                )
-            except Exception as e:
-                print(f"[OCR ERROR] PaddleOCR初期化エラー: {type(e).__name__}: {str(e)}")
-                raise
-        return cls._ocr
+        Args:
+            data: pytesseract.image_to_dataの出力
+            min_confidence: 最小信頼度スコア（0-100のスケール）
+
+        Returns:
+            行ごとにグループ化されたデータのリスト
+        """
+        lines = []
+        line_map = {}  # {(page_num, block_num, par_num, line_num): [word_data]}
+
+        n_boxes = len(data['text'])
+        filtered_count = 0
+        total_text_count = 0
+
+        for i in range(n_boxes):
+            # テキストが空、または信頼度が閾値未満の場合はスキップ
+            conf = float(data['conf'][i])
+            text = data['text'][i].strip()
+
+            if not text or conf < 0:  # -1は非テキスト要素
+                continue
+
+            total_text_count += 1
+
+            # 信頼度フィルタリング（0-100スケール）
+            if conf < min_confidence:
+                filtered_count += 1
+                continue
+
+            # confidenceを0-1スケールに正規化（レスポンス用）
+            confidence = conf / 100.0
+
+            # 行を識別するキー
+            line_key = (
+                data['page_num'][i],
+                data['block_num'][i],
+                data['par_num'][i],
+                data['line_num'][i]
+            )
+
+            if line_key not in line_map:
+                line_map[line_key] = []
+
+            line_map[line_key].append({
+                'text': text,
+                'confidence': confidence,
+                'left': data['left'][i],
+                'top': data['top'][i],
+                'width': data['width'][i],
+                'height': data['height'][i]
+            })
+
+        # 各行のデータを整形
+        for line_key, words in sorted(line_map.items()):
+            if not words:
+                continue
+
+            # 行全体のテキストを結合（日本語は空白なしで結合）
+            line_text = ''.join(word['text'] for word in words)
+
+            # 行全体の平均信頼度を計算
+            avg_confidence = sum(word['confidence'] for word in words) / len(words)
+
+            # 行全体のbboxを計算（4点の座標）
+            min_left = min(word['left'] for word in words)
+            min_top = min(word['top'] for word in words)
+            max_right = max(word['left'] + word['width'] for word in words)
+            max_bottom = max(word['top'] + word['height'] for word in words)
+
+            bbox = [
+                [min_left, min_top],           # 左上
+                [max_right, min_top],          # 右上
+                [max_right, max_bottom],       # 右下
+                [min_left, max_bottom]         # 左下
+            ]
+
+            lines.append({
+                'text': line_text,
+                'confidence': avg_confidence,
+                'bbox': bbox
+            })
+
+        print(f"[OCR DEBUG] Total text elements: {total_text_count}, Filtered by confidence: {filtered_count}, Grouped into {len(lines)} lines, Min confidence: {min_confidence}")
+        return lines
 
     @classmethod
     def extract_text_from_image(
@@ -85,91 +148,60 @@ class OCRService:
             image = Image.open(io.BytesIO(image_bytes))
             print(f"[OCR] Image mode: {image.mode}, size: {image.size}")
 
-            # RGBに変換（PNGのアルファチャンネル対策）
-            if image.mode != 'RGB':
-                print(f"[OCR] RGB変換中... ({image.mode} -> RGB)")
-                image = image.convert('RGB')
+            # 画像の前処理（OCR精度向上のため）
+            print("[OCR] 画像の前処理中...")
 
-            # NumPy配列に変換（PaddleOCRの入力形式）
-            print("[OCR] NumPy配列変換中...")
-            image_array = np.array(image)
-            print(f"[OCR] NumPy shape: {image_array.shape}")
+            # グレースケール化
+            if image.mode != 'L':
+                image = image.convert('L')
+                print(f"[OCR] グレースケール変換完了")
 
-            # OCR実行
-            print("[OCR] OCR実行中...")
-            ocr = cls.get_ocr()
-            result = ocr.ocr(image_array)
-            print(f"[OCR] OCR実行完了: result type={type(result)}")
+            # コントラスト強化（PIL ImageEnhance使用）
+            from PIL import ImageEnhance
+            enhancer = ImageEnhance.Contrast(image)
+            image = enhancer.enhance(2.0)  # コントラストを2倍に
+            print("[OCR] コントラスト強化完了")
 
-            # 結果を整形
-            lines = []
-            full_text_parts = []
+            # Tesseract OCR実行
+            print("[OCR] Tesseract OCR実行中...")
 
-            print(f"[OCR] 結果処理開始")
+            # 詳細データ取得（bbox, confidence含む）
+            # lang='jpn': 日本語モデル使用
+            # --psm 6: 単一の均一なテキストブロックと想定（文書向け）
+            # --oem 1: LSTM neural netモード（高精度）
+            data = pytesseract.image_to_data(
+                image,
+                lang='jpn',
+                output_type=pytesseract.Output.DICT,
+                config='--psm 6 --oem 1'
+            )
+            print(f"[OCR] OCR実行完了: {len(data['text'])} 要素検出")
 
-            if result and len(result) > 0:
-                ocr_result = result[0]
-                print(f"[OCR] ocr_result type={type(ocr_result)}")
-
-                # 新しいPaddleOCR (3.x) の構造に対応（辞書形式）
-                if isinstance(ocr_result, dict) and 'rec_texts' in ocr_result:
-                    rec_texts = ocr_result['rec_texts']
-                    rec_scores = ocr_result.get('rec_scores', [])
-                    rec_polys = ocr_result.get('rec_polys', [])
-
-                    print(f"[OCR] テキスト数: {len(rec_texts)}")
-
-                    for i, text in enumerate(rec_texts):
-                        confidence = float(rec_scores[i]) if i < len(rec_scores) else 1.0
-
-                        # rec_polysはnumpy arrayなのでtolist()で変換
-                        if i < len(rec_polys):
-                            bbox = rec_polys[i].tolist() if hasattr(rec_polys[i], 'tolist') else rec_polys[i]
-                        else:
-                            bbox = []
-
-                        print(f"[OCR] Line {i}: text={text}, confidence={confidence}")
-
-                        # 信頼度フィルタリング
-                        if confidence >= min_confidence:
-                            lines.append({
-                                'text': text,
-                                'confidence': confidence,
-                                'bbox': bbox
-                            })
-                            full_text_parts.append(text)
-                # 古いPaddleOCR (2.x) の構造にも対応（リスト形式）
-                elif isinstance(ocr_result, list):
-                    print(f"[OCR] 古い形式の結果")
-                    for line in ocr_result:
-                        bbox = line[0]
-                        text_info = line[1]
-
-                        if isinstance(text_info, str):
-                            text = text_info
-                            confidence = 1.0
-                        elif isinstance(text_info, (list, tuple)) and len(text_info) >= 2:
-                            text = text_info[0]
-                            confidence = float(text_info[1])
-                        else:
-                            continue
-
-                        if confidence >= min_confidence:
-                            lines.append({
-                                'text': text,
-                                'confidence': confidence,
-                                'bbox': bbox
-                            })
-                            full_text_parts.append(text)
+            # 単語レベルデータを行レベルにグループ化
+            # min_confidenceは0-1スケールだが、内部で0-100に変換される
+            print("[OCR] 結果を行単位にグループ化中...")
+            lines = cls._group_words_into_lines(data, min_confidence * 100)
+            print(f"[OCR] {len(lines)} 行検出")
 
             # 全文を改行で結合
-            full_text = '\n'.join(full_text_parts)
+            full_text = '\n'.join(line['text'] for line in lines)
+
+            # 平均信頼度を計算
+            average_confidence = 0.0
+            if lines:
+                average_confidence = sum(line['confidence'] for line in lines) / len(lines)
 
             return {
                 'text': full_text,
-                'lines': lines
+                'lines': lines,
+                'average_confidence': average_confidence
             }
 
+        except pytesseract.TesseractNotFoundError:
+            raise Exception(
+                "Tesseractがインストールされていません。"
+                "システムにtesseract-ocrと日本語データ(tesseract-ocr-jpn)をインストールしてください。"
+            )
         except Exception as e:
             raise Exception(f"OCR処理に失敗しました: {str(e)}")
 
@@ -190,53 +222,59 @@ class OCRService:
             OCR結果の辞書
         """
         try:
+            print(f"[OCR] ファイル処理開始: {len(file_bytes)} bytes")
+
             # PIL Imageに変換
             image = Image.open(io.BytesIO(file_bytes))
+            print(f"[OCR] Image mode: {image.mode}, size: {image.size}")
 
-            # RGBに変換
-            if image.mode != 'RGB':
-                image = image.convert('RGB')
+            # 画像の前処理（OCR精度向上のため）
+            print("[OCR] 画像の前処理中...")
 
-            # NumPy配列に変換
-            image_array = np.array(image)
+            # グレースケール化
+            if image.mode != 'L':
+                image = image.convert('L')
+                print(f"[OCR] グレースケール変換完了")
 
-            # OCR実行
-            ocr = cls.get_ocr()
-            result = ocr.ocr(image_array)
+            # コントラスト強化
+            from PIL import ImageEnhance
+            enhancer = ImageEnhance.Contrast(image)
+            image = enhancer.enhance(2.0)
+            print("[OCR] コントラスト強化完了")
 
-            # 結果を整形
-            lines = []
-            full_text_parts = []
+            # Tesseract OCR実行
+            print("[OCR] Tesseract OCR実行中...")
+            data = pytesseract.image_to_data(
+                image,
+                lang='jpn',
+                output_type=pytesseract.Output.DICT,
+                config='--psm 6 --oem 1'
+            )
+            print(f"[OCR] OCR実行完了: {len(data['text'])} 要素検出")
 
-            if result and result[0]:
-                for line in result[0]:
-                    bbox = line[0]
-                    text_info = line[1]
+            # 単語レベルデータを行レベルにグループ化
+            print("[OCR] 結果を行単位にグループ化中...")
+            lines = cls._group_words_into_lines(data, min_confidence * 100)
+            print(f"[OCR] {len(lines)} 行検出")
 
-                    # text_infoが文字列の場合とタプルの場合で処理を分ける
-                    if isinstance(text_info, str):
-                        text = text_info
-                        confidence = 1.0
-                    elif isinstance(text_info, (list, tuple)) and len(text_info) >= 2:
-                        text = text_info[0]
-                        confidence = float(text_info[1])
-                    else:
-                        continue
+            # 全文を改行で結合
+            full_text = '\n'.join(line['text'] for line in lines)
 
-                    if confidence >= min_confidence:
-                        lines.append({
-                            'text': text,
-                            'confidence': confidence,
-                            'bbox': bbox
-                        })
-                        full_text_parts.append(text)
-
-            full_text = '\n'.join(full_text_parts)
+            # 平均信頼度を計算
+            average_confidence = 0.0
+            if lines:
+                average_confidence = sum(line['confidence'] for line in lines) / len(lines)
 
             return {
                 'text': full_text,
-                'lines': lines
+                'lines': lines,
+                'average_confidence': average_confidence
             }
 
+        except pytesseract.TesseractNotFoundError:
+            raise Exception(
+                "Tesseractがインストールされていません。"
+                "システムにtesseract-ocrと日本語データ(tesseract-ocr-jpn)をインストールしてください。"
+            )
         except Exception as e:
             raise Exception(f"OCR処理に失敗しました: {str(e)}")

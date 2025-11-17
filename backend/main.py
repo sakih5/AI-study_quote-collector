@@ -4,6 +4,7 @@ from fastapi.openapi.utils import get_openapi
 from auth import get_current_user, get_supabase_client
 from routes import activities, tags, books, sns_users, quotes, export, ocr
 from supabase import Client
+from config import settings
 
 app = FastAPI(
     title="抜き書きアプリ API",
@@ -41,10 +42,19 @@ def custom_openapi():
 
 app.openapi = custom_openapi
 
-# CORS設定
+# 起動時の設定情報をログ出力
+print("=" * 50)
+print("FastAPI Application Starting...")
+print(f"Environment: {settings.environment}")
+print(f"Supabase URL: {settings.supabase_url}")
+print(f"CORS Origins: {settings.cors_origins}")
+print("=" * 50)
+
+# CORS設定（環境変数から読み込み）
+cors_origins = [origin.strip() for origin in settings.cors_origins.split(",")]
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],
+    allow_origins=cors_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

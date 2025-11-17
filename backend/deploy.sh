@@ -75,14 +75,36 @@ echo -e "${GREEN}Step 2: Deploying to Cloud Run...${NC}"
 # === gcloud run services describeで取得できるアプリのURLが旧型式のため、止める ===
 
 # === gcloud run services describeで取得できるアプリのURLが旧型式のため、止める → 修正後 ===
+# フロントエンドURL（デフォルト値を設定）
+FRONTEND_URL=${FRONTEND_URL:-"https://ai-study-quote-collector.vercel.app"}
+CORS_ORIGINS="http://localhost:3000,${FRONTEND_URL}"
+
+# 環境変数をファイルに書き出す（特殊文字を含むため）
+cat > /tmp/env-vars.yaml <<EOF
+SUPABASE_URL: "${SUPABASE_URL}"
+SUPABASE_KEY: "${SUPABASE_KEY}"
+CORS_ORIGINS: "${CORS_ORIGINS}"
+ENVIRONMENT: "production"
+EOF
+
 SERVICE_URL=$(gcloud run deploy ${SERVICE_NAME} \
   --image ${IMAGE_NAME} \
   --platform managed \
   --region ${REGION} \
   --allow-unauthenticated \
-  --set-env-vars="SUPABASE_URL=${SUPABASE_URL},SUPABASE_KEY=${SUPABASE_KEY}" \
+  --env-vars-file=/tmp/env-vars.yaml \
   --project ${PROJECT_ID} \
+  --timeout=300 \
+  --memory=512Mi \
+  --cpu=1 \
+  --max-instances=10 \
   --format 'value(status.url)')
+# NOTE: Tesseractに切り替え後、より軽量になる可能性があります。
+# パフォーマンステスト後、以下の設定を検討してください：
+# --timeout=120 --memory=256Mi
+
+# 一時ファイルを削除
+rm -f /tmp/env-vars.yaml
 # === gcloud run services describeで取得できるアプリのURLが旧型式のため、止める → 修正後 ===
 
 echo -e "${GREEN}========================================${NC}"

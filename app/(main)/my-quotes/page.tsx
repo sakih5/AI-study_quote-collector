@@ -130,7 +130,7 @@ export default function HomePage() {
       }
 
       // FastAPI URLを使用
-      const apiUrl = process.env.NEXT_PUBLIC_FASTAPI_URL || '';
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || process.env.NEXT_PUBLIC_FASTAPI_URL || '';
       const url = `${apiUrl}/api/export/csv${params.toString() ? '?' + params.toString() : ''}`;
 
       // fetchで認証付きリクエスト

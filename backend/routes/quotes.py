@@ -681,6 +681,15 @@ async def get_public_quotes(
         quotes = quotes_query.data
         total = len(quotes)
 
+        # デバッグ: 最初のquoteの構造を確認
+        if quotes:
+            first_quote = quotes[0]
+            print(f"[DEBUG] First quote structure:")
+            print(f"  - quote_activities: {first_quote.get('quote_activities')}")
+            print(f"  - quote_tags: {first_quote.get('quote_tags')}")
+            print(f"  - books: {first_quote.get('books')}")
+            print(f"  - sns_users: {first_quote.get('sns_users')}")
+
         # ランダムにシャッフル
         random.shuffle(quotes)
 

@@ -656,20 +656,7 @@ async def get_public_quotes(
         # 公開フレーズを取得（全件）
         # ジャンクションテーブル経由のリレーションシップは別クエリで取得
         quotes_query = supabase.table('quotes') \
-            .select('''
-                id,
-                text,
-                source_type,
-                book_id,
-                sns_user_id,
-                page_number,
-                source_meta,
-                is_public,
-                reference_link,
-                created_at,
-                books!quotes_book_id_fkey(id, title, author, cover_image_url),
-                sns_users!quotes_sns_user_id_fkey(id, platform, handle, display_name)
-            ''') \
+            .select('*') \
             .eq('is_public', True) \
             .is_('deleted_at', 'null') \
             .execute()
@@ -683,18 +670,43 @@ async def get_public_quotes(
         # 各quoteのIDを収集
         quote_ids = [q['id'] for q in quotes]
 
+        # book_idとsns_user_idを収集
+        book_ids = [q['book_id'] for q in quotes if q.get('book_id')]
+        sns_user_ids = [q['sns_user_id'] for q in quotes if q.get('sns_user_id')]
+
+        # booksとsns_usersを別クエリで取得
+        books_map = {}
+        if book_ids:
+            books_query = supabase.table('books') \
+                .select('id, title, author, cover_image_url') \
+                .in_('id', book_ids) \
+                .execute()
+            for book in books_query.data or []:
+                books_map[book['id']] = book
+
+        sns_users_map = {}
+        if sns_user_ids:
+            sns_users_query = supabase.table('sns_users') \
+                .select('id, platform, handle, display_name') \
+                .in_('id', sns_user_ids) \
+                .execute()
+            for sns_user in sns_users_query.data or []:
+                sns_users_map[sns_user['id']] = sns_user
+
         # activitiesとtagsを別クエリで取得
         # quote_activitiesとactivitiesをJOINして取得
         activities_query = supabase.table('quote_activities') \
             .select('quote_id, activities(id, name, icon)') \
             .in_('quote_id', quote_ids) \
             .execute()
+        print(f"[DEBUG] activities_query.data: {activities_query.data}")
 
         # quote_tagsとtagsをJOINして取得
         tags_query = supabase.table('quote_tags') \
             .select('quote_id, tags(id, name)') \
             .in_('quote_id', quote_ids) \
             .execute()
+        print(f"[DEBUG] tags_query.data: {tags_query.data}")
 
         # quote_id -> activities のマッピングを作成
         activities_map = defaultdict(list)
@@ -708,8 +720,12 @@ async def get_public_quotes(
             if qt.get('tags'):
                 tags_map[qt['quote_id']].append(qt['tags'])
 
-        # quotesにactivitiesとtagsを追加
+        # quotesにbooks, sns_users, activities, tagsを追加
         for quote in quotes:
+            if quote.get('book_id'):
+                quote['books'] = books_map.get(quote['book_id'])
+            if quote.get('sns_user_id'):
+                quote['sns_users'] = sns_users_map.get(quote['sns_user_id'])
             quote['_activities'] = activities_map.get(quote['id'], [])
             quote['_tags'] = tags_map.get(quote['id'], [])
 

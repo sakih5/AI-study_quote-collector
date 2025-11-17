@@ -6,8 +6,8 @@ import { createClient } from '@/lib/supabase/client';
  * 認証トークンを自動的に付与してFastAPIエンドポイントを呼び出す
  */
 
-// Next.js API Routes用のベースURL（相対パス）
-const FASTAPI_BASE_URL = process.env.NEXT_PUBLIC_FASTAPI_URL || '';
+// FastAPI用のベースURL
+const FASTAPI_BASE_URL = process.env.NEXT_PUBLIC_API_URL || process.env.NEXT_PUBLIC_FASTAPI_URL || '';
 
 /**
  * FastAPI用のfetchラッパー

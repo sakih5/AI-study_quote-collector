@@ -699,14 +699,12 @@ async def get_public_quotes(
             .select('quote_id, activities(id, name, icon)') \
             .in_('quote_id', quote_ids) \
             .execute()
-        print(f"[DEBUG] activities_query.data: {activities_query.data}")
 
         # quote_tagsとtagsをJOINして取得
         tags_query = supabase.table('quote_tags') \
             .select('quote_id, tags(id, name)') \
             .in_('quote_id', quote_ids) \
             .execute()
-        print(f"[DEBUG] tags_query.data: {tags_query.data}")
 
         # quote_id -> activities のマッピングを作成
         activities_map = defaultdict(list)

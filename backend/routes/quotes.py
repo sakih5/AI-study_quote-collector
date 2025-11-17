@@ -654,6 +654,7 @@ async def get_public_quotes(
         import random
 
         # 公開フレーズを取得（全件）
+        # ジャンクションテーブル経由のリレーションシップは別クエリで取得
         quotes_query = supabase.table('quotes') \
             .select('''
                 id,
@@ -666,10 +667,8 @@ async def get_public_quotes(
                 is_public,
                 reference_link,
                 created_at,
-                books(id, title, author, cover_image_url),
-                sns_users(id, platform, handle, display_name),
-                quote_activities(activities(id, name, icon)),
-                quote_tags(tags(id, name))
+                books!quotes_book_id_fkey(id, title, author, cover_image_url),
+                sns_users!quotes_sns_user_id_fkey(id, platform, handle, display_name)
             ''') \
             .eq('is_public', True) \
             .is_('deleted_at', 'null') \
@@ -681,14 +680,38 @@ async def get_public_quotes(
         quotes = quotes_query.data
         total = len(quotes)
 
-        # デバッグ: 最初のquoteの構造を確認
-        if quotes:
-            first_quote = quotes[0]
-            print(f"[DEBUG] First quote structure:")
-            print(f"  - quote_activities: {first_quote.get('quote_activities')}")
-            print(f"  - quote_tags: {first_quote.get('quote_tags')}")
-            print(f"  - books: {first_quote.get('books')}")
-            print(f"  - sns_users: {first_quote.get('sns_users')}")
+        # 各quoteのIDを収集
+        quote_ids = [q['id'] for q in quotes]
+
+        # activitiesとtagsを別クエリで取得
+        # quote_activitiesとactivitiesをJOINして取得
+        activities_query = supabase.table('quote_activities') \
+            .select('quote_id, activities(id, name, icon)') \
+            .in_('quote_id', quote_ids) \
+            .execute()
+
+        # quote_tagsとtagsをJOINして取得
+        tags_query = supabase.table('quote_tags') \
+            .select('quote_id, tags(id, name)') \
+            .in_('quote_id', quote_ids) \
+            .execute()
+
+        # quote_id -> activities のマッピングを作成
+        activities_map = defaultdict(list)
+        for qa in activities_query.data or []:
+            if qa.get('activities'):
+                activities_map[qa['quote_id']].append(qa['activities'])
+
+        # quote_id -> tags のマッピングを作成
+        tags_map = defaultdict(list)
+        for qt in tags_query.data or []:
+            if qt.get('tags'):
+                tags_map[qt['quote_id']].append(qt['tags'])
+
+        # quotesにactivitiesとtagsを追加
+        for quote in quotes:
+            quote['_activities'] = activities_map.get(quote['id'], [])
+            quote['_tags'] = tags_map.get(quote['id'], [])
 
         # ランダムにシャッフル
         random.shuffle(quotes)
@@ -723,8 +746,8 @@ async def get_public_quotes(
                 text=quote['text'],
                 source=PublicQuoteSource(**source_data),
                 reference_link=quote.get('reference_link'),
-                activities=[ActivityNested(**qa['activities']) for qa in quote.get('quote_activities', [])],
-                tags=[TagNested(**qt['tags']) for qt in quote.get('quote_tags', [])],
+                activities=[ActivityNested(**a) for a in quote.get('_activities', [])],
+                tags=[TagNested(**t) for t in quote.get('_tags', [])],
                 created_at=quote['created_at']
             )
             public_quotes.append(public_quote)

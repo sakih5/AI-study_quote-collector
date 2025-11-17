@@ -78,7 +78,7 @@ export default function PublicHomePage() {
         setLoading(true);
       }
 
-      const apiUrl = process.env.NEXT_PUBLIC_FASTAPI_URL || '';
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || process.env.NEXT_PUBLIC_FASTAPI_URL || '';
       const response = await fetch(`${apiUrl}/api/quotes/public?limit=50&offset=${offset}`);
       if (!response.ok) {
         throw new Error('Failed to fetch public quotes');

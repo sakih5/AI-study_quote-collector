@@ -4,8 +4,12 @@
 
 ### 1.1 ベースURL
 
-- 開発環境: `http://localhost:3000/api`
-- 本番環境: `https://your-app.vercel.app/api`
+- 開発環境（FastAPI）: `http://localhost:8000/api`
+- 開発環境（Next.js）: `http://localhost:3000`
+- 本番環境（FastAPI）: `https://quote-collector-api-3276884015.asia-northeast1.run.app/api`
+- 本番環境（Next.js）: `https://your-app.vercel.app`
+
+**注**: v2.0以降、バックエンドAPIはFastAPI（Python）で実装されています。Next.js API Routesは削除されました。
 
 ### 1.2 認証
 
@@ -84,6 +88,7 @@ Authorization: Bearer <token>
 | limit | int | No | 取得件数（デフォルト: 50） |
 | offset | int | No | オフセット（デフォルト: 0） |
 | search | string | No | 検索キーワード（タイトル・著者） |
+| has_quotes | bool | No | フレーズが存在する書籍のみ取得（デフォルト: false） |
 
 **レスポンス:**
 
@@ -138,14 +143,14 @@ Content-Type: application/json
 }
 ```
 
-#### POST /books/fetch-from-amazon
+#### POST /books/from-url
 
 Amazon URLから書籍情報を取得
 
 **リクエスト:**
 
 ```
-POST /api/books/fetch-from-amazon
+POST /api/books/from-url
 Authorization: Bearer <token>
 Content-Type: application/json
 
@@ -276,24 +281,34 @@ Content-Type: application/json
 
 ```json
 {
-  "success": true,
-  "platform": "X",
-  "user": {
+  "user_info": {
+    "platform": "X",
     "handle": "kentaro_dev",
     "display_name": "Kentaro | エンジニア"
-  }
+  },
+  "display_name_fetched": true,
+  "warning": null
 }
 ```
 
-**レスポンス（失敗）:**
+**レスポンス（表示名取得失敗）:**
 
 ```json
 {
-  "success": false,
-  "error": "ユーザー情報の取得に失敗しました",
-  "fallback_mode": true
+  "user_info": {
+    "platform": "X",
+    "handle": "kentaro_dev",
+    "display_name": null
+  },
+  "display_name_fetched": false,
+  "warning": "表示名を自動取得できませんでした。手動で入力してください。"
 }
 ```
+
+**フィールド説明:**
+- `user_info`: 抽出されたユーザー情報
+- `display_name_fetched`: 表示名の自動取得が成功したかどうか
+- `warning`: 警告メッセージ（表示名が取得できなかった場合など）
 
 ---
 
@@ -490,6 +505,8 @@ Authorization: Bearer <token>
       "text": "集中は筋肉のように鍛えられる。",
       "source_type": "BOOK",
       "page_number": 27,
+      "is_public": false,
+      "reference_link": "https://example.com/article",
       "book": {
         "id": 1,
         "title": "深い仕事",
@@ -551,6 +568,8 @@ Authorization: Bearer <token>
           "id": 123,
           "text": "集中は筋肉のように...",
           "page_number": 27,
+          "is_public": false,
+          "reference_link": null,
           "activities": [
             {
               "id": 2,
@@ -634,7 +653,9 @@ Content-Type: application/json
   ],
   "source_type": "BOOK",
   "book_id": 1,
-  "page_number": 27
+  "page_number": 27,
+  "is_public": false,
+  "reference_link": "https://example.com/article"
 }
 ```
 
@@ -672,7 +693,9 @@ Content-Type: application/json
 {
   "text": "集中は筋肉のように鍛えることができる。",
   "activity_ids": [2, 6],
-  "tag_ids": [10]
+  "tag_ids": [10],
+  "is_public": true,
+  "reference_link": "https://example.com/updated-article"
 }
 ```
 
@@ -708,6 +731,67 @@ Authorization: Bearer <token>
   "success": true
 }
 ```
+
+#### GET /quotes/public
+
+公開フレーズ一覧を取得（認証不要）
+
+**リクエスト:**
+
+```
+GET /api/quotes/public
+```
+
+**クエリパラメータ:**
+
+| パラメータ | 型 | 必須 | 説明 |
+|----------|-----|------|------|
+| limit | int | No | 取得件数（デフォルト: 50） |
+| offset | int | No | オフセット（デフォルト: 0） |
+
+**レスポンス:**
+
+```json
+{
+  "items": [
+    {
+      "type": "book",
+      "book": {
+        "id": 1,
+        "title": "深い仕事",
+        "author": "カル・ニューポート",
+        "cover_image_url": "https://..."
+      },
+      "quotes": [
+        {
+          "id": 123,
+          "text": "集中は筋肉のように...",
+          "page_number": 27,
+          "is_public": true,
+          "reference_link": null,
+          "activities": [...],
+          "tags": [...],
+          "created_at": "2024-10-27T10:00:00Z"
+        }
+      ]
+    },
+    {
+      "type": "sns",
+      "sns_user": {
+        "id": 2,
+        "platform": "X",
+        "handle": "kentaro_dev",
+        "display_name": "Kentaro | エンジニア"
+      },
+      "quotes": [...]
+    }
+  ],
+  "total": 25,
+  "has_more": true
+}
+```
+
+**注**: このエンドポイントは認証不要で、`is_public=true`のフレーズのみを返します。
 
 ---
 
@@ -748,7 +832,7 @@ language: jpn
   ],
   "lines": [
     {
-      "text": "集中は筋肉内のように鍛えられる。",
+      "text": "集中は筋肉のように鍛えられる。",
       "bbox": {
         "x": 100,
         "y": 200,
@@ -757,9 +841,15 @@ language: jpn
       }
     },
     ...
-  ]
+  ],
+  "average_confidence": 0.89
 }
 ```
+
+**注**:
+- OCRエンジン: Tesseract.js 5.x（日本語対応）
+- `average_confidence`: 抽出されたテキスト全体の平均信頼度（0-1）
+- 信頼度が低い場合、ユーザーはOCR結果を編集可能
 
 #### POST /ocr/extract-selection
 
@@ -885,3 +975,7 @@ GET /api/quotes?limit=50&offset=100
 |-----------|------|----------|--------|
 | 1.0 | 2024-10-27 | 初版作成 | - |
 | 2.0 | 2024-10-27 | 活動領域固定、アイコン画像削除、CSVエクスポート追加 | - |
+| 2.1 | 2024-11-14 | FastAPIへ完全移行、Next.js API Routes削除 | - |
+| 2.2 | 2024-11-15 | 公開フラグ機能追加（is_public）、参考リンク機能追加（reference_link） | - |
+| 2.3 | 2024-11-16 | SNSユーザー情報取得の警告機能追加 | - |
+| 2.4 | 2024-11-17 | OCRエンジンをTesseractに変更、average_confidence追加 | - |

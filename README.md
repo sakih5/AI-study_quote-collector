@@ -286,11 +286,10 @@ export FRONTEND_URL="https://your-frontend.vercel.app"
 
 1. Vercelプロジェクトを作成
 2. GitHubリポジトリを接続
-3. **Vercel Dashboard** → **Settings** → **General** で以下を設定:
-   - **Root Directory**: `frontend` ← **重要: モノレポ対応**
-   - **Build Command**: 自動検出（Next.jsが認識される）
-   - **Output Directory**: 自動検出
-   - **Install Command**: 自動検出
+3. ビルド設定は`vercel.json`で自動設定されます:
+   - **Build Command**: `cd frontend && npm run build`
+   - **Install Command**: `npm install --prefix frontend`
+   - **Output Directory**: `frontend/.next`
 4. 環境変数を設定（**Settings** → **Environment Variables**）:
    - `NEXT_PUBLIC_SUPABASE_URL`
    - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
@@ -299,14 +298,11 @@ export FRONTEND_URL="https://your-frontend.vercel.app"
 #### Vercel CLIでデプロイ
 
 ```bash
-# プロジェクトルートで実行（初回のみ対話式設定）
-vercel
-
-# 本番デプロイ
+# プロジェクトルートで実行
 vercel --prod
 ```
 
-**注意:** モノレポ構成のため、Vercel DashboardでRoot Directoryを`frontend`に設定する必要があります。
+**注意:** モノレポ構成のため、プロジェクトルートの`vercel.json`と`package.json`でfrontendディレクトリのビルドを実行します。
 
 **注意**: `frontend/Dockerfile`は**ローカル開発専用**で、Vercelデプロイには使用されません。
 

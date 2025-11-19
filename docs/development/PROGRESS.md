@@ -7,6 +7,7 @@
 ## 全体進捗
 
 ### Next.js アプリケーション
+
 ```
 Phase 1 (MVP): ██████████ 100% ✅
 Phase 2:       █████████░  95% ⚠️ (SNS表示名取得保留)
@@ -14,6 +15,7 @@ Phase 2:       █████████░  95% ⚠️ (SNS表示名取得保
 ```
 
 ### FastAPI バックエンド移行
+
 ```
 Phase 1: ██████████ 100% ✅ 環境構築
 Phase 2: ██████████ 100% ✅ 認証基盤
@@ -23,6 +25,7 @@ Phase 5: ██████████ 100% ✅ Cloud Runデプロイ
 ```
 
 ### 本番環境
+
 ```
 フロントエンド: ✅ Vercelデプロイ完了
 バックエンド:   ✅ Cloud Runデプロイ完了
@@ -329,7 +332,6 @@ Phase 5: ██████████ 100% ✅ Cloud Runデプロイ
 | 本番デプロイ | 2025-11-03 | ✅ 完了（Vercel + Cloud Run） |
 | コード品質改善 | 2025-11-03 | ✅ 完了（TypeScript/ESLintエラー0件） |
 | 本番環境安定化 | 2025-11-10 | ✅ 完了（ログインループ・API接続エラー修正） |
-| 修正計画書の実装 | 未定 | 📝 計画中 |
 
 ---
 
@@ -382,18 +384,19 @@ Phase 5: ██████████ 100% ✅ Cloud Runデプロイ
 ### 🎉 現在の状態（2025-11-11時点）
 
 **✅ 完了している主要タスク**:
+
 - Next.js Phase 1 (MVP): 100%完了
 - Next.js Phase 2 (重要機能): 95%完了（SNS表示名取得のみ保留）
 - FastAPI移行 Phase 1-5: すべて完了
 - TypeScript/ESLintエラー: 0件（完全修正済み）
 - 本番デプロイ: Vercel + Cloud Run + Supabase すべて稼働中
 - ログインループ・API接続エラー: 修正完了
-- **修正計画書 Phase 1 タスク1, 2, 7: 完了（UIライトテーマ化・ボタン色統一・件数カウント修正・Amazon表紙画像取得）**
 
 **🎯 本番環境URL**:
-- フロントエンド: https://ai-study-quote-collector.vercel.app
-- バックエンド: https://quote-collector-api-3276884015.asia-northeast1.run.app
-- データベース: Supabase (https://rrtcpgizbgghxylhnvtu.supabase.co)
+
+- フロントエンド: <https://ai-study-quote-collector.vercel.app>
+- バックエンド: <https://quote-collector-api-3276884015.asia-northeast1.run.app>
+- データベース: Supabase (<https://rrtcpgizbgghxylhnvtu.supabase.co>)
 
 ---
 
@@ -402,6 +405,7 @@ Phase 5: ██████████ 100% ✅ Cloud Runデプロイ
 #### 1. 修正計画書の実装（推奨: フェーズ1から順に実装）
 
 **フェーズ1: 優先度高（残り約30分）**
+
 1. ~~**件数カウント修正** - グループ数→フレーズ総数に変更~~ ✅ 完了
 2. **見た目の修正** - 部分完了
    - ~~ダーク→ライトテーマ~~ ✅ 完了
@@ -413,13 +417,15 @@ Phase 5: ██████████ 100% ✅ Cloud Runデプロイ
 
 **フェーズ2: 中優先度（1〜1.5時間）**
 4. **キーワード検索修正**
-   - 著者名での部分一致検索
-   - リアルタイム検索（検索ボタン削除）
+
+- 著者名での部分一致検索
+- リアルタイム検索（検索ボタン削除）
 
 **フェーズ3: OCR修正（2〜3時間）**
 5. **OCR改善**
-   - スペース除去
-   - Snipping Tool風のなぞり選択UI
+
+- スペース除去
+- Snipping Tool風のなぞり選択UI
 
 **フェーズ4: 公開機能（2〜3時間）**
 6. **ログイン前画面** - 公開フレーズのランダム表示
@@ -436,11 +442,13 @@ Phase 5: ██████████ 100% ✅ Cloud Runデプロイ
 フロントエンド統合作業中に、SNS表示名の自動取得が技術的制約により困難であることが判明しました。
 
 **試行した方法と結果**:
+
 1. **Google検索経由**: botブロックで失敗
 2. **プロフィールページ直接取得**: SPAのため初期HTMLに情報なし
 3. **og:title/JSONデータ抽出**: いずれも初期HTMLに存在せず
 
 **今後の選択肢**:
+
 1. **手動入力にする（推奨）** - 最もシンプルで確実（実装時間: 30分）
 2. ヘッドレスブラウザ使用 - 複雑で重い（実装時間: 5〜6時間）
 3. 公式API使用 - 有料（X API: $100/月）
@@ -519,6 +527,7 @@ Phase 5: ██████████ 100% ✅ Cloud Runデプロイ
 
 **完了**: 2025-11-02
 **作業ログ**:
+
 - [2025-11-01_fastapi_phase1-2.md](./work_logs/2025-11-01_fastapi_phase1-2.md)
 - [2025-11-02_swagger_ui_auth_fix.md](./work_logs/2025-11-02_swagger_ui_auth_fix.md)
 
@@ -553,9 +562,11 @@ Phase 5: ██████████ 100% ✅ Cloud Runデプロイ
 **状態**: ⚠️ **supabase-pyクライアントの動作不良により、POST/PUT操作でエラー発生**
 
 **問題詳細**:
+
 ```
 AttributeError: 'SyncQueryRequestBuilder' object has no attribute 'select'
 ```
+
 - GET/DELETE は正常動作
 - POST/PUT で `supabase.table('tags').select()` が失敗
 - 複数の解決策を試したが、いずれも失敗
@@ -577,6 +588,7 @@ AttributeError: 'SyncQueryRequestBuilder' object has no attribute 'select'
 **状態**: ✅ **完全動作確認済み**
 
 **重要な成果**:
+
 - supabase-pyの`.insert().select()`問題の回避策を確立
 - RLSポリシー対応のため`auth.py`を修正（全エンドポイントに適用）
 - FastAPIとNext.jsで同じデータが取得できることを確認
@@ -597,6 +609,7 @@ AttributeError: 'SyncQueryRequestBuilder' object has no attribute 'select'
 **状態**: ✅ **完全動作確認済み**
 
 **成果**:
+
 - Phase 3-3で確立したパターンを適用し、エラーなく実装完了
 - Pydantic Literalで型安全なプラットフォーム定義
 - FastAPIとNext.jsで同じデータが取得できることを確認
@@ -618,6 +631,7 @@ AttributeError: 'SyncQueryRequestBuilder' object has no attribute 'select'
 **状態**: ✅ **完全動作確認済み**
 
 **成果**:
+
 - Phase 3-3/3-4で確立したパターンを適用し、エラーなく実装完了
 - 複雑なグループ化クエリ（books, sns_users, other）が正常動作
 - 一括登録、活動領域・タグ関連付けが正常動作
@@ -654,7 +668,7 @@ AttributeError: 'SyncQueryRequestBuilder' object has no attribute 'select'
 
 **完了**: 2025-11-03
 **作業時間**: 2時間
-**デプロイURL**: https://quote-collector-api-3276884015.asia-northeast1.run.app
+**デプロイURL**: <https://quote-collector-api-3276884015.asia-northeast1.run.app>
 **作業ログ**: [2025-11-03_fastapi_cloud_run_deployment.md](./work_logs/2025-11-03_fastapi_cloud_run_deployment.md)
 
 ---
@@ -677,6 +691,7 @@ AttributeError: 'SyncQueryRequestBuilder' object has no attribute 'select'
 **完了**: 2025-11-03
 **作業時間**: 2.5時間
 **成果**:
+
 - ESLintエラー: 31 → 0 ✅
 - ESLintワーニング: 10 → 0 ✅
 - 修正ファイル: 17ファイル
@@ -698,7 +713,7 @@ AttributeError: 'SyncQueryRequestBuilder' object has no attribute 'select'
 
 **完了**: 2025-11-03
 **作業時間**: 約1時間
-**デプロイURL**: https://ai-study-quote-collector.vercel.app
+**デプロイURL**: <https://ai-study-quote-collector.vercel.app>
 **作業ログ**: [2025-11-03_vercel_deployment.md](./work_logs/2025-11-03_vercel_deployment.md)
 
 ---
@@ -706,12 +721,14 @@ AttributeError: 'SyncQueryRequestBuilder' object has no attribute 'select'
 ### ログインループ・API接続エラー修正 ✅ 100%
 
 **問題1: ログインループ**
+
 - [x] Next.jsバージョンの違いを調査（Next.js 14 vs 16）
 - [x] `cookies()`の動作の違いを確認
 - [x] 複数の修正を試行錯誤（Supabase SSRパターン、middleware等）
 - [x] 以前の動作していたコミットに戻すことで解決
 
 **問題2: API接続エラー（Failed to fetch）**
+
 - [x] エラーの原因特定（FastAPIベースURLの設定ミス）
 - [x] `lib/api/client.ts`の修正（`localhost:8000` → 空文字列）
 - [x] Next.js API Routes経由でのデータ取得に修正
@@ -728,6 +745,7 @@ AttributeError: 'SyncQueryRequestBuilder' object has no attribute 'select'
 ### UIライトテーマ化＆ボタン色統一＆件数カウント修正 ✅ 100%
 
 **完了したタスク（修正計画書フェーズ1より）:**
+
 - [x] タスク1: 件数カウント修正（グループ数→フレーズ総数）
 - [x] タスク2（追加作業）: ボタンの色を青系で統一
 - [x] モーダル背景色の完全ライトテーマ化（暗い背景色の削除）
@@ -754,9 +772,10 @@ AttributeError: 'SyncQueryRequestBuilder' object has no attribute 'select'
 
 4. **FastAPIバックエンドの再デプロイ**
    - Cloud Runへの再デプロイ成功
-   - サービスURL: https://quote-collector-api-n6pgp2mv4a-an.a.run.app
+   - サービスURL: <https://quote-collector-api-n6pgp2mv4a-an.a.run.app>
 
 **修正したファイル（12ファイル）:**
+
 - フロントエンド: 11ファイル
   - `app/(main)/layout.tsx`
   - `app/(main)/page.tsx`
@@ -781,6 +800,7 @@ AttributeError: 'SyncQueryRequestBuilder' object has no attribute 'select'
 ### Amazon表紙画像取得＆UIレイアウト改善 ✅ 100%
 
 **完了したタスク（修正計画書フェーズ1より）:**
+
 - [x] タスク7: Amazon表紙画像取得機能の完全実装
 - [x] 追加作業: 書籍表示の2カラムレイアウト実装
 - [x] 追加作業: ヘッダーボタンのスタイル調整
@@ -807,6 +827,7 @@ AttributeError: 'SyncQueryRequestBuilder' object has no attribute 'select'
    - カード全体の影、角丸、枠線を削除してシンプルに
 
 **修正したファイル（6ファイル）:**
+
 - `app/(main)/components/Header.tsx` - ログアウトボタン、タグ管理ボタン
 - `app/(main)/settings/tags/page.tsx` - 削除ボタン
 - `app/(main)/components/QuoteModal.tsx` - 画像プレビュー、状態管理、API送信

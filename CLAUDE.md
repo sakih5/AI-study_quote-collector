@@ -9,57 +9,102 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Tech Stack
 
 - **Frontend**: Next.js 14 (App Router), TypeScript 5.x, Tailwind CSS 3.x
-- **Backend**: Supabase (PostgreSQL 15, Auth, Storage), Next.js API Routes
-- **OCR**: Tesseract.js 5.x for Japanese text extraction
-- **Deployment**: Vercel (frontend), Supabase (backend)
-- **Testing**: Vitest (unit tests), Playwright (E2E)
-- **Development Tools**: ESLint, Prettier, pnpm/npm
+- **Backend**: FastAPI (Python 3.11+), Supabase (PostgreSQL 15, Auth, Storage)
+- **OCR**: pytesseract (Tesseract OCR) for Japanese text extraction (backend)
+- **Deployment**: Vercel (frontend), Google Cloud Run (backend API)
+- **Testing**: pytest (backend), Vitest (frontend unit tests), Playwright (E2E)
+- **Development Tools**: ESLint, Prettier, uv (Python package manager), npm
 
 ## Project Structure
 
+**Monorepo Structure**: The project is organized as a monorepo with separated frontend and backend directories, designed to accommodate future mobile app development.
+
 ```
-app/
-├── (auth)/              # Authentication routes (login, callback)
-├── (main)/              # Main application routes
-│   ├── layout.tsx       # Main layout with navigation
-│   ├── page.tsx         # Home screen (quote list)
-│   ├── settings/        # Settings and tag management
-│   └── components/      # Page-specific components
-│       ├── QuoteCard.tsx
-│       ├── QuoteModal.tsx
-│       └── OCRTextSelector.tsx
-└── api/                 # API routes
-    ├── activities/      # Fixed 10 activity domains
-    ├── books/           # Book management + Amazon scraping
-    ├── sns-users/       # SNS user management + info fetching
-    ├── tags/            # Tag CRUD + merge operations
-    ├── quotes/          # Quote CRUD + grouped queries
-    ├── ocr/             # OCR text extraction
-    └── export/          # CSV export
+frontend/                # Next.js Frontend Application
+├── app/                 # Next.js App Router
+│   ├── (auth)/          # Authentication routes (login, callback)
+│   ├── (main)/          # Main application routes
+│   │   ├── layout.tsx   # Main layout with navigation
+│   │   ├── my-quotes/   # Quote list page
+│   │   └── settings/    # Settings and tag management
+│   ├── terms/           # Terms of service page
+│   ├── page.tsx         # Public quotes page (unauthenticated)
+│   └── globals.css      # Global styles
+├── components/          # React components
+│   ├── ui/              # Reusable UI components
+│   ├── layouts/         # Layout components (Header, etc.)
+│   └── features/        # Domain-specific feature components
+│       └── quotes/      # Quote-related components
+│           ├── QuoteGroupCard.tsx
+│           ├── QuoteModal.tsx
+│           ├── QuoteEditModal.tsx
+│           ├── QuoteItem.tsx
+│           └── OCRTextSelector.tsx
+├── hooks/               # Custom React hooks (project-wide)
+│   ├── useQuotesGrouped.ts
+│   ├── useActivities.ts
+│   ├── useTags.ts
+│   └── useTagsManagement.ts
+├── lib/                 # Utility libraries
+│   ├── api/             # Backend API client
+│   │   ├── client.ts    # Base API client with auth
+│   │   ├── endpoints.ts # Organized API endpoint functions
+│   │   └── types.ts     # TypeScript types (auto-generated from OpenAPI)
+│   └── supabase/        # Supabase clients
+│       ├── client.ts    # Browser client
+│       ├── server.ts    # Server client with cookies
+│       └── types.ts     # Database types
+├── middleware.ts        # Auth middleware (redirect logic)
+├── package.json         # Frontend dependencies
+├── tsconfig.json        # TypeScript configuration
+├── next.config.js       # Next.js configuration
+└── .env.local           # Frontend environment variables
 
-lib/
-├── supabase/
-│   ├── client.ts        # Browser client
-│   ├── server.ts        # Server client with cookies
-│   └── types.ts         # Database types
-├── ocr/
-│   ├── tesseract.ts     # OCR processing with Tesseract.js
-│   ├── preprocess.ts    # Image preprocessing for accuracy
-│   └── selection.ts     # Extract text from user selection bounds
-├── scraping/
-│   ├── amazon.ts        # Scrape book info from Amazon URLs
-│   ├── google-search.ts # Get SNS display names via Google
-│   ├── sns-url-parser.ts # Parse X/Threads URLs
-│   └── rate-limiter.ts  # Rate limiting for external APIs
-└── utils/
-    ├── csv-export.ts    # Generate CSV with proper escaping
-    └── validators.ts    # Zod schemas
+backend/                 # FastAPI Backend API
+├── routes/              # API route handlers
+│   ├── activities.py
+│   ├── books.py
+│   ├── sns_users.py
+│   ├── tags.py
+│   ├── quotes.py
+│   ├── ocr.py
+│   └── export.py
+├── models/              # Pydantic models
+│   ├── quote.py
+│   ├── book.py
+│   └── tag.py
+├── services/            # Business logic
+│   ├── ocr_service.py   # Tesseract OCR processing
+│   ├── amazon_scraper.py
+│   ├── sns_scraper.py
+│   └── csv_generator.py
+├── tests/               # pytest tests
+│   ├── test_routes/
+│   └── test_services/
+├── main.py              # FastAPI app entry point
+├── config.py            # Configuration
+├── auth.py              # Authentication helpers
+└── requirements.txt     # Backend dependencies
 
-components/
-├── ui/                  # Shared UI components
-└── layouts/             # Layout components
+infra/                   # Infrastructure and deployment configs
+├── vercel/              # Vercel deployment configuration
+│   └── vercel.json      # Frontend build/deploy settings
+└── cloud-run/           # Google Cloud Run configuration
+    ├── deploy.sh        # Backend deployment script
+    └── docker compose.yml
 
-middleware.ts            # Auth middleware (redirect logic)
+docs/                    # Design documentation
+├── specs/               # Specification documents
+│   ├── 要件定義書_v2.md
+│   ├── 画面設計書_実装版_v2.md
+│   ├── API設計書_v2.md
+│   ├── データベース設計書_v2.md
+│   └── 技術仕様書_v2.md
+└── development/         # Development logs and notes
+
+scripts/                 # Utility scripts
+├── frontend/            # Frontend utility scripts
+└── backend/             # Backend utility scripts
 ```
 
 ## Architecture & Data Flow
@@ -89,15 +134,19 @@ middleware.ts            # Auth middleware (redirect logic)
 
 1. User opens registration modal (new or from existing source)
 2. Input text manually OR upload image for OCR
-3. If OCR: draw selection boxes on image → Tesseract.js extracts text → fill input fields
+3. If OCR:
+   - Drag & drop or click to upload image
+   - Backend (pytesseract) automatically processes image
+   - User draws selection boxes on image to extract specific text regions
+   - Extracted text fills input fields (editable)
 4. Select activity domains (required, multi-select)
 5. Add/select tags (optional, multi-select)
 6. Choose source type:
-   - **BOOK**: Enter Amazon URL → scrape book info → auto-fill
-   - **SNS**: Select platform (X/Threads) → enter post URL → extract handle + fetch display name
-   - **OTHER**: Free text fields (source, note)
+   - **BOOK**: Enter Amazon URL → backend scrapes book info → auto-fill
+   - **SNS**: Select platform (X/Threads) → enter post URL → backend extracts handle + fetches display name
+   - **OTHER**: Free text fields (source, note, reference_link) + public flag checkbox
 7. Batch registration: Add more quote input fields with same source
-8. Submit → save to Supabase
+8. Submit → save to Supabase via FastAPI
 
 ### Home Screen Display
 
@@ -132,7 +181,47 @@ middleware.ts            # Auth middleware (redirect logic)
 
 ## Development Commands
 
-When the project is implemented, these commands will be used:
+### Docker Compose (Recommended - Matches Cloud Run Environment)
+
+**All services** (run from project root):
+
+```bash
+# Start all services (frontend + backend)
+docker compose up
+
+# Start in background
+docker compose up -d
+
+# View logs
+docker compose logs -f
+
+# View specific service logs
+docker compose logs -f frontend
+docker compose logs -f backend
+
+# Rebuild images after Dockerfile changes
+docker compose up --build
+
+# Stop services
+docker compose down
+
+# Stop and remove volumes
+docker compose down -v
+
+# Execute commands in containers
+docker compose exec frontend npm run lint
+docker compose exec backend pytest
+```
+
+**Benefits:**
+- **Environment parity**: Same Dockerfile for development and Cloud Run production
+- **Isolated dependencies**: No conflicts with local Python/Node versions
+- **Tesseract OCR**: Pre-installed in backend container
+- **Easy onboarding**: New developers just need Docker
+
+### Local Development (Without Docker)
+
+**Frontend** (run from `/frontend` directory):
 
 ```bash
 # Development
@@ -149,10 +238,26 @@ npm run test         # Run Vitest unit tests
 npm run test:e2e     # Run Playwright E2E tests
 npm run test:watch   # Run tests in watch mode
 
-# Database (Supabase CLI)
-npx supabase start   # Start local Supabase
-npx supabase db reset # Reset local database
-npx supabase migration new <name> # Create new migration
+# OpenAPI Type Generation
+npm run generate-types      # Generate TypeScript types from local backend
+npm run generate-types:prod # Generate TypeScript types from production backend
+```
+
+**Backend** (run from `/backend` directory):
+
+```bash
+# Development
+uv run uvicorn main:app --reload  # Start FastAPI dev server on localhost:8000
+
+# Testing
+pytest                             # Run all tests
+pytest tests/test_routes/          # Run route tests only
+pytest -v --cov                    # Run tests with coverage
+
+# Database
+npx supabase start                 # Start local Supabase
+npx supabase db reset              # Reset local database
+npx supabase migration new <name>  # Create new migration
 ```
 
 ## Key Implementation Details
@@ -194,12 +299,15 @@ npx supabase migration new <name> # Create new migration
 
 ## Environment Variables
 
-Required in `.env.local`:
+**Frontend** (`frontend/.env.local`):
 
 ```bash
 # Supabase
 NEXT_PUBLIC_SUPABASE_URL=https://xxx.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJxxx...
+
+# Backend API URL
+NEXT_PUBLIC_API_URL=https://your-backend-url.run.app
 
 # Optional: SerpAPI for legal Google searches
 SERPAPI_KEY=xxx
@@ -207,6 +315,17 @@ SERPAPI_KEY=xxx
 # Development
 NODE_ENV=development
 NEXT_PUBLIC_APP_URL=http://localhost:3000
+```
+
+**Backend** (`backend/.env`):
+
+```bash
+# Supabase (Service Role Key for backend operations)
+SUPABASE_URL=https://xxx.supabase.co
+SUPABASE_SERVICE_ROLE_KEY=eyJxxx...
+
+# Optional: SerpAPI for SNS user info fetching
+SERPAPI_KEY=xxx
 ```
 
 ## Important Patterns

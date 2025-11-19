@@ -1,30 +1,29 @@
 # Vercel デプロイ設定
 
-## 設定ファイルの場所
-
-**Vercel設定ファイルはプロジェクトルートに移動しました:**
-
-- **設定ファイル**: `/vercel.json`（プロジェクトルート）
-- **Root Directory**: `frontend`
-
 ## モノレポ対応
 
-2025-11-19のモノレポ化により、Vercelの設定をプロジェクトルートに統一しました。
+2025-11-19のモノレポ化により、フロントエンドコードが`frontend/`ディレクトリに移動しました。
 
-### vercel.json の内容
+## 設定方法
+
+### 1. Vercel Dashboardで設定（必須）
+
+**Settings** → **General** → **Root Directory** を **`frontend`** に設定してください。
+
+これにより、Vercelは`frontend/`ディレクトリをプロジェクトのルートとして認識します。
+
+### 2. vercel.json の場所
+
+設定ファイルは `frontend/vercel.json` に配置されています（最小限の設定）:
 
 ```json
 {
-  "buildCommand": "npm run build",
-  "devCommand": "npm run dev",
-  "installCommand": "npm install",
-  "outputDirectory": ".next",
-  "framework": "nextjs",
-  "rootDirectory": "frontend"
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "framework": "nextjs"
 }
 ```
 
-`rootDirectory: "frontend"` により、Vercelは`frontend/`ディレクトリをプロジェクトルートとして扱います。
+Next.jsフレームワークとして認識されれば、ビルドコマンドなどは自動検出されます。
 
 ## デプロイ方法
 
@@ -32,7 +31,8 @@
 
 1. Vercelプロジェクトを作成
 2. GitHubリポジトリを接続
-3. Vercelが`vercel.json`を自動検出してビルド設定を適用
+3. **Settings** → **General** で Root Directory を `frontend` に設定
+4. プッシュするたびに自動デプロイ
 
 ### Vercel CLIでデプロイ
 
@@ -41,6 +41,8 @@
 vercel --prod
 ```
 
+初回実行時は対話式でRoot Directoryを`frontend`に設定してください。
+
 ## 環境変数
 
 Vercel Dashboardで以下の環境変数を設定してください:
@@ -48,6 +50,14 @@ Vercel Dashboardで以下の環境変数を設定してください:
 - `NEXT_PUBLIC_SUPABASE_URL`
 - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
 - `NEXT_PUBLIC_API_URL` (Cloud RunのバックエンドURL)
+
+## トラブルシューティング
+
+### エラー: Couldn't find any `pages` or `app` directory
+
+**原因:** Root Directoryが設定されていない、またはプロジェクトルート（`/`）のままになっている
+
+**解決策:** Vercel Dashboard → Settings → General → Root Directory を `frontend` に変更
 
 ## 参考リンク
 

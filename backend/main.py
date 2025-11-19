@@ -7,9 +7,9 @@ from supabase import Client
 from config import settings
 
 app = FastAPI(
-    title="抜き書きアプリ API",
+    title="ことばアーカイブ API",
     version="1.0.0",
-    description="FastAPI バックエンド",
+    description="ことばアーカイブ アプリのバックエンド（API）をFastAPIで作成",
     swagger_ui_parameters={
         "persistAuthorization": True  # 認証情報を保持
     }

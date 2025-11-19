@@ -19,8 +19,8 @@ dependencies = [
 
 [project.optional-dependencies]
 dev = [
-    "pytest==7.4.3",
-    "httpx==0.25.2",
+    "pytest>=7.4.3",
+    "httpx>=0.26.0",
 ]
 
 [build-system]

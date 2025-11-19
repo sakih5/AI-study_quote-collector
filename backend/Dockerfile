@@ -1,5 +1,5 @@
-# FastAPI Dockerfile for Cloud Run
-# Multi-stage build for optimized image size
+# FastAPI Dockerfile for Cloud Run and local development
+# Multi-stage build for optimized production image size
 
 # Stage 1: Build stage
 FROM python:3.12-slim as builder
@@ -7,21 +7,24 @@ FROM python:3.12-slim as builder
 # Set working directory
 WORKDIR /app
 
-# Install system dependencies
+# Install system dependencies and uv
 RUN apt-get update && apt-get install -y \
     gcc \
-    && rm -rf /var/lib/apt/lists/*
+    curl \
+    && rm -rf /var/lib/apt/lists/* \
+    && curl -LsSf https://astral.sh/uv/install.sh | sh
+
+# Add uv to PATH
+ENV PATH="/root/.local/bin:$PATH"
 
 # Copy dependency files
-COPY requirements.lock ./
+COPY pyproject.toml uv.lock ./
 
-# Create virtual environment and install dependencies
-RUN python -m venv /app/.venv
-ENV PATH="/app/.venv/bin:$PATH"
-RUN pip install --no-cache-dir -r requirements.lock
+# Install dependencies using uv (without installing the project itself)
+RUN uv sync --frozen --no-dev --no-install-project
 
 # Stage 2: Runtime stage
-FROM python:3.12-slim
+FROM python:3.12-slim AS runner
 
 # Set working directory
 WORKDIR /app

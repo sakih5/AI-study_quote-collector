@@ -1,0 +1,56 @@
+services:
+  # フロントエンド (Next.js)
+  # 注意: ローカル開発専用。Vercelデプロイにはこのコンテナは使われない
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      # 開発環境ではdepsステージまでビルド（ビルドステージをスキップ）
+      target: deps
+    ports:
+      - "3000:3000"
+    volumes:
+      # ホットリロード用にソースコードをマウント
+      - ./frontend:/app
+      # node_modulesはコンテナ内のものを優先
+      - /app/node_modules
+      - /app/.next
+    env_file:
+      - ./frontend/.env.local
+    environment:
+      - NODE_ENV=development
+      - WATCHPACK_POLLING=true
+    # 開発サーバー起動（Dockerfileのデフォルトコマンドを上書き）
+    command: npm run dev
+    depends_on:
+      - backend
+
+  # バックエンド (FastAPI)
+  # 注意: このDockerfileはCloud Run本番デプロイでも使用される（環境統一）
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+      # 開発環境ではrunnerステージまでビルド（本番と同じ）
+      target: runner
+    ports:
+      - "8000:8000"
+    volumes:
+      # ホットリロード用にソースコードをマウント
+      - ./backend:/app
+      # 仮想環境とキャッシュは除外
+      - /app/.venv
+    env_file:
+      - ./backend/.env
+    environment:
+      - ENVIRONMENT=development
+      - PORT=8000
+    # 開発サーバー起動（--reload付き）
+    command: /app/.venv/bin/uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+    # ヘルスチェック（開発環境用: port 8000をチェック）
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health').read()"]
+      interval: 30s
+      timeout: 10s
+      start_period: 5s
+      retries: 3

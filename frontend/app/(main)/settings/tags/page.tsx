@@ -143,43 +143,45 @@ export default function TagsManagementPage() {
 
       {/* 検索・ソートセクション */}
       <div className="mb-6 space-y-4">
-        <div className="flex gap-3">
+        <div className="flex flex-col sm:flex-row gap-3">
           <input
             type="text"
             value={searchKeyword}
             onChange={(e) => setSearchKeyword(e.target.value)}
             onKeyPress={handleKeyPress}
             placeholder="タグ名で検索..."
-            className="flex-1 px-4 py-3 bg-white border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="flex-1 px-4 py-3 bg-white border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
           />
           <button
             onClick={handleSearch}
-            className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors"
+            className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors w-full sm:w-auto"
           >
             検索
           </button>
         </div>
 
         {/* ソート */}
-        <div className="flex items-center gap-4">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-4">
           <label className="text-gray-600 text-sm">並び替え:</label>
-          <select
-            value={sortBy}
-            onChange={(e) => setSortBy(e.target.value as 'name' | 'created_at' | 'usage_count')}
-            className="px-4 py-2 bg-white border border-gray-300 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
-          >
-            <option value="usage_count">使用数順</option>
-            <option value="name">名前順</option>
-            <option value="created_at">作成日順</option>
-          </select>
-          <select
-            value={sortOrder}
-            onChange={(e) => setSortOrder(e.target.value as 'asc' | 'desc')}
-            className="px-4 py-2 bg-white border border-gray-300 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
-          >
-            <option value="desc">降順</option>
-            <option value="asc">昇順</option>
-          </select>
+          <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 w-full sm:w-auto">
+            <select
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value as 'name' | 'created_at' | 'usage_count')}
+              className="px-4 py-2 bg-white border border-gray-300 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm w-full sm:w-auto"
+            >
+              <option value="usage_count">使用数順</option>
+              <option value="name">名前順</option>
+              <option value="created_at">作成日順</option>
+            </select>
+            <select
+              value={sortOrder}
+              onChange={(e) => setSortOrder(e.target.value as 'asc' | 'desc')}
+              className="px-4 py-2 bg-white border border-gray-300 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm w-full sm:w-auto"
+            >
+              <option value="desc">降順</option>
+              <option value="asc">昇順</option>
+            </select>
+          </div>
         </div>
 
         <div className="text-gray-600 text-sm">全{tags.length}件のタグ</div>
@@ -230,14 +232,14 @@ export default function TagsManagementPage() {
               )}
 
               {/* アクションボタン */}
-              <div className="flex gap-3">
+              <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
                 <button
                   onClick={() => {
                     setRenamingTag(tag);
                     setNewTagName(tag.name);
                   }}
                   disabled={deletingTagId === tag.id}
-                  className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed w-full sm:w-auto"
                 >
                   名前変更
                 </button>
@@ -247,14 +249,14 @@ export default function TagsManagementPage() {
                     setTargetTagId(null);
                   }}
                   disabled={deletingTagId === tag.id || tags.length < 2}
-                  className="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white text-sm rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white text-sm rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed w-full sm:w-auto"
                 >
                   統合
                 </button>
                 <button
                   onClick={() => handleDelete(tag)}
                   disabled={deletingTagId === tag.id}
-                  className="px-4 py-2 bg-gray-400 hover:bg-gray-600 text-white text-sm rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="px-4 py-2 bg-gray-400 hover:bg-gray-600 text-white text-sm rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed w-full sm:w-auto"
                 >
                   {deletingTagId === tag.id ? '削除中...' : '削除'}
                 </button>

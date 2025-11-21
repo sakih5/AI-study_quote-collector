@@ -272,18 +272,18 @@ export default function HomePage() {
     <div className="max-w-6xl mx-auto">
       {/* 検索バー */}
       <div className="mb-6">
-        <div className="flex gap-3">
+        <div className="flex flex-col sm:flex-row gap-3">
           <input
             type="text"
             value={searchKeyword}
             onChange={(e) => setSearchKeyword(e.target.value)}
             onKeyPress={handleKeyPress}
             placeholder="本のタイトル/著者名・SNSのアカウント名・フレーズで検索"
-            className="flex-1 px-4 py-3 bg-white border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="flex-1 px-4 py-3 bg-white border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
           />
           <button
             onClick={handleSearch}
-            className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors"
+            className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors w-full sm:w-auto"
           >
             検索
           </button>
@@ -337,11 +337,11 @@ export default function HomePage() {
         </div>
 
         {/* 件数表示とアクションバー */}
-        <div className="flex items-center justify-between pt-2 border-t border-gray-300">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pt-2 border-t border-gray-300">
           {!isSelectionMode ? (
             <>
               {/* 通常モード */}
-              <div className="flex items-center gap-4">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-4 w-full sm:w-auto">
                 <p className="text-gray-600 text-sm">
                   {hasActiveFilters ? '該当フレーズ数' : 'フレーズ総数'}：
                   <span className="font-bold text-gray-900 ml-1">{total}件</span>
@@ -355,12 +355,12 @@ export default function HomePage() {
                   </button>
                 )}
               </div>
-              <div className="flex items-center gap-3">
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3 w-full sm:w-auto">
                 {/* 選択削除モードボタン */}
                 <button
                   onClick={toggleSelectionMode}
                   disabled={total === 0}
-                  className="px-4 py-2 bg-gray-500 hover:bg-gray-600 text-white text-sm font-medium rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                  className="px-4 py-2 bg-gray-500 hover:bg-gray-600 text-white text-sm font-medium rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                   title="複数のフレーズを選択して一括削除"
                 >
                   <span>☑️</span>
@@ -370,7 +370,7 @@ export default function HomePage() {
                 <button
                   onClick={handleExportCsv}
                   disabled={total === 0}
-                  className="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white text-sm font-medium rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                  className="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white text-sm font-medium rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                   title="表示中のフレーズをCSV形式でダウンロード"
                 >
                   <span>📥</span>
@@ -381,7 +381,7 @@ export default function HomePage() {
           ) : (
             <>
               {/* 選択モード */}
-              <div className="flex items-center gap-4">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-4 w-full sm:w-auto">
                 <p className="text-gray-900 text-sm font-medium">{selectedQuoteIds.size}件選択中</p>
                 <button
                   onClick={selectAllQuotes}
@@ -390,12 +390,12 @@ export default function HomePage() {
                   すべて選択
                 </button>
               </div>
-              <div className="flex items-center gap-3">
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3 w-full sm:w-auto">
                 {/* 削除ボタン */}
                 <button
                   onClick={handleBulkDelete}
                   disabled={selectedQuoteIds.size === 0 || isDeleting}
-                  className="px-4 py-2 bg-red-500 hover:bg-red-600 text-white text-sm font-medium rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                  className="px-4 py-2 bg-red-500 hover:bg-red-600 text-white text-sm font-medium rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                 >
                   <span>🗑️</span>
                   <span>{isDeleting ? '削除中...' : '削除'}</span>
@@ -426,28 +426,28 @@ export default function HomePage() {
       ) : items.length === 0 ? (
         <>
           {/* ウェルカムメッセージ（フレーズがない場合のみ） */}
-          <div className="bg-white rounded-lg p-8 mb-8 text-center shadow-lg border border-gray-200">
-            <h1 className="text-3xl font-bold text-gray-900 mb-4">ようこそ、ことばアーカイブへ</h1>
-            <p className="text-gray-600 mb-6">
+          <div className="bg-white rounded-lg p-6 md:p-8 mb-8 text-center shadow-lg border border-gray-200">
+            <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-4">ようこそ、ことばアーカイブへ</h1>
+            <p className="text-gray-600 mb-6 text-sm md:text-base">
               本やSNSから気になったフレーズを保存して、あなただけのアーカイブを作りましょう
             </p>
-            <div className="flex justify-center gap-4">
-              <div className="bg-gray-50 rounded-lg p-6 flex-1 max-w-xs border border-gray-200">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div className="bg-gray-50 rounded-lg p-6 border border-gray-200">
                 <div className="text-4xl mb-2">📚</div>
                 <h3 className="text-gray-900 font-semibold mb-2">フレーズを登録</h3>
                 <p className="text-gray-600 text-sm">本やSNSから気になった言葉を保存</p>
               </div>
-              <div className="bg-gray-50 rounded-lg p-6 flex-1 max-w-xs border border-gray-200">
+              <div className="bg-gray-50 rounded-lg p-6 border border-gray-200">
                 <div className="text-4xl mb-2">🏷️</div>
                 <h3 className="text-gray-900 font-semibold mb-2">タグで整理</h3>
                 <p className="text-gray-600 text-sm">活動領域やタグで分類して管理</p>
               </div>
-              <div className="bg-gray-50 rounded-lg p-6 flex-1 max-w-xs border border-gray-200">
+              <div className="bg-gray-50 rounded-lg p-6 border border-gray-200">
                 <div className="text-4xl mb-2">🔍</div>
                 <h3 className="text-gray-900 font-semibold mb-2">簡単に検索</h3>
                 <p className="text-gray-600 text-sm">キーワードやフィルターで素早く見つける</p>
               </div>
-              <div className="bg-gray-50 rounded-lg p-6 flex-1 max-w-xs border border-gray-200">
+              <div className="bg-gray-50 rounded-lg p-6 border border-gray-200">
                 <div className="text-4xl mb-2">🧠</div>
                 <h3 className="text-gray-900 font-semibold mb-2">CSVエクスポート</h3>
                 <p className="text-gray-600 text-sm">集約したフレーズをCSV形式で出力可能</p>

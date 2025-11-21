@@ -20,67 +20,71 @@ export default function QuoteItem({
   onToggleSelection
 }: QuoteItemProps) {
   return (
-    <div className={`bg-white rounded-lg shadow-md p-4 border ${
+    <div className={`bg-white rounded-lg shadow-md p-3 md:p-4 border ${
       isSelectionMode && isSelected ? 'border-blue-500 bg-blue-50' : 'border-gray-200'
     }`}>
-      <div className="flex items-start justify-between gap-4">
-        {/* チェックボックス（選択モード時のみ） */}
-        {isSelectionMode && (
-          <div className="flex-shrink-0 pt-1">
-            <input
-              type="checkbox"
-              checked={isSelected}
-              onChange={onToggleSelection}
-              className="w-5 h-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500 cursor-pointer"
-            />
-          </div>
-        )}
-
-        <div className="flex-1">
-          <p className="text-gray-900 text-lg font-bold mb-3">{quote.text}</p>
-
-          {/* 活動領域とタグ */}
-          <div className="flex flex-wrap gap-2">
-            {quote.activities.map((activity) => (
-              <span
-                key={activity.id}
-                className="px-2 py-1 bg-gray-100 text-gray-700 text-xs rounded"
-              >
-                {activity.icon} {activity.name}
-              </span>
-            ))}
-            {quote.tags.map((tag) => (
-              <span
-                key={tag.id}
-                className="px-2 py-1 bg-blue-50 text-blue-700 text-xs rounded"
-              >
-                {tag.name}
-              </span>
-            ))}
-          </div>
-
-          {/* 参考リンク */}
-          {quote.reference_link && (
-            <div className="mt-3">
-              <a
-                href={quote.reference_link}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-1 px-3 py-1.5 bg-gray-50 hover:bg-gray-100 text-gray-700 text-xs rounded-lg border border-gray-200 transition-colors"
-              >
-                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                </svg>
-                参考リンクを開く
-              </a>
+      <div className="flex flex-col sm:flex-row items-start justify-between gap-3">
+        {/* 上部：チェックボックス+テキストコンテンツ */}
+        <div className="flex items-start gap-3 w-full">
+          {/* チェックボックス（選択モード時のみ） */}
+          {isSelectionMode && (
+            <div className="flex-shrink-0 pt-1">
+              <input
+                type="checkbox"
+                checked={isSelected}
+                onChange={onToggleSelection}
+                className="w-5 h-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500 cursor-pointer"
+              />
             </div>
           )}
+
+          <div className="flex-1 min-w-0">
+            <p className="text-gray-900 text-base md:text-lg font-bold mb-3 break-words">{quote.text}</p>
+
+            {/* 活動領域とタグ */}
+            <div className="flex flex-wrap gap-2">
+              {quote.activities.map((activity) => (
+                <span
+                  key={activity.id}
+                  className="px-2 py-1 bg-gray-100 text-gray-700 text-xs rounded"
+                >
+                  {activity.icon} {activity.name}
+                </span>
+              ))}
+              {quote.tags.map((tag) => (
+                <span
+                  key={tag.id}
+                  className="px-2 py-1 bg-blue-50 text-blue-700 text-xs rounded"
+                >
+                  {tag.name}
+                </span>
+              ))}
+            </div>
+
+            {/* 参考リンク */}
+            {quote.reference_link && (
+              <div className="mt-3">
+                <a
+                  href={quote.reference_link}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1 px-3 py-1.5 bg-gray-50 hover:bg-gray-100 text-gray-700 text-xs rounded-lg border border-gray-200 transition-colors"
+                >
+                  <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                  </svg>
+                  参考リンクを開く
+                </a>
+              </div>
+            )}
+          </div>
         </div>
 
-        <div className="flex items-center gap-2 flex-shrink-0">
+        {/* 右側/下部：ページ番号と編集・削除ボタン */}
+        <div className="flex items-center gap-2 flex-shrink-0 self-end sm:self-start">
           {/* ページ番号 */}
           {pageNumber && (
-            <div className="text-gray-500 text-sm">p.{pageNumber}</div>
+            <div className="text-gray-500 text-sm whitespace-nowrap">p.{pageNumber}</div>
           )}
 
           {/* 編集・削除ボタン（通常モード時のみ） */}

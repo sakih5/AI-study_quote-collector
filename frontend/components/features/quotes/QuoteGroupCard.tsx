@@ -22,10 +22,10 @@ export default function QuoteGroupCard({
   if (group.type === 'book') {
     const { book, quotes } = group;
     return (
-      <div className="bg-white p-6">
-        <div className="flex gap-6 items-start">
+      <div className="bg-white p-4 md:p-6">
+        <div className="flex flex-col lg:flex-row gap-4 lg:gap-6 items-start">
           {/* 左側：書籍情報（1/3） */}
-          <div className="w-1/3 flex-shrink-0 sticky top-6 self-start bg-gray-50 p-4 rounded-lg">
+          <div className="w-full lg:w-1/3 flex-shrink-0 lg:sticky lg:top-6 self-start bg-gray-50 p-4 rounded-lg">
             {/* 書籍カバー */}
             <div className="flex justify-center mb-3">
               {book.cover_image_url ? (
@@ -52,7 +52,7 @@ export default function QuoteGroupCard({
           </div>
 
           {/* 右側：フレーズ一覧（2/3） */}
-          <div className="flex-1">
+          <div className="w-full lg:flex-1">
             <div className="space-y-3">
               {quotes.map((quote) => (
                 <QuoteItem
@@ -78,10 +78,10 @@ export default function QuoteGroupCard({
     const platformIcon = sns_user.platform === 'X' ? '𝕏' : '@';
 
     return (
-      <div className="bg-white p-6">
-        <div className="flex gap-6 items-start">
+      <div className="bg-white p-4 md:p-6">
+        <div className="flex flex-col lg:flex-row gap-4 lg:gap-6 items-start">
           {/* 左側：SNSユーザー情報（1/3） */}
-          <div className="w-1/3 flex-shrink-0 sticky top-6 self-start bg-gray-50 p-4 rounded-lg">
+          <div className="w-full lg:w-1/3 flex-shrink-0 lg:sticky lg:top-6 self-start bg-gray-50 p-4 rounded-lg">
             <div className="flex flex-col items-center text-center">
               {/* SNSアイコン */}
               <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mb-3">
@@ -100,7 +100,7 @@ export default function QuoteGroupCard({
           </div>
 
           {/* 右側：フレーズ一覧（2/3） */}
-          <div className="flex-1">
+          <div className="w-full lg:flex-1">
             <div className="space-y-3">
               {quotes.map((quote) => (
                 <QuoteItem
@@ -123,10 +123,10 @@ export default function QuoteGroupCard({
   // OTHER タイプ
   const { source_info, quotes } = group;
   return (
-    <div className="bg-white p-6">
-      <div className="flex gap-6 items-start">
+    <div className="bg-white p-4 md:p-6">
+      <div className="flex flex-col lg:flex-row gap-4 lg:gap-6 items-start">
         {/* 左側：その他メタ情報（1/3） */}
-        <div className="w-1/3 flex-shrink-0 sticky top-6 self-start bg-gray-50 p-4 rounded-lg">
+        <div className="w-full lg:w-1/3 flex-shrink-0 lg:sticky lg:top-6 self-start bg-gray-50 p-4 rounded-lg">
           <div className="text-center">
             <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mb-3 mx-auto">
               <span className="text-3xl">📝</span>
@@ -146,7 +146,7 @@ export default function QuoteGroupCard({
         </div>
 
         {/* 右側：フレーズ一覧（2/3） */}
-        <div className="flex-1">
+        <div className="w-full lg:flex-1">
           <div className="space-y-3">
             {quotes.map((quote) => (
               <QuoteItem

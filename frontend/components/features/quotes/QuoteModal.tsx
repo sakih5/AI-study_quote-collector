@@ -449,14 +449,14 @@ export default function QuoteModal({ isOpen, onClose }: QuoteModalProps) {
       <div className="fixed inset-0 bg-gray-900/20 z-40" />
 
       {/* モーダル */}
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 pointer-events-none">
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 pointer-events-none">
         <div
-          className="bg-white rounded-lg shadow-2xl w-full max-w-3xl max-h-[90vh] overflow-y-auto pointer-events-auto"
+          className="bg-white rounded-lg shadow-2xl w-full max-w-3xl max-h-[95vh] sm:max-h-[90vh] overflow-y-auto pointer-events-auto"
           onClick={(e) => e.stopPropagation()}
         >
           {/* ヘッダー */}
-          <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between z-10">
-            <h2 className="text-2xl font-bold text-gray-900">フレーズを登録</h2>
+          <div className="sticky top-0 bg-white border-b border-gray-200 px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between z-10">
+            <h2 className="text-xl sm:text-2xl font-bold text-gray-900">フレーズを登録</h2>
             <button
               onClick={onClose}
               className="text-gray-600 hover:text-gray-900 transition-colors text-2xl"
@@ -466,7 +466,7 @@ export default function QuoteModal({ isOpen, onClose }: QuoteModalProps) {
           </div>
 
           {/* コンテンツ */}
-          <div className="p-6 space-y-4">
+          <div className="p-4 sm:p-6 space-y-4">
             {/* セクション0: OCR（画像からテキスト抽出） */}
             <div className="border border-blue-600 rounded-lg p-4 bg-blue-900/10">
               <div className="flex items-center justify-between mb-2">
@@ -610,7 +610,7 @@ export default function QuoteModal({ isOpen, onClose }: QuoteModalProps) {
                         {activitiesLoading ? (
                           <p className="text-gray-600 text-sm">読み込み中...</p>
                         ) : (
-                          <div className="grid grid-cols-2 gap-2">
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                             {activities.map((activity) => (
                               <label
                                 key={activity.id}
@@ -1258,7 +1258,7 @@ export default function QuoteModal({ isOpen, onClose }: QuoteModalProps) {
           </div>
 
           {/* フッター */}
-          <div className="sticky bottom-0 bg-white border-t border-gray-200 px-6 py-4">
+          <div className="sticky bottom-0 bg-white border-t border-gray-200 px-4 sm:px-6 py-4">
             {/* 公開/非公開トグル */}
             <div className="mb-4">
               <label className="flex items-center gap-3 cursor-pointer">
@@ -1295,18 +1295,18 @@ export default function QuoteModal({ isOpen, onClose }: QuoteModalProps) {
             )}
 
             {/* ボタン */}
-            <div className="flex justify-end gap-3">
+            <div className="flex flex-col sm:flex-row justify-end gap-2 sm:gap-3">
               <button
                 onClick={onClose}
                 disabled={isSubmitting}
-                className="px-6 py-2 bg-blue-400 hover:bg-blue-500 text-gray-900 font-medium rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="px-6 py-2 bg-blue-400 hover:bg-blue-500 text-gray-900 font-medium rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed w-full sm:w-auto"
               >
                 キャンセル
               </button>
               <button
                 onClick={handleSubmit}
                 disabled={isSubmitting}
-                className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed w-full sm:w-auto"
               >
                 {isSubmitting ? '登録中...' : '登録する'}
               </button>

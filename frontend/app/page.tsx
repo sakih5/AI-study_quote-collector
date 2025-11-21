@@ -167,16 +167,16 @@ export default function PublicHomePage() {
       {/* ヘッダー */}
       <header className="bg-white border-b border-gray-200 sticky top-0 z-10">
         <div className="container mx-auto px-4 py-4">
-          <div className="flex justify-between items-center">
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900">ことばアーカイブ</h1>
-              <p className="text-sm text-gray-600 mt-1">
+          <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-3">
+            <div className="flex-1">
+              <h1 className="text-xl md:text-2xl font-bold text-gray-900">ことばアーカイブ</h1>
+              <p className="text-xs md:text-sm text-gray-600 mt-1">
                 心に響いた言葉を、いつでも一瞬で取り出せる。あなた専用の引き出しを作ろう
               </p>
             </div>
             <Link
               href="/login"
-              className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors"
+              className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors text-center w-full md:w-auto"
             >
               ログイン/新規登録
             </Link>
@@ -185,43 +185,43 @@ export default function PublicHomePage() {
       </header>
 
       {/* アプリ紹介セクション */}
-      <section className="bg-gradient-to-b from-blue-50 to-white py-12 border-b border-gray-200">
+      <section className="bg-gradient-to-b from-blue-50 to-white py-8 md:py-12 border-b border-gray-200">
         <div className="container mx-auto px-4 max-w-4xl">
           {/* メインメッセージ */}
-          <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+          <div className="text-center mb-8 md:mb-12">
+            <h2 className="text-xl md:text-3xl lg:text-4xl font-bold text-gray-900 mb-3 md:mb-4">
               心に響いた言葉を、一箇所に。
             </h2>
-            <p className="text-lg text-gray-600 mb-2">
+            <p className="text-sm md:text-base lg:text-lg text-gray-600 mb-1 md:mb-2">
               本・SNS・メモから、大切なフレーズを集めて整理できる、あなた専用のアーカイブです。
             </p>
-            <p className="text-gray-500">
+            <p className="text-xs md:text-sm lg:text-base text-gray-500">
               必要な時に、すぐに取り出せる。そんな「言葉の引き出し」を作りましょう。
             </p>
           </div>
 
           {/* 主な機能 */}
-          <div className="grid md:grid-cols-3 gap-6 mb-8">
-            <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-              <div className="text-4xl mb-3">📚</div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">多様な出典に対応</h3>
-              <p className="text-sm text-gray-600">
+          <div className="grid md:grid-cols-3 gap-4 md:gap-6 mb-6 md:mb-8">
+            <div className="bg-white p-4 md:p-6 rounded-lg shadow-sm border border-gray-200">
+              <div className="text-3xl md:text-4xl mb-2 md:mb-3">📚</div>
+              <h3 className="text-base md:text-lg font-semibold text-gray-900 mb-1 md:mb-2">多様な出典に対応</h3>
+              <p className="text-xs md:text-sm text-gray-600">
                 書籍・SNS（X/Threads）・その他のメモなど、あらゆる場所から心に響いたフレーズを登録できます。
               </p>
             </div>
 
-            <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-              <div className="text-4xl mb-3">🏷️</div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">柔軟な整理・分類</h3>
-              <p className="text-sm text-gray-600">
+            <div className="bg-white p-4 md:p-6 rounded-lg shadow-sm border border-gray-200">
+              <div className="text-3xl md:text-4xl mb-2 md:mb-3">🏷️</div>
+              <h3 className="text-base md:text-lg font-semibold text-gray-900 mb-1 md:mb-2">柔軟な整理・分類</h3>
+              <p className="text-xs md:text-sm text-gray-600">
                 活動領域（仕事・学習・趣味など）やタグで分類。後から検索・フィルタリングして簡単に見つけられます。
               </p>
             </div>
 
-            <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-              <div className="text-4xl mb-3">🧠</div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">スマートなデータ活用</h3>
-              <p className="text-sm text-gray-600">
+            <div className="bg-white p-4 md:p-6 rounded-lg shadow-sm border border-gray-200">
+              <div className="text-3xl md:text-4xl mb-2 md:mb-3">🧠</div>
+              <h3 className="text-base md:text-lg font-semibold text-gray-900 mb-1 md:mb-2">スマートなデータ活用</h3>
+              <p className="text-xs md:text-sm text-gray-600">
                 フレーズはCSV形式でエクスポート可能。AIへ流し込んで、自分の価値観や思考パターンを可視化できます。
               </p>
             </div>
@@ -231,11 +231,11 @@ export default function PublicHomePage() {
           <div className="text-center">
             <Link
               href="/login"
-              className="inline-block px-8 py-3 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors shadow-md hover:shadow-lg"
+              className="inline-block px-6 md:px-8 py-2 md:py-3 bg-blue-600 hover:bg-blue-700 text-white text-sm md:text-base font-medium rounded-lg transition-colors shadow-md hover:shadow-lg"
             >
               今すぐ始める（無料）
             </Link>
-            <p className="text-xs text-gray-500 mt-3">
+            <p className="text-xs text-gray-500 mt-2 md:mt-3">
               GoogleアカウントまたはGitHubアカウントで簡単に登録できます
             </p>
           </div>
@@ -243,10 +243,10 @@ export default function PublicHomePage() {
       </section>
 
       {/* 公開フレーズセクション */}
-      <section className="container mx-auto px-4 py-12 max-w-4xl">
-        <div className="text-center mb-8">
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">みんなが公開したフレーズ</h2>
-          <p className="text-gray-600">他のユーザーが公開した心に響くフレーズを見てみましょう</p>
+      <section className="container mx-auto px-4 py-8 md:py-12 max-w-4xl">
+        <div className="text-center mb-6 md:mb-8">
+          <h2 className="text-lg md:text-2xl font-bold text-gray-900 mb-1 md:mb-2">みんなが公開したフレーズ</h2>
+          <p className="text-sm md:text-base text-gray-600">他のユーザーが公開した心に響くフレーズを見てみましょう</p>
         </div>
 
         {loading ? (
@@ -267,10 +267,10 @@ export default function PublicHomePage() {
               {quotes.map((quote) => (
                 <div
                   key={quote.id}
-                  className="bg-white p-6 rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-shadow"
+                  className="bg-white p-4 md:p-6 rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-shadow"
                 >
                   {/* フレーズテキスト */}
-                  <p className="text-gray-900 text-lg font-medium mb-4 leading-relaxed">
+                  <p className="text-gray-900 text-base md:text-lg font-medium mb-3 md:mb-4 leading-relaxed">
                     {quote.text}
                   </p>
 
@@ -323,14 +323,14 @@ export default function PublicHomePage() {
       </section>
 
       {/* フッター */}
-      <footer className="bg-white border-t border-gray-200 mt-12 py-6">
+      <footer className="bg-white border-t border-gray-200 mt-8 md:mt-12 py-4 md:py-6">
         <div className="container mx-auto px-4 text-center">
-          <p className="text-gray-600 text-sm">
+          <p className="text-gray-600 text-xs md:text-sm">
             ログインして、あなた専用の言葉の引き出しを整えましょう
           </p>
           <Link
             href="/login"
-            className="inline-block mt-4 px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors"
+            className="inline-block mt-3 md:mt-4 px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm md:text-base font-medium rounded-lg transition-colors"
           >
             ログイン/新規登録
           </Link>
